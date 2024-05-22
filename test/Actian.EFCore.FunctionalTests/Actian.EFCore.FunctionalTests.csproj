@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational.Specification.Tests" Version="3.1.10" />
-    <PackageReference Include="Actian.Client" Version="3.0.1" />
+    <PackageReference Include="Actian.Client" Version="3.0.2" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.7.1" />
     <PackageReference Include="System.Diagnostics.EventLog" Version="4.7.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.7.0" />
