@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net80</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <Description>Entity Framework Core provider for Actian</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 

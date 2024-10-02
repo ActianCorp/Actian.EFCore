@@ -2,19 +2,46 @@
 
 [Entity Framework Core](https://github.com/dotnet/efcore) provider for Actian X, Ingres, and Vector.
 
-Also see previous https://github.com/ActianCorp/EntityFramework6.Ingres/
+   * [Overview](#overview)
+   * [Installing Actian.EFCore](#installing-actianefcore)
+      + [Before installing](#before-installing)
+      + [Install using the .NET Core CLI](#install-using-the-net-core-cli)
+      + [Install using the NuGet Package Manager Console in Visual Studio](#install-using-the-nuget-package-manager-console-in-visual-studio)
+   * [Testing](#testing)
+      + [Configuration for tests](#configuration-for-tests)
+      + [Preparing to test](#preparing-to-test)
+      + [Running tests](#running-tests)
+   * [History](#history)
+
+
+## Overview
+
+Actian.EFCore is a database provider for Entity Framework Core that allows access to Actian Ingres and Vector from EFCore. Further references:
+
+  * https://en.wikipedia.org/wiki/Entity_Framework
+  * https://learn.microsoft.com/en-us/ef/core/
+  * https://github.com/dotnet/efcore
+
+## Obtaining Actian.EFCore
+
+Source code and issue tracker is located at https://github.com/ActianCorp/Actian.EFCore/
+
+Pre-built binaries are available from https://esd.actian.com/
+
+## Support
+
+Issues may be opened at [ActianCorp GitHub Project Page for EFCore](https://github.com/ActianCorp/Actian.EFCore/issues).
+Alternatively contact support.
 
 ## Installing Actian.EFCore
 
 ### Before installing
 
-Actian.EFCore relies on Actian.Client version 3.0.0 and above to work. Actian.Client has not been published to [NuGet.org], so it will have to be added to a local or private NuGet feed, which the project has access to.
+Actian.EFCore 8.0 relies on Actian.Client (Actian .NET Data Provider) version 8.0.0 and above to work. Actian.Client has not been published to [NuGet.org], so it will have to be added to a local or private NuGet feed, which the project has access to.
 
-Actian.Client can be downloaded from [Customer Downloads].
+Actian.Client (Actian .NET Data Provider) can be downloaded from [Customer Downloads Provider].
 
 For help setting up a local NuGet feed see: [Setting up Local NuGet Feeds | Microsoft Docs].
-
-Beta versions of Actian.EFCore can be installed from [Actian.EFCore Packages].
 
 ### Install using the .NET Core CLI
 
@@ -86,45 +113,12 @@ dotnet test
 
 The environment variable `ACTIAN_TEST_CONNECTION_STRING` must be have a valid value for this to work.
 
-## Continous integration
+## History
 
-Actian.EFCore is built and tested using build script `.github/workflows/build.yml`. A build is started when:
+ * EFCore 8 - for Ingres and Vector - Authored by https://github.com/mianculovici
+ * EFCore 3 - for Actian X, Ingres and Vector. Based on https://github.com/2PS-Consulting/Actian.EFCore Authored by https://github.com/MortenHoustonLudvigsen and https://github.com/mianculovici
+ * https://github.com/ActianCorp/EntityFramework6.Ingres/ Authored by https://github.com/thoda04
 
-- Changes are pushed to branch `main`.
-- Changes are pushed to a branch that has a pull request to branch `main`. _This has been disabled for now_
-
-Test results are saved to branch [TestResults] branch of the [Actian.EFCore repository].
-
-The tests are run in each of the following environments:
-
-### WIN64_INGRES_11_2_0, Ingres
-
-- Host: Actian1
-- Windows Server 2022 64 bit
-- Actian X server 11.2.0
-- Compatibility: Ingres
-- Installation: CI
-- `ACTIAN_TEST_CONNECTION_STRING`:   
-  "localhost;Port=CI7;User ID=efcore_test;Password=xxxxxxxxxx;Persist Security Info=true"
-- Latest test results for main branch:   
-  <https://github.com/2PS-Consulting/Actian.EFCore/blob/TestResults/Branch-main/localhost-CI7/Index.md>
-
-### WIN64_INGRES_11_2_0, Ansi
-
-- Host: Actian1
-- Windows Server 2022 64 bit
-- Actian X server 11.2.0
-- Compatibility: ANSI/ISO Entry SQL-92
-- Installation: CA
-- `ACTIAN_TEST_CONNECTION_STRING`:   
-  "localhost;Port=CA7;User ID=efcore_test;Password=xxxxxxxxxx;Persist Security Info=true"
-- Latest test results for main branch:   
-  <https://github.com/2PS-Consulting/Actian.EFCore/blob/TestResults/Branch-main/localhost-CA7/Index.md>
-
-
-[Customer Downloads]: https://esd.actian.com/
+[Customer Downloads Provider]: https://esd.actian.com/product/drivers/.Net_Data_Provider/Windows_64-Bit/.Net_Data_Provider_GA
 [Setting up Local NuGet Feeds | Microsoft Docs]: https://docs.microsoft.com/en-us/nuget/hosting-packages/local-feeds
 [NuGet.org]: https://www.nuget.org/
-[Actian.EFCore Packages]: https://github.com/2PS-Consulting/Actian.EFCore/pkgs/nuget/Actian.EFCore
-[TestResults]: https://github.com/2PS-Consulting/Actian.EFCore/tree/TestResults
-[Actian.EFCore repository]: https://github.com/2PS-Consulting/Actian.EFCore
