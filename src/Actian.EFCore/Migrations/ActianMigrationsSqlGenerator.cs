@@ -1196,20 +1196,122 @@ namespace Actian.EFCore.Migrations
         {
         }
 
-        protected override void IndexOptions(
-            CreateIndexOperation operation,
-            IModel? model,
-            MigrationCommandListBuilder builder)
+        /// <summary>
+        ///     Generates a SQL fragment for extras (filter, included columns, options) of an index from a <see cref="CreateIndexOperation" />.
+        /// </summary>
+        /// <param name="operation">The operation.</param>
+        /// <param name="model">The target model which may be <see langword="null" /> if the operations exist without a model.</param>
+        /// <param name="builder">The command builder to use to add the SQL fragment.</param>
+        protected override void IndexOptions(MigrationOperation operation, IModel? model, MigrationCommandListBuilder builder)
         {
-            if (!string.IsNullOrEmpty(operation.Filter))
+            if (operation[ActianAnnotationNames.Include] is IReadOnlyList<string> includeColumns
+                && includeColumns.Count > 0)
             {
-                throw new InvalidOperationException(ActianStrings.AlterMemoryOptimizedTable); // TODO: Use the correct string
+                builder.Append(" INCLUDE (");
+                for (var i = 0; i < includeColumns.Count; i++)
+                {
+                    builder.Append(Dependencies.SqlGenerationHelper.DelimitIdentifier(includeColumns[i]));
+
+                    if (i != includeColumns.Count - 1)
+                    {
+                        builder.Append(", ");
+                    }
+                }
+
+                builder.Append(")");
             }
 
-            builder.WithClause()
-                .Persistence(operation[ActianAnnotationNames.Persistence] as bool?)
-                .Build();
+            if (operation is CreateIndexOperation createIndexOperation)
+            {
+                if (!string.IsNullOrEmpty(createIndexOperation.Filter))
+                {
+                    builder
+                        .Append(" WHERE ")
+                        .Append(createIndexOperation.Filter);
+                }
+                else if (UseLegacyIndexFilters(createIndexOperation, model))
+                {
+                    var table = model?.GetRelationalModel().FindTable(createIndexOperation.Table, createIndexOperation.Schema);
+                    var nullableColumns = createIndexOperation.Columns
+                        .Where(c => table?.FindColumn(c)?.IsNullable != false)
+                        .ToList();
+
+                    builder.Append(" WHERE ");
+                    for (var i = 0; i < nullableColumns.Count; i++)
+                    {
+                        if (i != 0)
+                        {
+                            builder.Append(" AND ");
+                        }
+
+                        builder
+                            .Append(Dependencies.SqlGenerationHelper.DelimitIdentifier(nullableColumns[i]))
+                            .Append(" IS NOT NULL");
+                    }
+                }
+            }
+
+            IndexWithOptions(operation, builder);
         }
+
+        private static void IndexWithOptions(MigrationOperation operation, MigrationCommandListBuilder builder)
+        {
+            var options = new List<string>();
+
+            if (operation[ActianAnnotationNames.FillFactor] is int fillFactor)
+            {
+                options.Add("FILLFACTOR = " + fillFactor);
+            }
+
+            if (operation[ActianAnnotationNames.CreatedOnline] is bool isOnline && isOnline)
+            {
+                options.Add("ONLINE = ON");
+            }
+
+            if (operation[ActianAnnotationNames.SortInTempDb] is bool sortInTempDb && sortInTempDb)
+            {
+                options.Add("SORT_IN_TEMPDB = ON");
+            }
+
+            if (operation[ActianAnnotationNames.DataCompression] is DataCompressionType dataCompressionType)
+            {
+                switch (dataCompressionType)
+                {
+                    case DataCompressionType.None:
+                        options.Add("DATA_COMPRESSION = NONE");
+                        break;
+                    case DataCompressionType.Row:
+                        options.Add("DATA_COMPRESSION = ROW");
+                        break;
+                    case DataCompressionType.Page:
+                        options.Add("DATA_COMPRESSION = PAGE");
+                        break;
+                }
+            }
+
+            if (options.Count > 0)
+            {
+                builder
+                    .Append(" WITH (")
+                    .Append(string.Join(", ", options))
+                    .Append(")");
+            }
+        }
+
+        /// <summary>
+        ///     Checks whether or not <see cref="CreateIndexOperation" /> should have a filter generated for it by
+        ///     Migrations.
+        /// </summary>
+        /// <param name="operation">The index creation operation.</param>
+        /// <param name="model">The target model.</param>
+        /// <returns><see langword="true" /> if a filter should be generated.</returns>
+        protected virtual bool UseLegacyIndexFilters(CreateIndexOperation operation, IModel? model)
+            => (!TryGetVersion(model, out var version) || VersionComparer.Compare(version, "2.0.0") < 0)
+                && operation.Filter is null
+                && operation.IsUnique
+                && operation[ActianAnnotationNames.Clustered] is null or false
+                && model?.GetRelationalModel().FindTable(operation.Table, operation.Schema) is var table
+                && operation.Columns.Any(c => table?.FindColumn(c)?.IsNullable != false);
 
         /// <summary>
         ///     Gets the list of indexes that need to be rebuilt when the given column is changing.
@@ -1595,7 +1697,7 @@ namespace Actian.EFCore.Migrations
             bool suppressTransaction = false
             )
         {
-            base.EndStatement(builder, true);
+            base.EndStatement(builder, false);
         }
 
         private string SqlLiteral<T>(T value)

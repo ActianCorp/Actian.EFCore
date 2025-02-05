@@ -22,9 +22,6 @@ public class NorthwindSetOperationsQueryActianTest : NorthwindSetOperationsQuery
         Fixture.TestSqlLoggerFactory.SetTestOutputHelper(testOutputHelper);
     }
 
-    protected override bool CanExecuteQueryString
-        => true;
-
     [ConditionalFact]
     public virtual void Check_all_tests_overridden()
         => TestHelpers.AssertAllMethodsOverridden(GetType());
@@ -124,7 +121,7 @@ OFFSET @__p_0 ROWS FETCH NEXT @__p_0 ROWS ONLY
 
         AssertSql(
             """
-SELECT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT "u"."CustomerID", "u"."Address", "u"."City", "u"."CompanyName", "u"."ContactName", "u"."ContactTitle", "u"."Country", "u"."Fax", "u"."Phone", "u"."PostalCode", "u"."Region"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
@@ -133,8 +130,8 @@ FROM (
     SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM "Customers" AS "c0"
     WHERE "c0"."City" = N'London'
-) AS "t"
-WHERE "t"."ContactName" LIKE N'%Thomas%'
+) AS "u"
+WHERE "u"."ContactName" LIKE N'%Thomas%'
 """);
     }
 
@@ -268,7 +265,7 @@ WHERE "c0"."City" = N'London'
 
         AssertSql(
             """
-SELECT "t"."Address"
+SELECT "u"."Address"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
@@ -277,8 +274,8 @@ FROM (
     SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM "Customers" AS "c0"
     WHERE "c0"."City" = N'London'
-) AS "t"
-WHERE "t"."Address" LIKE N'%Hanover%'
+) AS "u"
+WHERE "u"."Address" LIKE N'%Hanover%'
 """);
     }
 
@@ -295,7 +292,7 @@ FROM (
     UNION
     SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM "Customers" AS "c0"
-) AS "t"
+) AS "u"
 """);
     }
 
@@ -305,7 +302,7 @@ FROM (
 
         AssertSql(
             """
-SELECT "t"."CustomerID" AS "Id"
+SELECT "u"."CustomerID" AS "Id"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
@@ -314,7 +311,7 @@ FROM (
     SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM "Customers" AS "c0"
     WHERE "c0"."CompanyName" LIKE N'B%'
-) AS "t"
+) AS "u"
 """);
     }
 
@@ -324,16 +321,16 @@ FROM (
 
         AssertSql(
             """
-SELECT "t"."CompanyName"
+SELECT "u"."CompanyName"
 FROM (
     SELECT "c"."CompanyName"
     FROM "Customers" AS "c"
     UNION
     SELECT "p"."ProductName" AS "CompanyName"
     FROM "Products" AS "p"
-) AS "t"
-WHERE "t"."CompanyName" LIKE N'C%'
-ORDER BY "t"."CompanyName"
+) AS "u"
+WHERE "u"."CompanyName" LIKE N'C%'
+ORDER BY "u"."CompanyName"
 """);
     }
 
@@ -373,7 +370,7 @@ ORDER BY "t0"."Foo"
 
         AssertSql(
             """
-SELECT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+SELECT "u"."CustomerID", "u"."Address", "u"."City", "u"."CompanyName", "u"."ContactName", "u"."ContactTitle", "u"."Country", "u"."Fax", "u"."Phone", "u"."PostalCode", "u"."Region", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
@@ -382,9 +379,9 @@ FROM (
     SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM "Customers" AS "c0"
     WHERE "c0"."City" = N'London'
-) AS "t"
-LEFT JOIN "Orders" AS "o" ON "t"."CustomerID" = "o"."CustomerID"
-ORDER BY "t"."CustomerID"
+) AS "u"
+LEFT JOIN "Orders" AS "o" ON "u"."CustomerID" = "o"."CustomerID"
+ORDER BY "u"."CustomerID"
 """);
     }
 
@@ -394,7 +391,7 @@ ORDER BY "t"."CustomerID"
 
         AssertSql(
             """
-SELECT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+SELECT "u"."CustomerID", "u"."Address", "u"."City", "u"."CompanyName", "u"."ContactName", "u"."ContactTitle", "u"."Country", "u"."Fax", "u"."Phone", "u"."PostalCode", "u"."Region", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
@@ -403,9 +400,9 @@ FROM (
     SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM "Customers" AS "c0"
     WHERE "c0"."City" = N'London'
-) AS "t"
-LEFT JOIN "Orders" AS "o" ON "t"."CustomerID" = "o"."CustomerID"
-ORDER BY "t"."CustomerID"
+) AS "u"
+LEFT JOIN "Orders" AS "o" ON "u"."CustomerID" = "o"."CustomerID"
+ORDER BY "u"."CustomerID"
 """);
     }
 
@@ -1132,7 +1129,7 @@ FROM (
 
         AssertSql(
             """
-SELECT "t"."CustomerID", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+SELECT "u"."CustomerID", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
@@ -1141,9 +1138,9 @@ FROM (
     SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM "Customers" AS "c0"
     WHERE "c0"."CustomerID" LIKE N'F%'
-) AS "t"
-LEFT JOIN "Orders" AS "o" ON "t"."CustomerID" = "o"."CustomerID"
-ORDER BY "t"."CustomerID"
+) AS "u"
+LEFT JOIN "Orders" AS "o" ON "u"."CustomerID" = "o"."CustomerID"
+ORDER BY "u"."CustomerID"
 """);
     }
 
@@ -1170,7 +1167,7 @@ GROUP BY "o0"."CustomerID"
 
         AssertSql(
             """
-SELECT "t"."CustomerID", "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
+SELECT "u"."CustomerID", "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Orders" AS "o"
@@ -1181,9 +1178,9 @@ FROM (
     FROM "Orders" AS "o0"
     LEFT JOIN "Customers" AS "c0" ON "o0"."CustomerID" = "c0"."CustomerID"
     WHERE "o0"."OrderID" < 10250
-) AS "t"
-LEFT JOIN "Orders" AS "o1" ON "t"."CustomerID" = "o1"."CustomerID"
-ORDER BY "t"."CustomerID"
+) AS "u"
+LEFT JOIN "Orders" AS "o1" ON "u"."CustomerID" = "o1"."CustomerID"
+ORDER BY "u"."CustomerID"
 """);
     }
 
@@ -1193,7 +1190,7 @@ ORDER BY "t"."CustomerID"
 
         AssertSql(
             """
-SELECT "t"."OrderDate", "t"."CustomerID", "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
+SELECT "u"."OrderDate", "u"."CustomerID", "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o"."OrderDate"
     FROM "Orders" AS "o"
@@ -1204,9 +1201,9 @@ FROM (
     FROM "Orders" AS "o0"
     LEFT JOIN "Customers" AS "c0" ON "o0"."CustomerID" = "c0"."CustomerID"
     WHERE "o0"."OrderID" < 10250
-) AS "t"
-LEFT JOIN "Orders" AS "o1" ON "t"."CustomerID" = "o1"."CustomerID"
-ORDER BY "t"."CustomerID", "t"."OrderDate"
+) AS "u"
+LEFT JOIN "Orders" AS "o1" ON "u"."CustomerID" = "o1"."CustomerID"
+ORDER BY "u"."CustomerID", "u"."OrderDate"
 """);
     }
 
@@ -1423,7 +1420,7 @@ WHERE "c0"."CustomerID" LIKE N'B%'
 
         AssertSql(
             """
-SELECT "t"."City"
+SELECT "u"."City"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
@@ -1432,7 +1429,7 @@ FROM (
     SELECT DISTINCT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM "Customers" AS "c0"
     WHERE "c0"."CustomerID" LIKE N'B%'
-) AS "t"
+) AS "u"
 """);
     }
 
@@ -1442,7 +1439,7 @@ FROM (
 
         AssertSql(
             """
-SELECT "t"."City"
+SELECT "u"."City"
 FROM (
     SELECT DISTINCT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
@@ -1451,7 +1448,7 @@ FROM (
     SELECT DISTINCT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM "Customers" AS "c0"
     WHERE "c0"."CustomerID" LIKE N'B%'
-) AS "t"
+) AS "u"
 """);
     }
 
@@ -1481,7 +1478,7 @@ WHERE "c1"."CustomerID" LIKE N'A%'
 
         AssertSql(
             """
-SELECT "t"."City"
+SELECT "u"."City"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
@@ -1490,7 +1487,7 @@ FROM (
     SELECT DISTINCT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM "Customers" AS "c0"
     WHERE "c0"."CustomerID" LIKE N'B%'
-) AS "t"
+) AS "u"
 UNION ALL
 SELECT "c1"."City"
 FROM "Customers" AS "c1"
@@ -1546,6 +1543,54 @@ FROM "Customers" AS "c"
 UNION
 SELECT "c0"."ContactTitle" AS "ContactName"
 FROM "Customers" AS "c0"
+""");
+    }
+
+    public override async Task Intersect_on_distinct(bool async)
+    {
+        await base.Intersect_on_distinct(async);
+
+        AssertSql(
+"""
+SELECT "c"."CompanyName"
+FROM "Customers" AS "c"
+WHERE "c"."City" = N'México D.F.'
+INTERSECT
+SELECT "c0"."CompanyName"
+FROM "Customers" AS "c0"
+WHERE "c0"."ContactTitle" = N'Owner'
+""");
+    }
+
+    public override async Task Union_on_distinct(bool async)
+    {
+        await base.Union_on_distinct(async);
+
+        AssertSql(
+"""
+SELECT "c"."CompanyName"
+FROM "Customers" AS "c"
+WHERE "c"."City" = N'México D.F.'
+UNION
+SELECT "c0"."CompanyName"
+FROM "Customers" AS "c0"
+WHERE "c0"."ContactTitle" = N'Owner'
+""");
+    }
+
+    public override async Task Except_on_distinct(bool async)
+    {
+        await base.Except_on_distinct(async);
+
+        AssertSql(
+"""
+SELECT "c"."CompanyName"
+FROM "Customers" AS "c"
+WHERE "c"."City" = N'México D.F.'
+EXCEPT
+SELECT "c0"."CompanyName"
+FROM "Customers" AS "c0"
+WHERE "c0"."ContactTitle" = N'Owner'
 """);
     }
 

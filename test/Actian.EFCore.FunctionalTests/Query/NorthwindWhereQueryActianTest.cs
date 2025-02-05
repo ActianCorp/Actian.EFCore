@@ -23,12 +23,165 @@ public class NorthwindWhereQueryActianTest : NorthwindWhereQueryRelationalTestBa
         Fixture.TestSqlLoggerFactory.SetTestOutputHelper(testOutputHelper);
     }
 
-    protected override bool CanExecuteQueryString
-        => true;
-
     [ConditionalFact]
     public virtual void Check_all_tests_overridden()
         => TestHelpers.AssertAllMethodsOverridden(GetType());
+
+    [ActianTodo]
+    public override async Task Where_ternary_boolean_condition_negated(bool async)
+    {
+        await base.Where_ternary_boolean_condition_negated(async);
+
+        AssertSql();
+    }
+
+    public override async Task EF_Parameter(bool async)
+    {
+        await base.EF_Parameter(async);
+
+        AssertSql(
+"""
+@__p_0='ALFKI'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" = @__p_0
+""");
+    }
+
+    public override async Task EF_Parameter_with_subtree(bool async)
+    {
+        await base.EF_Parameter_with_subtree(async);
+
+        AssertSql(
+"""
+@__p_0='ALFKI'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" = @__p_0
+""");
+    }
+
+    public override async Task EF_Parameter_does_not_parameterized_as_part_of_bigger_subtree(bool async)
+    {
+        await base.EF_Parameter_does_not_parameterized_as_part_of_bigger_subtree(async);
+
+        AssertSql(
+"""
+@__id_0='ALF'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" = (@__id_0 + N'KI')
+""");
+    }
+
+    public override async Task EF_Parameter_with_non_evaluatable_argument_throws(bool async)
+    {
+        await base.EF_Parameter_with_non_evaluatable_argument_throws(async);
+
+        AssertSql();
+    }
+
+    public override async Task Implicit_cast_in_predicate(bool async)
+    {
+        await base.Implicit_cast_in_predicate(async);
+
+        AssertSql(
+"""
+SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+FROM "Orders" AS "o"
+WHERE "o"."CustomerID" = N'1337'
+""",
+            //
+            """
+@__prm_Value_0='1337'
+
+SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+FROM "Orders" AS "o"
+WHERE "o"."CustomerID" = @__prm_Value_0
+""",
+            //
+            """
+@__ToString_0='1337'
+
+SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+FROM "Orders" AS "o"
+WHERE "o"."CustomerID" = @__ToString_0
+""",
+            //
+            """
+@__p_0='1337'
+
+SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+FROM "Orders" AS "o"
+WHERE "o"."CustomerID" = @__p_0
+""",
+            //
+            """
+SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+FROM "Orders" AS "o"
+WHERE "o"."CustomerID" = N'1337'
+""");
+    }
+
+    //[ActianTodo]
+    public override async Task Interface_casting_though_generic_method(bool async)
+    {
+        await base.Interface_casting_though_generic_method(async);
+
+        AssertSql(
+"""
+@__id_0='10252'
+
+SELECT "o"."OrderID" AS "Id"
+FROM "Orders" AS "o"
+WHERE "o"."OrderID" = @__id_0
+""",
+                //
+                """
+SELECT "o"."OrderID" AS "Id"
+FROM "Orders" AS "o"
+WHERE "o"."OrderID" = 10252
+""",
+                //
+                """
+SELECT "o"."OrderID" AS "Id"
+FROM "Orders" AS "o"
+WHERE "o"."OrderID" = 10252
+""",
+                //
+                """
+SELECT "o"."OrderID" AS "Id"
+FROM "Orders" AS "o"
+WHERE "o"."OrderID" = 10252
+""");
+    }
+
+    [ActianTodo]
+    public override async Task Take_and_Where_evaluation_order(bool async)
+    {
+        await base.Take_and_Where_evaluation_order(async);
+
+        AssertSql();
+    }
+
+    [ActianTodo]
+    public override async Task Skip_and_Where_evaluation_order(bool async)
+    {
+        await base.Skip_and_Where_evaluation_order(async);
+
+        AssertSql();
+    }
+
+    [ActianTodo]
+    public override async Task Take_and_Distinct_evaluation_order(bool async)
+    {
+        await base.Take_and_Distinct_evaluation_order(async);
+
+        AssertSql();
+    }
 
     public override async Task Where_simple(bool async)
     {
@@ -557,6 +710,7 @@ END = CAST(1 AS bit)
 """);
     }
 
+    [ActianTodo]
     public override async Task Where_bitwise_xor(bool async)
     {
         // Cannot eval 'where (("c".CustomerID == \"ALFKI\") ^ True)'. Issue #16645.

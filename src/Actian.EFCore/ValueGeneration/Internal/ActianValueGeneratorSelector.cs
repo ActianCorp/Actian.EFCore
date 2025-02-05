@@ -2,6 +2,7 @@
 using Actian.EFCore.Storage.Internal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
@@ -32,17 +33,29 @@ namespace Actian.EFCore.ValueGeneration.Internal
 
         public new virtual IActianValueGeneratorCache Cache => (IActianValueGeneratorCache)base.Cache;
 
-        public override ValueGenerator Select(IProperty property, ITypeBase typeBase)
+        [Obsolete("Use TrySelect and throw if needed when the generator is not found.")]
+        public override ValueGenerator? Select(IProperty property, ITypeBase typeBase)
+        {
+            if (TrySelect(property, typeBase, out var valueGenerator))
+            {
+                return valueGenerator;
+            }
+
+            throw new NotSupportedException(
+                CoreStrings.NoValueGenerator(property.Name, property.DeclaringType.DisplayName(), property.ClrType.ShortDisplayName()));
+        }
+
+        public override bool TrySelect(IProperty property, ITypeBase typeBase, out ValueGenerator? valueGenerator)
         {
             if (property.GetValueGeneratorFactory() != null
                 || property.GetValueGenerationStrategy() != ActianValueGenerationStrategy.SequenceHiLo)
             {
-                return base.Select(property, typeBase);
+                return base.TrySelect(property, typeBase, out valueGenerator);
             }
 
             var propertyType = property.ClrType.UnwrapNullableType().UnwrapEnumType();
 
-            var generator = _sequenceFactory.TryCreate(
+            valueGenerator = _sequenceFactory.TryCreate(
                 property,
                 propertyType,
                 Cache.GetOrAddSequenceState(property, _connection),
@@ -50,16 +63,16 @@ namespace Actian.EFCore.ValueGeneration.Internal
                 _rawSqlCommandBuilder,
                 _commandLogger);
 
-            if (generator != null)
+            if (valueGenerator != null)
             {
-                return generator;
+                return true;
             }
 
             var converter = property.GetTypeMapping().Converter;
             if (converter != null
                 && converter.ProviderClrType != propertyType)
             {
-                generator = _sequenceFactory.TryCreate(
+                valueGenerator = _sequenceFactory.TryCreate(
                     property,
                     converter.ProviderClrType,
                     Cache.GetOrAddSequenceState(property, _connection),
@@ -67,15 +80,14 @@ namespace Actian.EFCore.ValueGeneration.Internal
                     _rawSqlCommandBuilder,
                     _commandLogger);
 
-                if (generator != null)
+                if (valueGenerator != null)
                 {
-                    return generator.WithConverter(converter);
+                    valueGenerator = valueGenerator.WithConverter(converter);
+                    return true;
                 }
             }
 
-            throw new ArgumentException(
-                CoreStrings.InvalidValueGeneratorFactoryProperty(
-                    nameof(ActianSequenceValueGeneratorFactory), property.Name, property.DeclaringType.DisplayName()));
+            return false;
         }
 
         protected override ValueGenerator? FindForType(IProperty property, ITypeBase typeBase, Type clrType)

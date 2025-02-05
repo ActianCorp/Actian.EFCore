@@ -12,7 +12,7 @@ namespace Actian.EFCore.TestUtilities
 {
     public static class TestEnvironment
     {
-        public static string DefaultConnection = "Data Source=(localdb)";//\\MSSQLLocalDB;Database=master;Integrated Security=True;Connect Timeout=60;ConnectRetryCount=0";
+        public static string DefaultConnection = "";//"Data Source=(localdb)";//\\MSSQLLocalDB;Database=master;Integrated Security=True;Connect Timeout=60;ConnectRetryCount=0";
 
         public static void Log(object testObject, ITestOutputHelper testOutputHelper)
         {

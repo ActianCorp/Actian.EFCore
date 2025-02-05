@@ -18,9 +18,6 @@ public class NorthwindNavigationsQueryActianTest : NorthwindNavigationsQueryRela
         fixture.TestSqlLoggerFactory.SetTestOutputHelper(testOutputHelper);
     }
 
-    protected override bool CanExecuteQueryString
-        => true;
-
     [ConditionalFact]
     public virtual void Check_all_tests_overridden()
         => TestHelpers.AssertAllMethodsOverridden(GetType());
@@ -371,15 +368,15 @@ WHERE "c"."City" = N'Seattle' AND ("c"."Phone" <> N'555 555 5555' OR "c"."Phone"
 
         AssertSql(
             """
-SELECT "o"."CustomerID", "t"."CustomerID" AS "C2"
+SELECT "o"."CustomerID", "o1"."CustomerID" AS "C2"
 FROM "Orders" AS "o"
 CROSS JOIN (
     SELECT "o0"."CustomerID"
     FROM "Orders" AS "o0"
     WHERE "o0"."OrderID" < 10400
-) AS "t"
+) AS "o1"
 LEFT JOIN "Customers" AS "c" ON "o"."CustomerID" = "c"."CustomerID"
-LEFT JOIN "Customers" AS "c0" ON "t"."CustomerID" = "c0"."CustomerID"
+LEFT JOIN "Customers" AS "c0" ON "o1"."CustomerID" = "c0"."CustomerID"
 WHERE "o"."OrderID" < 10300 AND ("c"."City" = "c0"."City" OR ("c"."City" IS NULL AND "c0"."City" IS NULL))
 """);
     }
@@ -770,16 +767,16 @@ WHERE (
 
         AssertSql(
             """
-SELECT "t0"."OrderID", "t0"."CustomerID", "t0"."EmployeeID", "t0"."OrderDate"
+SELECT "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
 FROM "Customers" AS "c"
 LEFT JOIN (
-    SELECT "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate"
+    SELECT "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
     FROM (
         SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate", ROW_NUMBER() OVER(PARTITION BY "o"."CustomerID" ORDER BY "o"."OrderID") AS "row"
         FROM "Orders" AS "o"
-    ) AS "t"
-    WHERE "t"."row" <= 1
-) AS "t0" ON "c"."CustomerID" = "t0"."CustomerID"
+    ) AS "o0"
+    WHERE "o0"."row" <= 1
+) AS "o1" ON "c"."CustomerID" = "o1"."CustomerID"
 ORDER BY "c"."CustomerID"
 """);
     }
@@ -988,16 +985,16 @@ FROM "Customers" AS "c"
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "t0"."OrderID", "t0"."CustomerID", "t0"."EmployeeID", "t0"."OrderDate"
+SELECT "c"."CustomerID", "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
 FROM "Customers" AS "c"
 LEFT JOIN (
-    SELECT "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate"
+    SELECT "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
     FROM (
         SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate", ROW_NUMBER() OVER(PARTITION BY "o"."CustomerID" ORDER BY "o"."OrderID") AS "row"
         FROM "Orders" AS "o"
-    ) AS "t"
-    WHERE "t"."row" <= 1
-) AS "t0" ON "c"."CustomerID" = "t0"."CustomerID"
+    ) AS "o0"
+    WHERE "o0"."row" <= 1
+) AS "o1" ON "c"."CustomerID" = "o1"."CustomerID"
 WHERE "c"."CustomerID" LIKE N'A%'
 ORDER BY "c"."CustomerID"
 """);
@@ -1036,11 +1033,11 @@ ORDER BY "t"."OrderID"
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 LEFT JOIN (
-    SELECT "o"."OrderID", "o"."ProductID", "o"."Discount", "o"."Quantity", "o"."UnitPrice", "o0"."OrderID" AS "OrderID0", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate", "c0"."CustomerID" AS "CustomerID0", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
+    SELECT "c0"."CustomerID" AS "CustomerID0"
     FROM "Order Details" AS "o"
     INNER JOIN "Orders" AS "o0" ON "o"."OrderID" = 10260
     INNER JOIN "Customers" AS "c0" ON "o0"."CustomerID" = "c0"."CustomerID"
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID0"
+) AS "s" ON "c"."CustomerID" = "s"."CustomerID0"
 """);
     }
 
@@ -1053,11 +1050,11 @@ LEFT JOIN (
 SELECT "c"."CustomerID"
 FROM "Customers" AS "c"
 LEFT JOIN (
-    SELECT "o"."OrderID", "o"."ProductID", "o"."Discount", "o"."Quantity", "o"."UnitPrice", "o0"."OrderID" AS "OrderID0", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate", "c0"."CustomerID" AS "CustomerID0", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
+    SELECT "c0"."CustomerID" AS "CustomerID0"
     FROM "Order Details" AS "o"
     INNER JOIN "Orders" AS "o0" ON "o"."OrderID" = 10260
     INNER JOIN "Customers" AS "c0" ON "o0"."CustomerID" = "c0"."CustomerID"
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID0"
+) AS "s" ON "c"."CustomerID" = "s"."CustomerID0"
 """);
     }
 
@@ -1120,15 +1117,15 @@ WHERE "o"."OrderID" IN (10643, 10692) AND (
 
         AssertSql(
             """
-SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate", "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate"
+SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate", "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
 FROM "Orders" AS "o"
 CROSS JOIN (
     SELECT "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
     FROM "Orders" AS "o0"
     WHERE "o0"."OrderID" < 10400
-) AS "t"
+) AS "o1"
 LEFT JOIN "Customers" AS "c" ON "o"."CustomerID" = "c"."CustomerID"
-LEFT JOIN "Customers" AS "c0" ON "t"."CustomerID" = "c0"."CustomerID"
+LEFT JOIN "Customers" AS "c0" ON "o1"."CustomerID" = "c0"."CustomerID"
 WHERE "o"."OrderID" < 10300 AND ("c"."City" = "c0"."City" OR ("c"."City" IS NULL AND "c0"."City" IS NULL))
 """);
     }

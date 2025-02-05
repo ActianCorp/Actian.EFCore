@@ -1423,6 +1423,64 @@ WHERE RAND() >= 0.0
 """);
         }
 
+        public override async Task Collate_is_null(bool async)
+        {
+            await base.Collate_is_null(async);
+
+            AssertSql(
+                """
+    SELECT COUNT(*)
+    FROM "Customers" AS "c"
+    WHERE "c"."Region" IS NULL
+    """);
+        }
+
+        [ActianTodo]
+        public override async Task Least(bool async)
+        {
+            await base.Least(async);
+
+            AssertSql();
+        }
+
+        [ActianTodo]
+        public override async Task Greatest(bool async)
+        {
+            await base.Greatest(async);
+
+            AssertSql();
+        }
+
+        [ActianTodo]
+        public override async Task Least_with_nullable_value_type(bool async)
+        {
+            await base.Least_with_nullable_value_type(async);
+
+            AssertSql();
+        }
+
+        [ActianTodo]
+        public override async Task Greatest_with_nullable_value_type(bool async)
+        {
+            await base.Greatest_with_nullable_value_type(async);
+
+            AssertSql();
+        }
+
+        public override async Task Least_with_parameter_array_is_not_supported(bool async)
+        {
+            await base.Least_with_parameter_array_is_not_supported(async);
+
+            AssertSql();
+        }
+
+        public override async Task Greatest_with_parameter_array_is_not_supported(bool async)
+        {
+            await base.Greatest_with_parameter_array_is_not_supported(async);
+
+            AssertSql();
+        }
+
         private void AssertSql(params string[] expected)
             => Fixture.TestSqlLoggerFactory.AssertBaseline(expected);
     }

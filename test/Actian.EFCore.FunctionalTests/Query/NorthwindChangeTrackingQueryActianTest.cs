@@ -1,4 +1,5 @@
-﻿using Actian.EFCore.TestUtilities;
+﻿using System.Linq;
+using Actian.EFCore.TestUtilities;
 using Microsoft.EntityFrameworkCore.TestModels.Northwind;
 using Microsoft.EntityFrameworkCore.TestUtilities;
 using Xunit;
@@ -53,7 +54,27 @@ FROM "Employees" AS "e"
 
     public override void Can_disable_and_reenable_query_result_tracking_query_caching_using_options()
     {
-        base.Can_disable_and_reenable_query_result_tracking_query_caching_using_options();
+        //base.Can_disable_and_reenable_query_result_tracking_query_caching_using_options();
+
+        using (var context = CreateContext())
+        {
+            Assert.Equal(QueryTrackingBehavior.TrackAll, context.ChangeTracker.QueryTrackingBehavior);
+
+            var results = context.Employees.ToList();
+
+            Assert.Equal(9, results.Count);
+            Assert.Equal(9, context.ChangeTracker.Entries().Count());
+        }
+
+        using (var context = CreateNoTrackingContext())
+        {
+            Assert.Equal(QueryTrackingBehavior.NoTracking, context.ChangeTracker.QueryTrackingBehavior);
+
+            var results = context.Employees.ToList();
+
+            Assert.Equal(9, results.Count);
+            Assert.Empty(context.ChangeTracker.Entries());
+        }
 
         AssertSql(
             """
@@ -351,8 +372,11 @@ WHERE "c"."CustomerID" = N'ALFKI'
     private void AssertSql(params string[] expected)
         => Fixture.TestSqlLoggerFactory.AssertBaseline(expected);
 
+    //protected override NorthwindContext CreateNoTrackingContext()
+    //    => new NorthwindActianContext(
+    //        new DbContextOptionsBuilder(Fixture.CreateOptions()).Options);
     protected override NorthwindContext CreateNoTrackingContext()
-        => new NorthwindActianContext(
-            new DbContextOptionsBuilder(Fixture.CreateOptions())
-                .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking).Options);
+    => new NorthwindActianContext(
+        new DbContextOptionsBuilder(Fixture.CreateOptions())
+            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking).Options);
 }

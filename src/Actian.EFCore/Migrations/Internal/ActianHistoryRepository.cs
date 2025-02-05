@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Text;
+using System.Threading.Tasks;
+using System.Threading;
 using Actian.EFCore.Scaffolding.Internal;
 using Actian.EFCore.Utilities;
 using Ingres.Client;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -45,6 +48,8 @@ namespace Actian.EFCore.Migrations.Internal
             return value is int intValue && intValue == 1
                 || value is short shortValue && shortValue == 1;
         }
+
+        public override LockReleaseBehavior LockReleaseBehavior => LockReleaseBehavior.Connection;
 
         public override string GetCreateIfNotExistsScript()
             => Exists() ? "" : GetCreateScript();
@@ -89,5 +94,90 @@ namespace Actian.EFCore.Migrations.Internal
             .Append("END")
             .AppendLine(SqlGenerationHelper.StatementTerminator)
             .ToString();
+
+        public override IMigrationsDatabaseLock AcquireDatabaseLock()
+        {
+            Dependencies.MigrationsLogger.AcquiringMigrationLock();
+
+            var dbLock = CreateMigrationDatabaseLock();
+            int result;
+            try
+            {
+                result = (int)CreateGetLockCommand().ExecuteScalar(CreateRelationalCommandParameters())!;
+            }
+            catch
+            {
+                try
+                {
+                    dbLock.Dispose();
+                }
+                catch
+                {
+                }
+
+                throw;
+            }
+
+            return result < 0
+                ? throw new TimeoutException()
+                : dbLock;
+        }
+
+        public override async Task<IMigrationsDatabaseLock> AcquireDatabaseLockAsync(CancellationToken cancellationToken = default)
+        {
+            Dependencies.MigrationsLogger.AcquiringMigrationLock();
+
+            var dbLock = CreateMigrationDatabaseLock();
+            int result;
+            try
+            {
+                result = (int)(await CreateGetLockCommand().ExecuteScalarAsync(CreateRelationalCommandParameters(), cancellationToken)
+                    .ConfigureAwait(false))!;
+            }
+            catch
+            {
+                try
+                {
+                    await dbLock.DisposeAsync().ConfigureAwait(false);
+                }
+                catch
+                {
+                }
+
+                throw;
+            }
+
+            return result < 0
+                ? throw new TimeoutException()
+                : dbLock;
+        }
+
+        private ActianMigrationDatabaseLock CreateMigrationDatabaseLock()
+    => new(
+        Dependencies.RawSqlCommandBuilder.Build(
+            """
+DECLARE @result int;
+EXEC @result = sp_releaseapplock @Resource = '__EFMigrationsLock', @LockOwner = 'Session';
+SELECT @result
+"""),
+        CreateRelationalCommandParameters(),
+        this);
+
+        private RelationalCommandParameterObject CreateRelationalCommandParameters()
+            => new(
+                Dependencies.Connection,
+                null,
+                null,
+                Dependencies.CurrentContext.Context,
+                Dependencies.CommandLogger, CommandSource.Migrations);
+
+        private IRelationalCommand CreateGetLockCommand()
+    => Dependencies.RawSqlCommandBuilder.Build(
+        """
+DECLARE @result int;
+EXEC @result = sp_getapplock @Resource = '__EFMigrationsLock', @LockOwner = 'Session', @LockMode = 'Exclusive';
+SELECT @result
+""",
+        []).RelationalCommand;
     }
 }

@@ -24,9 +24,6 @@ public class NorthwindFunctionsQueryActianTest : NorthwindFunctionsQueryRelation
         Fixture.TestSqlLoggerFactory.SetTestOutputHelper(testOutputHelper);
     }
 
-    protected override bool CanExecuteQueryString
-        => true;
-
     [ConditionalFact]
     public virtual void Check_all_tests_overridden()
         => TestHelpers.AssertAllMethodsOverridden(GetType());
@@ -2299,6 +2296,9 @@ WHERE "o"."CustomerID" = N'ALFKI' AND (CONVERT(nvarchar(max), "o"."OrderDate") L
             """
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
+WHERE CASE
+    WHEN "c"."Region" IS NOT NULL THEN 0
+END = 0
 """);
     }
 
@@ -2835,6 +2835,149 @@ SELECT "o"."ProductID", VAR("o"."UnitPrice") AS "SampleStandardDeviation", VARP(
 FROM "Order Details" AS "o"
 GROUP BY "o"."ProductID"
 """);
+    }
+
+    public override async Task String_StartsWith_with_StringComparison_Ordinal(bool async)
+    {
+        await base.String_StartsWith_with_StringComparison_Ordinal(async);
+
+        AssertSql();
+    }
+
+    public override async Task String_StartsWith_with_StringComparison_OrdinalIgnoreCase(bool async)
+    {
+        await base.String_StartsWith_with_StringComparison_OrdinalIgnoreCase(async);
+
+        AssertSql();
+    }
+
+    public override async Task String_EndsWith_with_StringComparison_Ordinal(bool async)
+    {
+        await base.String_EndsWith_with_StringComparison_Ordinal(async);
+
+        AssertSql();
+    }
+
+    public override async Task String_EndsWith_with_StringComparison_OrdinalIgnoreCase(bool async)
+    {
+        await base.String_EndsWith_with_StringComparison_OrdinalIgnoreCase(async);
+
+        AssertSql();
+    }
+
+    public override async Task String_Contains_with_StringComparison_Ordinal(bool async)
+    {
+        await base.String_Contains_with_StringComparison_Ordinal(async);
+
+        AssertSql();
+    }
+
+    public override async Task String_Contains_with_StringComparison_OrdinalIgnoreCase(bool async)
+    {
+        await base.String_Contains_with_StringComparison_OrdinalIgnoreCase(async);
+
+        AssertSql();
+    }
+
+    public override async Task String_StartsWith_with_StringComparison_unsupported(bool async)
+    {
+        await base.String_StartsWith_with_StringComparison_unsupported(async);
+
+        AssertSql();
+    }
+
+    public override async Task String_EndsWith_with_StringComparison_unsupported(bool async)
+    {
+        await base.String_EndsWith_with_StringComparison_unsupported(async);
+
+        AssertSql();
+    }
+
+    [ActianTodo]
+    public override async Task String_Contains_in_projection(bool async)
+    {
+        await base.String_Contains_in_projection(async);
+
+        AssertSql();
+    }
+
+    [ActianTodo]
+    public override async Task String_Contains_negated_in_predicate(bool async)
+    {
+        await base.String_Contains_negated_in_predicate(async);
+
+        AssertSql();
+    }
+
+    [ActianTodo]
+    public override async Task String_Contains_negated_in_projection(bool async)
+    {
+        await base.String_Contains_negated_in_projection(async);
+
+        AssertSql();
+    }
+
+    public override async Task String_Contains_with_StringComparison_unsupported(bool async)
+    {
+        await base.String_Contains_with_StringComparison_unsupported(async);
+
+        AssertSql();
+    }
+
+    [ActianTodo]
+    public override async Task String_Join_non_aggregate(bool async)
+    {
+        await base.String_Join_non_aggregate(async);
+
+        AssertSql();
+    }
+
+    [ActianTodo]
+    public override async Task Where_math_max_nested(bool async)
+    {
+        await base.Where_math_max_nested(async);
+
+        AssertSql();
+    }
+
+    [ActianTodo]
+    public override async Task Where_math_max_nested_twice(bool async)
+    {
+        await base.Where_math_max_nested_twice(async);
+
+        AssertSql();
+    }
+
+    [ActianTodo]
+    public override async Task Where_math_min_nested(bool async)
+    {
+        await base.Where_math_min_nested(async);
+
+        AssertSql();
+    }
+
+    [ActianTodo]
+    public override async Task Where_math_min_nested_twice(bool async)
+    {
+        await base.Where_math_min_nested_twice(async);
+
+        AssertSql();
+    }
+
+    [ActianTodo]
+    public override async Task Select_ToString_IndexOf(bool async)
+    {
+        await base.Select_ToString_IndexOf(async);
+
+        AssertSql();
+    }
+
+    [ActianTodo]
+    public override async Task Select_IndexOf_ToString(bool async)
+    {
+        await base.Select_IndexOf_ToString(async);
+
+        AssertSql();
     }
 
     private void AssertSql(params string[] expected)

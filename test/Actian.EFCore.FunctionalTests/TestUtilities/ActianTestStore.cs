@@ -9,12 +9,15 @@ using System.Text;
 using System.Threading.Tasks;
 using Actian.EFCore.Parsing.Internal;
 using Ingres.Client;
+using Microsoft.CodeAnalysis.Differencing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.TestUtilities;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
+
+#nullable enable
 
 #pragma warning disable IDE0022 // Use block body for methods
 // ReSharper disable SuggestBaseTypeForParameter
@@ -25,19 +28,19 @@ namespace Actian.EFCore.TestUtilities
  
         public const int CommandTimeout = 300;
 
-        public static ActianTestStore GetIIDbDb()
-            => (ActianTestStore)ActianIIDbDbTestStoreFactory.Instance
-                .GetOrCreate(ActianIIDbDbTestStoreFactory.Name).Initialize(null, (Func<DbContext>)null);
+        public static async Task<ActianTestStore> GetIIDbDb()
+            => (ActianTestStore) await ActianIIDbDbTestStoreFactory.Instance
+                .GetOrCreate(ActianIIDbDbTestStoreFactory.Name).InitializeAsync(null, (Func<DbContext>?)null);
 
-        public static ActianTestStore GetNorthwindStore()
-            => (ActianTestStore)ActianNorthwindTestStoreFactory.Instance
-                .GetOrCreate(ActianNorthwindTestStoreFactory.Name).Initialize(null, (Func<DbContext>)null);
+        public static async Task<ActianTestStore> GetNorthwindStore()
+            => (ActianTestStore) await ActianNorthwindTestStoreFactory.Instance
+                .GetOrCreate(ActianNorthwindTestStoreFactory.Name).InitializeAsync(null, (Func<DbContext>?)null);
 
         public static ActianTestStore GetOrCreate(string name)
             => new ActianTestStore(name);
 
-        public static ActianTestStore GetOrCreateInitialized(string name)
-            => new ActianTestStore(name).InitializeActian(null, (Func<DbContext>)null, null);
+        public static async Task<ActianTestStore> GetOrCreateInitializedAsync(string name)
+            => await new ActianTestStore(name).InitializeActianAsync(null, (Func<DbContext>?)null, null);
 
         public static ActianTestStore GetOrCreateWithUser(string name, string initUser)
             => new ActianTestStore (name, initUser);
@@ -48,31 +51,43 @@ namespace Actian.EFCore.TestUtilities
         public static ActianTestStore Create(string name)
             => new ActianTestStore(name, shared: false);
 
-        public static ActianTestStore CreateInitialized(string name)
-            => new ActianTestStore(name, shared: false)
-                .InitializeActian(null, (Func<DbContext>)null, null);
+        public static async Task<ActianTestStore> CreateInitializedAsync(string name)
+            => await new ActianTestStore(name, shared: false)
+                .InitializeActianAsync(null, (Func<DbContext>?)null, null);
 
-        private readonly string _scriptPath;
+        //private readonly string? _fileName;
+        private readonly string? _initScript;
+        private readonly string? _scriptPath;
 
         private ActianTestStore(
-            string name,
-            string scriptPath = null,
-            bool shared = true)
-            : base(name, shared)
+        string name,
+        string? initScript = null,
+        string? scriptPath = null,
+        bool shared = true)
+            : base(name, shared, CreateConnection(name))
         {
             SetOutput(new ActianTestStoreLogger(name));
             Logger.LogInformation($"Creating ActianTestStore {name}");
             Console.WriteLine($"Creating ActianTestStore {name}");
-            if (scriptPath != null)
+
+            if (initScript != null)
             {
-                _scriptPath = Path.Combine(Path.GetDirectoryName(typeof(ActianTestStore).GetTypeInfo().Assembly.Location), scriptPath);
+                _initScript = initScript;
             }
 
-            ConnectionString = TestEnvironment.GetConnectionString(Name);
-            Connection = new IngresConnection(ConnectionString);
+            if (scriptPath != null)
+            {
+                _scriptPath = Path.Combine(Path.GetDirectoryName(typeof(ActianTestStore).GetTypeInfo().Assembly.Location)!, scriptPath);
+            }
 
             Console.WriteLine($"Server version: {TestEnvironment.ActianServerVersion}");
             Logger.LogInformation($"Server version: {TestEnvironment.ActianServerVersion}");
+        }
+
+        private static IngresConnection CreateConnection(string name)
+        {
+            var connectionString = CreateConnectionString(name);
+            return new IngresConnection(connectionString);
         }
 
         public IngresConnection IngresConnection => (IngresConnection)Connection;
@@ -85,12 +100,43 @@ namespace Actian.EFCore.TestUtilities
             _actianTestLogger.SetOutput(output);
         }
 
-        public ActianTestStore InitializeActian(IServiceProvider serviceProvider, Func<DbContext> createContext, Action<DbContext> seed)
-            => (ActianTestStore)Initialize(serviceProvider, createContext, seed);
+        public async Task<ActianTestStore> InitializeActianAsync(
+            IServiceProvider? serviceProvider,
+            Func<DbContext>? createContext,
+            Func<DbContext, Task>? seed)
+            => (ActianTestStore)await InitializeAsync(serviceProvider, createContext, seed);
 
-        public ActianTestStore InitializeActian(
-            IServiceProvider serviceProvider, Func<ActianTestStore, DbContext> createContext, Action<DbContext> seed)
-            => InitializeActian(serviceProvider, () => createContext(this), seed);
+        public async Task<ActianTestStore> InitializeActianAsync(
+            IServiceProvider serviceProvider,
+            Func<ActianTestStore, DbContext> createContext,
+            Func<DbContext, Task> seed)
+            => await InitializeActianAsync(serviceProvider, () => createContext(this), seed);
+
+        protected override async Task InitializeAsync(Func<DbContext> createContext, Func<DbContext, Task>? seed, Func<DbContext, Task>? clean)
+        {
+            if (await CreateDatabase(clean))
+            {
+                if (_scriptPath != null)
+                {
+                    ExecuteScript(await File.ReadAllTextAsync(_scriptPath));
+                }
+                else
+                {
+                    using var context = createContext();
+                    await context.Database.EnsureCreatedResilientlyAsync();
+
+                    if (_initScript != null)
+                    {
+                        ExecuteScript(_initScript);
+                    }
+
+                    if (seed != null)
+                    {
+                        await seed.Invoke(context);
+                    }
+                }
+            }
+        }
 
         public IngresConnection GetIIDbDbConnection()
         {
@@ -98,49 +144,13 @@ namespace Actian.EFCore.TestUtilities
         }
 
         private static readonly HashSet<(Type, string)> _scriptExecuted = new HashSet<(Type, string)>();
-        protected override void Initialize(Func<DbContext> createContext, Action<DbContext> seed, Action<DbContext> clean)
-        {
-            var loggerFactory = ServiceProvider.GetRequiredService<ILoggerFactory>();
-            if (loggerFactory is ActianTestSqlLoggerFactory actianTestSqlLoggerFactory)
-            {
-                actianTestSqlLoggerFactory.AddLogger(Logger);
-            }
-            Logger.LogInformation("Initializing");
-            try
-            {
-                if (CreateDatabase(clean))
-                {
-                    if (_scriptPath != null)
-                    {
-                        _scriptExecuted.Add((GetType(), _scriptPath));
-                        ExecuteScript(_scriptPath);
-                    }
-                    else
-                    {
-                        using var context = createContext();
-                        context.Database.EnsureCreatedResiliently();
-                        seed?.Invoke(context);
-                    }
-                }
-                else if (_scriptPath != null && !_scriptExecuted.Contains((GetType(), _scriptPath)))
-                {
-                    _scriptExecuted.Add((GetType(), _scriptPath));
-                    //ExecuteScript(_scriptPath);
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ex, ex.Message);
-                throw;
-            }
-        }
 
         public override DbContextOptionsBuilder AddProviderOptions(DbContextOptionsBuilder builder)
             => builder
                 .UseActian(Connection, b => b.ApplyConfiguration())
                 .ConfigureWarnings(b => b.Ignore(ActianEventId.SavepointsDisabledBecauseOfMARS));
 
-        private bool CreateDatabase(Action<DbContext> clean)
+        private async Task<bool> CreateDatabase(Func<DbContext, Task>? clean)
         {
             if (!DatabaseExists())
                 throw new NotSupportedException($"Can not create Actian database {Connection.Database}");
@@ -154,7 +164,7 @@ namespace Actian.EFCore.TestUtilities
                 ).Options
             );
             clean?.Invoke(context);
-            Clean(context);
+            await CleanAsync(context);
             return true;
         }
 
@@ -201,8 +211,11 @@ namespace Actian.EFCore.TestUtilities
             context.Database.EnsureClean();
         }
 
-        public override void Clean(DbContext context)
-            => context.Database.EnsureClean();
+        public override Task CleanAsync(DbContext context)
+        {
+            context.Database.EnsureClean();
+            return Task.CompletedTask;
+        }
 
         public void CleanObjects()
         {
@@ -279,7 +292,7 @@ namespace Actian.EFCore.TestUtilities
         public Task<T> ExecuteScalarAsync<T>(string sql, params object[] parameters)
             => ExecuteScalarAsync<T>(Connection, sql, parameters);
 
-        private Task<T> ExecuteScalarAsync<T>(DbConnection connection, string sql, IReadOnlyList<object> parameters = null)
+        private Task<T> ExecuteScalarAsync<T>(DbConnection connection, string sql, IReadOnlyList<object> parameters = null!)
             => ExecuteAsync(connection, async command => await command.ExecuteScalarAsync<T>(), sql, false, parameters);
 
         public int ExecuteNonQuery(string sql, params object[] parameters)
@@ -348,7 +361,7 @@ namespace Actian.EFCore.TestUtilities
             return ExecuteStatements(parsedStatements, ignoreErrors: true);
         }
 
-        public int ExecuteStatements(IEnumerator<ActianSqlStatement> statements, TextWriter log = null, bool ignoreErrors = false)
+        public int ExecuteStatements(IEnumerator<ActianSqlStatement> statements, TextWriter log = null!, bool ignoreErrors = false)
         {
             try
             {
@@ -444,13 +457,13 @@ namespace Actian.EFCore.TestUtilities
             }
         }
 
-        private int ExecuteNonQuery(DbConnection connection, string sql, object[] parameters = null)
+        private int ExecuteNonQuery(DbConnection connection, string sql, object[] parameters = null!)
             => Execute(connection, command => Log(sql, () => command.ExecuteNonQuery()), sql, false, parameters);
 
         public Task<int> ExecuteNonQueryAsync(string sql, params object[] parameters)
             => ExecuteNonQueryAsync(Connection, sql, parameters);
 
-        private Task<int> ExecuteNonQueryAsync(DbConnection connection, string sql, IReadOnlyList<object> parameters = null)
+        private Task<int> ExecuteNonQueryAsync(DbConnection connection, string sql, IReadOnlyList<object> parameters = null!)
             => ExecuteAsync(connection, command => LogAsync(sql, () => command.ExecuteNonQueryAsync()), sql, false, parameters);
 
         public IEnumerable<T> Query<T>(string sql, params object[] parameters)
@@ -459,7 +472,7 @@ namespace Actian.EFCore.TestUtilities
         public IEnumerable<T> Query<T>(string sql, Func<DbDataReader, T> read, params object[] parameters)
             => Query(Connection, sql, read, parameters);
 
-        private IEnumerable<T> Query<T>(DbConnection connection, string sql, Func<DbDataReader, T> read, object[] parameters = null)
+        private IEnumerable<T> Query<T>(DbConnection connection, string sql, Func<DbDataReader, T> read, object[] parameters = null!)
             => Execute(
                 connection, command =>
                 {
@@ -472,7 +485,7 @@ namespace Actian.EFCore.TestUtilities
                     return results;
                 }, sql, false, parameters);
 
-        private IEnumerable<T> Query<T>(DbConnection connection, string sql, object[] parameters = null)
+        private IEnumerable<T> Query<T>(DbConnection connection, string sql, object[] parameters = null!)
             => Execute(
                 connection, command =>
                 {
@@ -491,7 +504,7 @@ namespace Actian.EFCore.TestUtilities
         public Task<IEnumerable<T>> QueryAsync<T>(string sql, Func<DbDataReader, T> read, params object[] parameters)
             => QueryAsync<T>(Connection, sql, read, parameters);
 
-        private Task<IEnumerable<T>> QueryAsync<T>(DbConnection connection, string sql, Func<DbDataReader, T> read, object[] parameters = null)
+        private Task<IEnumerable<T>> QueryAsync<T>(DbConnection connection, string sql, Func<DbDataReader, T> read, object[] parameters = null!)
             => ExecuteAsync(
                 connection, async command =>
                 {
@@ -505,7 +518,7 @@ namespace Actian.EFCore.TestUtilities
                     return results.AsEnumerable();
                 }, sql, false, parameters);
 
-        private Task<IEnumerable<T>> QueryAsync<T>(DbConnection connection, string sql, object[] parameters = null)
+        private Task<IEnumerable<T>> QueryAsync<T>(DbConnection connection, string sql, object[] parameters = null!)
             => ExecuteAsync(
                 connection, async command =>
                 {
@@ -523,7 +536,7 @@ namespace Actian.EFCore.TestUtilities
         public int ForEach(string sql, Action<DbDataReader> action, params object[] parameters)
             => ForEach(Connection, sql, action, parameters);
 
-        private int ForEach(DbConnection connection, string sql, Action<DbDataReader> action, object[] parameters = null)
+        private int ForEach(DbConnection connection, string sql, Action<DbDataReader> action, object[] parameters = null!)
             => Execute(
                 connection, command =>
                 {
@@ -539,7 +552,7 @@ namespace Actian.EFCore.TestUtilities
 
         private T Execute<T>(
             DbConnection connection, Func<DbCommand, T> execute, string sql,
-            bool useTransaction = false, object[] parameters = null)
+            bool useTransaction = false, object[] parameters = null!)
             => new TestActianRetryingExecutionStrategy(Name).Execute(
                 new
                 {
@@ -581,7 +594,7 @@ namespace Actian.EFCore.TestUtilities
 
         private Task<T> ExecuteAsync<T>(
             DbConnection connection, Func<DbCommand, Task<T>> executeAsync, string sql,
-            bool useTransaction = false, IReadOnlyList<object> parameters = null)
+            bool useTransaction = false, IReadOnlyList<object> parameters = null!)
             => new TestActianRetryingExecutionStrategy(Name).ExecuteAsync(
                 new
                 {
@@ -610,7 +623,7 @@ namespace Actian.EFCore.TestUtilities
                     T result;
                     using (var command = CreateCommand(connection, sql, parameters))
                     {
-                        result = await LogAsync(sql, () => executeAsync(command));
+                        result = await executeAsync(command);
                     }
 
                     if (transaction != null)
@@ -671,7 +684,7 @@ namespace Actian.EFCore.TestUtilities
         private static DbCommand CreateCommand(
             DbConnection connection,
             string commandText,
-            IReadOnlyList<object> parameters = null)
+            IReadOnlyList<object> parameters = null!)
         {
             var command = connection.CreateCommand();
 
@@ -711,13 +724,12 @@ namespace Actian.EFCore.TestUtilities
         public override void Dispose()
         {
             Connection?.Dispose();
-            Connection = null;
             base.Dispose();
         }
 
-        public static string CreateConnectionString(string name, string fileName = null, bool? multipleActiveResultSets = null)
+        public static string CreateConnectionString(string name, string fileName = null!, bool? multipleActiveResultSets = null)
         {
-            return new IngresConnectionStringBuilder(TestEnvironment.DefaultConnection).ToString();
+            return new IngresConnectionStringBuilder(TestEnvironment.GetConnectionString(name)).ToString();
         }
     }
 }

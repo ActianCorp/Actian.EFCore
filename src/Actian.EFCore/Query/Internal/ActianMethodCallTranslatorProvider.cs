@@ -1,12 +1,15 @@
-﻿using JetBrains.Annotations;
+﻿using Actian.EFCore.Infrastructure.Internal;
+using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Query;
 
 namespace Actian.EFCore.Query.Internal
 {
     public class ActianMethodCallTranslatorProvider : RelationalMethodCallTranslatorProvider
     {
-        public ActianMethodCallTranslatorProvider([NotNull] RelationalMethodCallTranslatorProviderDependencies dependencies)
-            : base(dependencies)
+        public ActianMethodCallTranslatorProvider(
+        RelationalMethodCallTranslatorProviderDependencies dependencies,
+        IActianSingletonOptions actianSingletonOptions)
+        : base(dependencies)
         {
             var sqlExpressionFactory = dependencies.SqlExpressionFactory;
 
@@ -20,7 +23,7 @@ namespace Actian.EFCore.Query.Internal
                 //new ActianMathTranslator(sqlExpressionFactory),
                 //new ActianNewGuidTranslator(sqlExpressionFactory),
                 //new ActianObjectToStringTranslator(sqlExpressionFactory),
-                new ActianStringMethodTranslator(sqlExpressionFactory)
+                new ActianStringMethodTranslator(sqlExpressionFactory, actianSingletonOptions)
             });
         }
     }

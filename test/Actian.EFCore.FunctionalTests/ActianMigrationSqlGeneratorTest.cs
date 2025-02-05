@@ -41,7 +41,7 @@ namespace Actian.EFCore
 set session authorization "dbo";
 GO
 
-CREATE INDEX "IX_People_Name" ON "dbo"."People" ("FirstName", "LastName");
+CREATE INDEX "IX_People_Name" ON "dbo"."People" ("FirstName", "LastName") WHERE "FirstName" IS NOT NULL AND "LastName" IS NOT NULL WITH (ONLINE = ON);
 """);
         }
 
@@ -64,7 +64,7 @@ CREATE INDEX "IX_People_Name" ON "dbo"."People" ("FirstName", "LastName");
 set session authorization "dbo";
 GO
 
-CREATE INDEX "IX_People_Name" ON "dbo"."People" ("FirstName", "LastName");
+CREATE INDEX "IX_People_Name" ON "dbo"."People" ("FirstName", "LastName") WHERE "FirstName" IS NOT NULL AND "LastName" IS NOT NULL WITH (SORT_IN_TEMPDB = ON);
 """);
         }
 
@@ -95,7 +95,7 @@ CREATE INDEX "IX_People_Name" ON "dbo"."People" ("FirstName", "LastName");
 set session authorization "dbo";
 GO
 
-CREATE INDEX "IX_People_Name" ON "dbo"."People" ("FirstName", "LastName");
+CREATE INDEX "IX_People_Name" ON "dbo"."People" ("FirstName", "LastName") WHERE "FirstName" IS NOT NULL AND "LastName" IS NOT NULL WITH (DATA_COMPRESSION = {dataCompression.ToString().ToUpper()});
 
 """);
         }
@@ -1659,7 +1659,7 @@ ALTER SEQUENCE ""dbo"".""TestRestartSequenceOperation"" RESTART WITH NULL;";
 }
 
 [ConditionalFact]
-        public virtual void CreateIndex_generates_exec_when_legacy_filter_and_idempotent()
+public virtual void CreateIndex_generates_exec_when_legacy_filter_and_idempotent()
 {
     Generate(
         modelBuilder =>
@@ -1677,7 +1677,7 @@ ALTER SEQUENCE ""dbo"".""TestRestartSequenceOperation"" RESTART WITH NULL;";
 
     AssertSql(
         """
-CREATE INDEX "IX_Table1_Column1" ON "Table1" ("Column1");
+CREATE INDEX "IX_Table1_Column1" ON "Table1" ("Column1") WHERE "Column1" IS NOT NULL;
 """);
 }
 

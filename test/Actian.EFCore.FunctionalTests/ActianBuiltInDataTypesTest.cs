@@ -34,14 +34,14 @@ namespace Actian.EFCore
             Fixture.TestSqlLoggerFactory.SetTestOutputHelper(testOutputHelper);
         }
 
-        public override void Can_compare_enum_to_constant()
+        public override async Task Can_compare_enum_to_constant()
         {
-            base.Can_compare_enum_to_constant();
+            await base.Can_compare_enum_to_constant();
         }
 
-        public override void  Can_compare_enum_to_parameter()
+        public override async Task Can_compare_enum_to_parameter()
         {
-            base.Can_compare_enum_to_parameter();
+            await base.Can_compare_enum_to_parameter();
         }
 
         public override async Task Can_filter_projection_with_captured_enum_variable(bool async)
@@ -187,16 +187,16 @@ namespace Actian.EFCore
         }
 
         [ActianTodo]
-        public override void Can_perform_query_with_max_length()
+        public override async Task Can_perform_query_with_max_length()
         {
-            Assert.Equal(1, 1);
+            await base.Can_perform_query_with_max_length();
         }
 
         
         [ActianTodo]
-        public override void Can_perform_query_with_ansi_strings_test()
+        public override async Task Can_perform_query_with_ansi_strings_test()
         {
-            Assert.Equal(1, 1);
+            await base.Can_perform_query_with_ansi_strings_test();
         }
         
 
@@ -266,6 +266,13 @@ namespace Actian.EFCore
             ExecuteQueryString(context, 54, set.Where(e => e.Id == 54 && e.StringAnsi3 == shortString));
             ExecuteQueryString(context, 54, set.Where(e => e.Id == 54 && e.StringUnicode == shortString));
             ExecuteQueryString(context, 54, set.Where(e => e.Id == 54 && e.StringAnsi9000 == longString));
+        }
+
+        [ActianTodo]
+        [ConditionalFact]
+        public override Task Can_query_with_null_parameters_using_any_nullable_data_type()
+        {
+            return base.Can_query_with_null_parameters_using_any_nullable_data_type();
         }
 
         [ActianTodo]
@@ -2703,30 +2710,28 @@ WHERE DATEDIFF(nanosecond, [m].[TimeSpanAsTime], @__timeSpan_1) = 0
         }
         
         [ActianTodo]
-        public override void Can_insert_and_read_back_all_non_nullable_data_types()
+        public override async Task Can_insert_and_read_back_all_non_nullable_data_types()
         {
-            base.Can_insert_and_read_back_all_non_nullable_data_types();
+            await base.Can_insert_and_read_back_all_non_nullable_data_types();
         }
         
 
         [ActianTodo]
-        public override void Can_insert_and_read_back_all_nullable_data_types_with_values_set_to_non_null()
+        public override async Task Can_insert_and_read_back_all_nullable_data_types_with_values_set_to_non_null()
         {
-            base.Can_insert_and_read_back_all_nullable_data_types_with_values_set_to_non_null();
+            await base.Can_insert_and_read_back_all_nullable_data_types_with_values_set_to_non_null();
         }
 
         [ActianTodo]
-        public override void Can_insert_and_read_back_all_nullable_data_types_with_values_set_to_null()
+        public override async Task Can_insert_and_read_back_all_nullable_data_types_with_values_set_to_null()
         {
-            base.Can_insert_and_read_back_all_nullable_data_types_with_values_set_to_null();
+            await base.Can_insert_and_read_back_all_nullable_data_types_with_values_set_to_null();
         }
 
         [ActianTodo]
-        public override void Can_insert_and_read_back_non_nullable_backed_data_types()
+        public override async Task Can_insert_and_read_back_non_nullable_backed_data_types()
         {
-            Assert.Equal(1, 1);
-
-            base.Can_insert_and_read_back_non_nullable_backed_data_types();
+            await base.Can_insert_and_read_back_non_nullable_backed_data_types();
             /*
             using (var context = CreateContext())
             {
@@ -2805,87 +2810,87 @@ WHERE DATEDIFF(nanosecond, [m].[TimeSpanAsTime], @__timeSpan_1) = 0
         }
 
         [ActianTodo]
-        public override void Can_insert_and_read_back_nullable_backed_data_types()
+        public override async Task Can_insert_and_read_back_nullable_backed_data_types()
         {
-            base.Can_insert_and_read_back_nullable_backed_data_types();
+            await base.Can_insert_and_read_back_nullable_backed_data_types();
         }
 
         [ActianTodo]
-        public override void Can_insert_and_read_back_object_backed_data_types()
+        public override async Task Can_insert_and_read_back_object_backed_data_types()
         {
-            base.Can_insert_and_read_back_object_backed_data_types();
+            await base.Can_insert_and_read_back_object_backed_data_types();
         }
 
         [ActianTodo]
-        public override void Can_insert_and_read_back_with_binary_key()
+        public override async Task Can_insert_and_read_back_with_binary_key()
         {
-            base.Can_insert_and_read_back_with_binary_key();
+            await base.Can_insert_and_read_back_with_binary_key();
         }
 
         [ActianTodo]
-        public override void Can_insert_and_read_back_with_null_binary_foreign_key()
+        public override async Task Can_insert_and_read_back_with_null_binary_foreign_key()
         {
-            base.Can_insert_and_read_back_with_null_binary_foreign_key();
+            await base.Can_insert_and_read_back_with_null_binary_foreign_key();
         }
 
         [ActianTodo]
-        public override void Can_insert_and_read_back_with_null_string_foreign_key()
+        public override async Task Can_insert_and_read_back_with_null_string_foreign_key()
         {
-            base.Can_insert_and_read_back_with_null_string_foreign_key();
+            await base.Can_insert_and_read_back_with_null_string_foreign_key();
         }
 
         [ActianTodo]
-        public override void Can_insert_and_read_back_with_string_key()
+        public override async Task Can_insert_and_read_back_with_string_key()
         {
-            base.Can_insert_and_read_back_with_string_key();
+            await base.Can_insert_and_read_back_with_string_key();
         }
 
         [ActianTodo]
-        public override void Can_insert_and_read_with_max_length_set()
+        public override async Task Can_insert_and_read_with_max_length_set()
         {
-            base.Can_insert_and_read_with_max_length_set();
+            await base.Can_insert_and_read_with_max_length_set();
         }
 
         [ActianTodo]
-        public override void Can_insert_query_multiline_string()
+        public override async Task Can_insert_query_multiline_string()
         {
-            base.Can_insert_query_multiline_string();
+            await base.Can_insert_query_multiline_string();
         }
 
         [ActianTodo]
-        public override void Can_query_using_any_data_type()
+        public override async Task Can_query_using_any_data_type()
         {
-            base.Can_query_using_any_data_type();
+            await base.Can_query_using_any_data_type();
         }
 
         [ActianTodo]
-        public override void Can_query_using_any_data_type_nullable_shadow()
+        public override async Task Can_query_using_any_data_type_nullable_shadow()
         {
-            base.Can_query_using_any_data_type_nullable_shadow();
+            await base.Can_query_using_any_data_type_nullable_shadow();
         }
 
         [ActianTodo]
-        public override void Can_query_using_any_data_type_shadow()
+        public override async Task Can_query_using_any_data_type_shadow()
         {
-            base.Can_query_using_any_data_type_shadow();
+            await base.Can_query_using_any_data_type_shadow();
         }
 
         [ActianTodo]
-        public override void Can_query_using_any_nullable_data_type()
+        public override async Task Can_query_using_any_nullable_data_type()
         {
-            base.Can_query_using_any_nullable_data_type();
+            await base.Can_query_using_any_nullable_data_type();
         }
 
         [ActianTodo]
-        public override void Can_query_using_any_nullable_data_type_as_literal()
+        public override async Task Can_query_using_any_nullable_data_type_as_literal()
         {
-            base.Can_query_using_any_nullable_data_type_as_literal();
+            await base.Can_query_using_any_nullable_data_type_as_literal();
         }
 
         [ActianTodo]
-        public override void Can_read_back_mapped_enum_from_collection_first_or_default()
+        public override async Task Can_read_back_mapped_enum_from_collection_first_or_default()
         {
-            base.Can_read_back_mapped_enum_from_collection_first_or_default();
+            await base.Can_read_back_mapped_enum_from_collection_first_or_default();
         }
 
         [ActianTodo]
@@ -3509,9 +3514,9 @@ UnicodeDataTypes.StringUnicode ---> [nullable nvarchar] [MaxLength = -1]
         }
 
         [ActianTodo]
-        public override void Object_to_string_conversion()
+        public override async Task Object_to_string_conversion()
         {
-            base.Object_to_string_conversion();
+            await base.Object_to_string_conversion();
 
             AssertSql(
                 """
@@ -3522,9 +3527,9 @@ WHERE [b].[Id] = 13
         }
 
         [ActianTodo]
-        public override void Optional_datetime_reading_null_from_database()
+        public override async Task Optional_datetime_reading_null_from_database()
         {
-            base.Optional_datetime_reading_null_from_database();
+            await base.Optional_datetime_reading_null_from_database();
         }
 
         public static string QueryForColumnTypes(DbContext context, params string[] tablesToIgnore)

@@ -22,9 +22,6 @@ public class NorthwindAggregateOperatorsQueryActianTest : NorthwindAggregateOper
         Fixture.TestSqlLoggerFactory.SetTestOutputHelper(testOutputHelper);
     }
 
-    protected override bool CanExecuteQueryString
-        => true;
-
     [ConditionalFact]
     public virtual void Check_all_tests_overridden()
         => TestHelpers.AssertAllMethodsOverridden(GetType());
@@ -713,69 +710,6 @@ WHERE "p"."ProductID" < 40
 """);
     }
 
-    [ActianTodo]
-    public override async Task Sum_over_subquery_is_client_eval(bool async)
-    {
-        // Aggregates. Issue #15937.
-        Assert.Equal(
-            "130",
-            (await Assert.ThrowsAsync<Exception>(
-                async () => await base.Sum_over_subquery_is_client_eval(async))).ToString());
-
-        AssertSql(
-            """
-SELECT COALESCE(SUM((
-    SELECT COALESCE(SUM("o"."OrderID"), 0)
-    FROM "Orders" AS "o"
-    WHERE "c"."CustomerID" = "o"."CustomerID")), 0)
-FROM "Customers" AS "c"
-""");
-    }
-
-    [ActianTodo]
-    public override async Task Sum_over_nested_subquery_is_client_eval(bool async)
-    {
-        // Aggregates. Issue #15937.
-        Assert.Equal(
-            "130",
-            (await Assert.ThrowsAsync<Exception>(
-                async () => await base.Sum_over_nested_subquery_is_client_eval(async))).ToString());
-
-        AssertSql(
-            """
-SELECT COALESCE(SUM((
-    SELECT COALESCE(SUM(5 + (
-        SELECT COALESCE(SUM("o0"."ProductID"), 0)
-        FROM "Order Details" AS "o0"
-        WHERE "o"."OrderID" = "o0"."OrderID")), 0)
-    FROM "Orders" AS "o"
-    WHERE "c"."CustomerID" = "o"."CustomerID")), 0)
-FROM "Customers" AS "c"
-""");
-    }
-
-    [ActianTodo]
-    public override async Task Sum_over_min_subquery_is_client_eval(bool async)
-    {
-        // Aggregates. Issue #15937.
-        Assert.Equal(
-            "130",
-            (await Assert.ThrowsAsync<Exception>(
-                async () => await base.Sum_over_min_subquery_is_client_eval(async))).ToString());
-
-        AssertSql(
-            """
-SELECT COALESCE(SUM((
-    SELECT COALESCE(SUM(5 + (
-        SELECT MIN("o0"."ProductID")
-        FROM "Order Details" AS "o0"
-        WHERE "o"."OrderID" = "o0"."OrderID")), 0)
-    FROM "Orders" AS "o"
-    WHERE "c"."CustomerID" = "o"."CustomerID")), 0)
-FROM "Customers" AS "c"
-""");
-    }
-
     public override async Task Sum_on_float_column(bool async)
     {
         await base.Sum_on_float_column(async);
@@ -881,81 +815,6 @@ WHERE "p"."ProductID" < 40
 """);
     }
 
-    [ActianTodo]
-    public override async Task Average_over_subquery_is_client_eval(bool async)
-    {
-        // Aggregates. Issue #15937.
-        Assert.Equal(
-            "130",
-            (await Assert.ThrowsAsync<Exception>(
-                async () => await base.Average_over_subquery_is_client_eval(async))).ToString());
-
-        AssertSql(
-            """
-SELECT AVG(CAST((
-    SELECT COALESCE(SUM("o"."OrderID"), 0)
-    FROM "Orders" AS "o"
-    WHERE "c"."CustomerID" = "o"."CustomerID") AS float))
-FROM "Customers" AS "c"
-""");
-    }
-
-    [ActianTodo]
-    public override async Task Average_over_nested_subquery_is_client_eval(bool async)
-    {
-        // Aggregates. Issue #15937.
-        Assert.Equal(
-            "130",
-            (await Assert.ThrowsAsync<Exception>(
-                async () => await base.Average_over_nested_subquery_is_client_eval(async))).ToString());
-
-        AssertSql(
-            """
-@__p_0='3'
-
-SELECT AVG(CAST((
-    SELECT AVG(5.0E0 + (
-        SELECT AVG(CAST("o0"."ProductID" AS float))
-        FROM "Order Details" AS "o0"
-        WHERE "o"."OrderID" = "o0"."OrderID"))
-    FROM "Orders" AS "o"
-    WHERE "t"."CustomerID" = "o"."CustomerID") AS decimal(18,2)))
-FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID"
-    FROM "Customers" AS "c"
-    ORDER BY "c"."CustomerID"
-) AS "t"
-""");
-    }
-
-    [ActianTodo]
-    public override async Task Average_over_max_subquery_is_client_eval(bool async)
-    {
-        // Aggregates. Issue #15937.
-        Assert.Equal(
-            "130",
-            (await Assert.ThrowsAsync<Exception>(
-                async () => await base.Average_over_max_subquery_is_client_eval(async))).ToString());
-
-        AssertSql(
-            """
-@__p_0='3'
-
-SELECT AVG(CAST((
-    SELECT AVG(CAST(5 + (
-        SELECT MAX("o0"."ProductID")
-        FROM "Order Details" AS "o0"
-        WHERE "o"."OrderID" = "o0"."OrderID") AS float))
-    FROM "Orders" AS "o"
-    WHERE "t"."CustomerID" = "o"."CustomerID") AS decimal(18,2)))
-FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID"
-    FROM "Customers" AS "c"
-    ORDER BY "c"."CustomerID"
-) AS "t"
-""");
-    }
-
     public override async Task Average_on_float_column(bool async)
     {
         await base.Average_on_float_column(async);
@@ -1032,81 +891,6 @@ WHERE "p"."ProductID" < 40
 """);
     }
 
-    [ActianTodo]
-    public override async Task Min_over_subquery_is_client_eval(bool async)
-    {
-        // Aggregates. Issue #15937.
-        Assert.Equal(
-            "130",
-            (await Assert.ThrowsAsync<Exception>(
-                async () => await base.Min_over_subquery_is_client_eval(async))).ToString());
-
-        AssertSql(
-            """
-SELECT MIN((
-    SELECT COALESCE(SUM("o"."OrderID"), 0)
-    FROM "Orders" AS "o"
-    WHERE "c"."CustomerID" = "o"."CustomerID"))
-FROM "Customers" AS "c"
-""");
-    }
-
-    [ActianTodo]
-    public override async Task Min_over_nested_subquery_is_client_eval(bool async)
-    {
-        // Aggregates. Issue #15937.
-        Assert.Equal(
-            "130",
-            (await Assert.ThrowsAsync<Exception>(
-                async () => await base.Min_over_nested_subquery_is_client_eval(async))).ToString());
-
-        AssertSql(
-            """
-@__p_0='3'
-
-SELECT MIN((
-    SELECT MIN(5 + (
-        SELECT MIN("o0"."ProductID")
-        FROM "Order Details" AS "o0"
-        WHERE "o"."OrderID" = "o0"."OrderID"))
-    FROM "Orders" AS "o"
-    WHERE "t"."CustomerID" = "o"."CustomerID"))
-FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID"
-    FROM "Customers" AS "c"
-    ORDER BY "c"."CustomerID"
-) AS "t"
-""");
-    }
-
-    [ActianTodo]
-    public override async Task Min_over_max_subquery_is_client_eval(bool async)
-    {
-        // Aggregates. Issue #15937.
-        Assert.Equal(
-            "130",
-            (await Assert.ThrowsAsync<Exception>(
-                async () => await base.Min_over_max_subquery_is_client_eval(async))).ToString());
-
-        AssertSql(
-            """
-@__p_0='3'
-
-SELECT MIN((
-    SELECT MIN(5 + (
-        SELECT MAX("o0"."ProductID")
-        FROM "Order Details" AS "o0"
-        WHERE "o"."OrderID" = "o0"."OrderID"))
-    FROM "Orders" AS "o"
-    WHERE "t"."CustomerID" = "o"."CustomerID"))
-FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID"
-    FROM "Customers" AS "c"
-    ORDER BY "c"."CustomerID"
-) AS "t"
-""");
-    }
-
     public override async Task Max_with_no_arg(bool async)
     {
         await base.Max_with_no_arg(async);
@@ -1138,81 +922,6 @@ FROM "Orders" AS "o"
 SELECT MAX(COALESCE("p"."UnitPrice", 0.0))
 FROM "Products" AS "p"
 WHERE "p"."ProductID" < 40
-""");
-    }
-
-    [ActianTodo]
-    public override async Task Max_over_subquery_is_client_eval(bool async)
-    {
-        // Aggregates. Issue #15937.
-        Assert.Equal(
-            "130",
-            (await Assert.ThrowsAsync<Exception>(
-                async () => await base.Max_over_subquery_is_client_eval(async))).ToString());
-
-        AssertSql(
-            """
-SELECT MAX((
-    SELECT COALESCE(SUM("o"."OrderID"), 0)
-    FROM "Orders" AS "o"
-    WHERE "c"."CustomerID" = "o"."CustomerID"))
-FROM "Customers" AS "c"
-""");
-    }
-
-    [ActianTodo]
-    public override async Task Max_over_nested_subquery_is_client_eval(bool async)
-    {
-        // Aggregates. Issue #15937.
-        Assert.Equal(
-            "130",
-            (await Assert.ThrowsAsync<Exception>(
-                async () => await base.Max_over_nested_subquery_is_client_eval(async))).ToString());
-
-        AssertSql(
-            """
-@__p_0='3'
-
-SELECT MAX((
-    SELECT MAX(5 + (
-        SELECT MAX("o0"."ProductID")
-        FROM "Order Details" AS "o0"
-        WHERE "o"."OrderID" = "o0"."OrderID"))
-    FROM "Orders" AS "o"
-    WHERE "t"."CustomerID" = "o"."CustomerID"))
-FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID"
-    FROM "Customers" AS "c"
-    ORDER BY "c"."CustomerID"
-) AS "t"
-""");
-    }
-
-    [ActianTodo]
-    public override async Task Max_over_sum_subquery_is_client_eval(bool async)
-    {
-        // Aggregates. Issue #15937.
-        Assert.Equal(
-            "130",
-            (await Assert.ThrowsAsync<Exception>(
-                async () => await base.Max_over_sum_subquery_is_client_eval(async))).ToString());
-
-        AssertSql(
-            """
-@__p_0='3'
-
-SELECT MAX((
-    SELECT MAX(5 + (
-        SELECT COALESCE(SUM("o0"."ProductID"), 0)
-        FROM "Order Details" AS "o0"
-        WHERE "o"."OrderID" = "o0"."OrderID"))
-    FROM "Orders" AS "o"
-    WHERE "t"."CustomerID" = "o"."CustomerID"))
-FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID"
-    FROM "Customers" AS "c"
-    ORDER BY "c"."CustomerID"
-) AS "t"
 """);
     }
 
@@ -1316,12 +1025,12 @@ FROM "Customers" AS "c"
 
         AssertSql(
             """
-SELECT "t"."Country"
+SELECT "c0"."Country"
 FROM (
     SELECT DISTINCT "c"."Country"
     FROM "Customers" AS "c"
-) AS "t"
-ORDER BY "t"."Country"
+) AS "c0"
+ORDER BY "c0"."Country"
 """);
     }
 
@@ -1331,12 +1040,12 @@ ORDER BY "t"."Country"
 
         AssertSql(
             """
-SELECT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
     SELECT DISTINCT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
-) AS "t"
-ORDER BY "t"."CustomerID"
+) AS "c0"
+ORDER BY "c0"."CustomerID"
 """);
     }
 
@@ -1346,12 +1055,12 @@ ORDER BY "t"."CustomerID"
 
         AssertSql(
             """
-SELECT "t"."CustomerID"
+SELECT "c0"."CustomerID"
 FROM (
     SELECT DISTINCT "c"."CustomerID"
     FROM "Customers" AS "c"
-) AS "t"
-ORDER BY "t"."CustomerID"
+) AS "c0"
+ORDER BY "c0"."CustomerID"
 """);
     }
 
@@ -1365,7 +1074,7 @@ SELECT COUNT(*)
 FROM (
     SELECT DISTINCT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
-) AS "t"
+) AS "c0"
 """);
     }
 
@@ -1379,7 +1088,7 @@ SELECT COUNT(*)
 FROM (
     SELECT DISTINCT "c"."City"
     FROM "Customers" AS "c"
-) AS "t"
+) AS "c0"
 """);
     }
 
@@ -2960,7 +2669,7 @@ FROM (
 
         AssertSql(
             """
-SELECT CAST(1 AS bit)
+SELECT TRUE
 """);
     }
 
@@ -3068,6 +2777,184 @@ SELECT MIN(CASE
 END)
 FROM "Customers" AS "c"
 """);
+    }
+
+    [ActianSkipIngres]
+    public override async Task Sum_over_subquery(bool async)
+    {
+        await base.Sum_over_subquery(async);
+
+        AssertSql();
+    }
+
+    [ActianSkipIngres]
+    public override async Task Sum_over_nested_subquery(bool async)
+    {
+        await base.Sum_over_nested_subquery(async);
+
+        AssertSql();
+    }
+
+    [ActianSkipIngres]
+    public override async Task Sum_over_min_subquery(bool async)
+    {
+        await base.Sum_over_min_subquery(async);
+
+        AssertSql();
+    }
+
+    [ActianSkipIngres]
+    public override async Task Sum_over_scalar_returning_subquery(bool async)
+    {
+        await base.Sum_over_scalar_returning_subquery(async);
+
+        AssertSql();
+    }
+
+    [ActianSkipIngres]
+    public override async Task Sum_over_Any_subquery(bool async)
+    {
+        await base.Sum_over_Any_subquery(async);
+
+        AssertSql();
+    }
+
+    [ActianSkipIngres]
+    public override async Task Sum_over_uncorrelated_subquery(bool async)
+    {
+        await base.Sum_over_uncorrelated_subquery(async);
+
+        AssertSql();
+    }
+
+    public override async Task Average_over_subquery(bool async)
+    {
+        await base.Average_over_subquery(async);
+
+        AssertSql(
+            """
+SELECT AVG(CAST((
+    SELECT COALESCE(SUM("o"."OrderID"), 0)
+    FROM "Orders" AS "o"
+    WHERE "c"."CustomerID" = "o"."CustomerID") AS float))
+FROM "Customers" AS "c"
+""");
+    }
+
+    [ActianTodo] // Expected: 46.7126322751323; Actual: 46.706
+    public override async Task Average_over_nested_subquery(bool async)
+    {
+        await base.Average_over_nested_subquery(async);
+
+        AssertSql();
+    }
+
+    [ActianTodo] // Expected: 59.841269841269866666666666667; Actual: 59.836
+    public override async Task Average_over_max_subquery(bool async)
+    {
+        await base.Average_over_max_subquery(async);
+
+        AssertSql();
+    }
+
+    [ActianSkipIngres]
+    public override async Task Min_over_subquery(bool async)
+    {
+        await base.Min_over_subquery(async);
+
+        AssertSql();
+    }
+
+    [ActianSkipIngres]
+    public override async Task Min_over_nested_subquery(bool async)
+    {
+        await base.Min_over_nested_subquery(async);
+
+        AssertSql();
+    }
+
+    [ActianSkipIngres]
+    public override async Task Min_over_max_subquery(bool async)
+    {
+        await base.Min_over_max_subquery(async);
+
+        AssertSql();
+    }
+
+    [ActianSkipIngres]
+    public override async Task Max_over_subquery(bool async)
+    {
+        await base.Max_over_subquery(async);
+
+        AssertSql();
+    }
+
+    [ActianSkipIngres]
+    public override async Task Max_over_nested_subquery(bool async)
+    {
+        await base.Max_over_nested_subquery(async);
+
+        AssertSql();
+    }
+
+    [ActianSkipIngres]
+    public override async Task Max_over_sum_subquery(bool async)
+    {
+        await base.Max_over_sum_subquery(async);
+
+        AssertSql();
+    }
+
+    public override async Task Return_type_of_singular_operator_is_preserved(bool async)
+    {
+        await base.Return_type_of_singular_operator_is_preserved(async);
+
+        AssertSql(
+"""
+SELECT FIRST 1 "c"."CustomerID", "c"."City"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" = N'ALFKI'
+""",
+                //
+                """
+SELECT FIRST 1 "c"."CustomerID", "c"."City"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" = N'ALFKI'
+""",
+                //
+                """
+SELECT FIRST 2 "c"."CustomerID", "c"."City"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" = N'ALFKI'
+""",
+                //
+                """
+SELECT FIRST 2 "c"."CustomerID", "c"."City"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" = N'ALFKI'
+""",
+                //
+                """
+SELECT FIRST 1 "c"."CustomerID", "c"."City"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" LIKE N'A%'
+ORDER BY "c"."CustomerID" DESC
+""",
+                //
+                """
+SELECT FIRST 1 "c"."CustomerID", "c"."City"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" LIKE N'A%'
+ORDER BY "c"."CustomerID" DESC
+""");
+    }
+
+    [ActianTodo] // Expected: 121.040; Actual: 120.96
+    public override async Task Type_casting_inside_sum(bool async)
+    {
+        await base.Type_casting_inside_sum(async);
+
+        AssertSql();
     }
 
     private void AssertSql(params string[] expected)

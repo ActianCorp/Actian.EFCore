@@ -1,9 +1,13 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Actian.EFCore.TestUtilities;
+using Humanizer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.TestModels.UpdatesModel;
 using Microsoft.EntityFrameworkCore.TestUtilities;
 using Xunit;
 using Xunit.Abstractions;
+using static Microsoft.EntityFrameworkCore.Migrations.MigrationsInfrastructureFixtureBase;
 
 namespace Actian.EFCore
 {
@@ -58,22 +62,52 @@ namespace Actian.EFCore
         public override void Find_int_key_from_store()
         {
             base.Find_int_key_from_store();
-            AssertSql(@"@__p_0='77'
+            AssertSql(
+                """
+@__p_0='77'
 
-SELECT FIRST 1 ""i"".""Id"", ""i"".""Foo""
-FROM ""IntKey"" AS ""i""
-WHERE ""i"".""Id"" = @__p_0");
+SELECT "i3"."Id", "i3"."Foo", "s"."IntKeyId", "s"."Id", "s"."Prop", "s"."NestedOwned_Prop", "s"."Owned1IntKeyId", "s"."Owned1Id", "s"."Id0", "s"."Prop0", "i3"."OwnedReference_Prop", "i3"."OwnedReference_NestedOwned_Prop", "i2"."Owned1IntKeyId", "i2"."Id", "i2"."Prop"
+FROM (
+    SELECT FIRST 1 "i"."Id", "i"."Foo", "i"."OwnedReference_Prop", "i"."OwnedReference_NestedOwned_Prop"
+    FROM "IntKey" AS "i"
+    WHERE "i"."Id" = @__p_0
+) AS "i3"
+LEFT JOIN (
+    SELECT "i0"."IntKeyId", "i0"."Id", "i0"."Prop", "i0"."NestedOwned_Prop", "i1"."Owned1IntKeyId", "i1"."Owned1Id", "i1"."Id" AS "Id0", "i1"."Prop" AS "Prop0"
+    FROM "IntKey_OwnedCollection" AS "i0"
+    LEFT JOIN "IntKey_OwnedCollection_NestedOwnedCollection" AS "i1" ON "i0"."IntKeyId" = "i1"."Owned1IntKeyId" AND "i0"."Id" = "i1"."Owned1Id"
+) AS "s" ON "i3"."Id" = "s"."IntKeyId"
+LEFT JOIN "IntKey_NestedOwnedCollection" AS "i2" ON CASE
+    WHEN "i3"."OwnedReference_Prop" IS NOT NULL THEN "i3"."Id"
+END = "i2"."Owned1IntKeyId"
+ORDER BY "i3"."Id", "s"."IntKeyId", "s"."Id", "s"."Owned1IntKeyId", "s"."Owned1Id", "s"."Id0", "i2"."Owned1IntKeyId"
+""");
         }
 
 
         public override void Returns_null_for_int_key_not_in_store()
         {
             base.Returns_null_for_int_key_not_in_store();
-            AssertSql(@"@__p_0='99'
+            AssertSql(
+                """
+@__p_0='99'
 
-SELECT FIRST 1 ""i"".""Id"", ""i"".""Foo""
-FROM ""IntKey"" AS ""i""
-WHERE ""i"".""Id"" = @__p_0");
+SELECT "i3"."Id", "i3"."Foo", "s"."IntKeyId", "s"."Id", "s"."Prop", "s"."NestedOwned_Prop", "s"."Owned1IntKeyId", "s"."Owned1Id", "s"."Id0", "s"."Prop0", "i3"."OwnedReference_Prop", "i3"."OwnedReference_NestedOwned_Prop", "i2"."Owned1IntKeyId", "i2"."Id", "i2"."Prop"
+FROM (
+    SELECT FIRST 1 "i"."Id", "i"."Foo", "i"."OwnedReference_Prop", "i"."OwnedReference_NestedOwned_Prop"
+    FROM "IntKey" AS "i"
+    WHERE "i"."Id" = @__p_0
+) AS "i3"
+LEFT JOIN (
+    SELECT "i0"."IntKeyId", "i0"."Id", "i0"."Prop", "i0"."NestedOwned_Prop", "i1"."Owned1IntKeyId", "i1"."Owned1Id", "i1"."Id" AS "Id0", "i1"."Prop" AS "Prop0"
+    FROM "IntKey_OwnedCollection" AS "i0"
+    LEFT JOIN "IntKey_OwnedCollection_NestedOwnedCollection" AS "i1" ON "i0"."IntKeyId" = "i1"."Owned1IntKeyId" AND "i0"."Id" = "i1"."Owned1Id"
+) AS "s" ON "i3"."Id" = "s"."IntKeyId"
+LEFT JOIN "IntKey_NestedOwnedCollection" AS "i2" ON CASE
+    WHEN "i3"."OwnedReference_Prop" IS NOT NULL THEN "i3"."Id"
+END = "i2"."Owned1IntKeyId"
+ORDER BY "i3"."Id", "s"."IntKeyId", "s"."Id", "s"."Owned1IntKeyId", "s"."Owned1Id", "s"."Id0", "i2"."Owned1IntKeyId"
+""");
         }
 
 
@@ -89,20 +123,47 @@ WHERE ""i"".""Id"" = @__p_0");
             base.Find_int_key_from_store();
             AssertSql(@"@__p_0='77'
 
-SELECT FIRST 1 ""i"".""Id"", ""i"".""Foo""
-FROM ""IntKey"" AS ""i""
-WHERE ""i"".""Id"" = @__p_0");
+SELECT ""i3"".""Id"", ""i3"".""Foo"", ""s"".""IntKeyId"", ""s"".""Id"", ""s"".""Prop"", ""s"".""NestedOwned_Prop"", ""s"".""Owned1IntKeyId"", ""s"".""Owned1Id"", ""s"".""Id0"", ""s"".""Prop0"", ""i3"".""OwnedReference_Prop"", ""i3"".""OwnedReference_NestedOwned_Prop"", ""i2"".""Owned1IntKeyId"", ""i2"".""Id"", ""i2"".""Prop""
+FROM (
+    SELECT FIRST 1 ""i"".""Id"", ""i"".""Foo"", ""i"".""OwnedReference_Prop"", ""i"".""OwnedReference_NestedOwned_Prop""
+    FROM ""IntKey"" AS ""i""
+    WHERE ""i"".""Id"" = @__p_0
+) AS ""i3""
+LEFT JOIN (
+    SELECT ""i0"".""IntKeyId"", ""i0"".""Id"", ""i0"".""Prop"", ""i0"".""NestedOwned_Prop"", ""i1"".""Owned1IntKeyId"", ""i1"".""Owned1Id"", ""i1"".""Id"" AS ""Id0"", ""i1"".""Prop"" AS ""Prop0""
+    FROM ""IntKey_OwnedCollection"" AS ""i0""
+    LEFT JOIN ""IntKey_OwnedCollection_NestedOwnedCollection"" AS ""i1"" ON ""i0"".""IntKeyId"" = ""i1"".""Owned1IntKeyId"" AND ""i0"".""Id"" = ""i1"".""Owned1Id""
+) AS ""s"" ON ""i3"".""Id"" = ""s"".""IntKeyId""
+LEFT JOIN ""IntKey_NestedOwnedCollection"" AS ""i2"" ON CASE
+    WHEN ""i3"".""OwnedReference_Prop"" IS NOT NULL THEN ""i3"".""Id""
+END = ""i2"".""Owned1IntKeyId""
+ORDER BY ""i3"".""Id"", ""s"".""IntKeyId"", ""s"".""Id"", ""s"".""Owned1IntKeyId"", ""s"".""Owned1Id"", ""s"".""Id0"", ""i2"".""Owned1IntKeyId""");
         }
 
 
         public override void Returns_null_for_nullable_int_key_not_in_store()
         {
             base.Returns_null_for_int_key_not_in_store();
-            AssertSql(@"@__p_0='99'
+            AssertSql(
+                """
+@__p_0='99'
 
-SELECT FIRST 1 ""i"".""Id"", ""i"".""Foo""
-FROM ""IntKey"" AS ""i""
-WHERE ""i"".""Id"" = @__p_0");
+SELECT "i3"."Id", "i3"."Foo", "s"."IntKeyId", "s"."Id", "s"."Prop", "s"."NestedOwned_Prop", "s"."Owned1IntKeyId", "s"."Owned1Id", "s"."Id0", "s"."Prop0", "i3"."OwnedReference_Prop", "i3"."OwnedReference_NestedOwned_Prop", "i2"."Owned1IntKeyId", "i2"."Id", "i2"."Prop"
+FROM (
+    SELECT FIRST 1 "i"."Id", "i"."Foo", "i"."OwnedReference_Prop", "i"."OwnedReference_NestedOwned_Prop"
+    FROM "IntKey" AS "i"
+    WHERE "i"."Id" = @__p_0
+) AS "i3"
+LEFT JOIN (
+    SELECT "i0"."IntKeyId", "i0"."Id", "i0"."Prop", "i0"."NestedOwned_Prop", "i1"."Owned1IntKeyId", "i1"."Owned1Id", "i1"."Id" AS "Id0", "i1"."Prop" AS "Prop0"
+    FROM "IntKey_OwnedCollection" AS "i0"
+    LEFT JOIN "IntKey_OwnedCollection_NestedOwnedCollection" AS "i1" ON "i0"."IntKeyId" = "i1"."Owned1IntKeyId" AND "i0"."Id" = "i1"."Owned1Id"
+) AS "s" ON "i3"."Id" = "s"."IntKeyId"
+LEFT JOIN "IntKey_NestedOwnedCollection" AS "i2" ON CASE
+    WHEN "i3"."OwnedReference_Prop" IS NOT NULL THEN "i3"."Id"
+END = "i2"."Owned1IntKeyId"
+ORDER BY "i3"."Id", "s"."IntKeyId", "s"."Id", "s"."Owned1IntKeyId", "s"."Owned1Id", "s"."Id0", "i2"."Owned1IntKeyId"
+""");
         }
 
 

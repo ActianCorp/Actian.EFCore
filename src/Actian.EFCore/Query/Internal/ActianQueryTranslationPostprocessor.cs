@@ -17,8 +17,7 @@ namespace Actian.EFCore.Query.Internal
         public ActianQueryTranslationPostprocessor(
             QueryTranslationPostprocessorDependencies dependencies,
             RelationalQueryTranslationPostprocessorDependencies relationalDependencies,
-            QueryCompilationContext queryCompilationContext,
-            IRelationalTypeMappingSource typeMappingSource)
+            ActianQueryCompilationContext queryCompilationContext)
             : base(dependencies, relationalDependencies, queryCompilationContext)
         {
 
