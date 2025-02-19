@@ -19,6 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Actian.Client" Version="8.0.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational.Specification.Tests" Version="9.0.0" />
     <PackageReference Include="System.Runtime" Version="4.3.1" />
@@ -55,9 +56,6 @@
   <ItemGroup>
     <Reference Include="Microsoft.EntityFrameworkCore">
       <HintPath>..\..\..\efcore9\artifacts\bin\EFCore.Relational\Debug\net8.0\Microsoft.EntityFrameworkCore.dll</HintPath>
-    </Reference>
-    <Reference Include="Actian.Client">
-      <HintPath>..\..\..\dotNet-8.0\Actian.Client\bin\Debug\net8.0\Actian.Client.dll</HintPath>
     </Reference>
   </ItemGroup>
 

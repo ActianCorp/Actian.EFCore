@@ -7,7 +7,7 @@
 
     <Company>Actian Corporation</Company>
     <Authors>Actian Corporation</Authors>
-    <Copyright>©2024 Actian Corporation. All Rights Reserved.</Copyright>
+    <Copyright>©2025 Actian Corporation. All Rights Reserved.</Copyright>
     <Product>Actian Entity Framework Core Provider</Product>
     <Description>Actian Entity Framework Core Provider</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
@@ -55,6 +55,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Actian.Client" Version="8.0.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
@@ -90,9 +91,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="Actian.Client">
-      <HintPath>..\..\..\dotNet-8.0\Actian.Client\bin\Debug\net8.0\Actian.Client.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.EntityFrameworkCore">
       <HintPath>..\..\..\efcore9\artifacts\bin\EFCore\Debug\net8.0\Microsoft.EntityFrameworkCore.dll</HintPath>
     </Reference>
