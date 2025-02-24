@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq.Expressions;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
@@ -11,33 +13,87 @@ namespace Actian.EFCore.Query.Internal
     public class SearchConditionConvertingExpressionVisitor : SqlExpressionVisitor
     {
         private bool _isSearchCondition;
-        private readonly ISqlExpressionFactory Factory;
+        private readonly ISqlExpressionFactory _sqlExpressionFactory;
 
-        public SearchConditionConvertingExpressionVisitor(ISqlExpressionFactory factory)
-        {
-            Factory = factory;
-        }
 
-        private Expression ApplyConversion(SqlExpression sqlExpression, bool condition) => _isSearchCondition
-            ? ConvertToSearchCondition(sqlExpression, condition)
-            : ConvertToValue(sqlExpression, condition);
+        public SearchConditionConvertingExpressionVisitor(
+            ISqlExpressionFactory sqlExpressionFactory)
+            => _sqlExpressionFactory = sqlExpressionFactory;
 
-        private Expression ConvertToSearchCondition(SqlExpression sqlExpression, bool condition) => condition
-            ? sqlExpression
-            : BuildCompareToExpression(sqlExpression);
+        private SqlExpression ApplyConversion(SqlExpression sqlExpression, bool condition)
+            => _isSearchCondition
+                ? ConvertToSearchCondition(sqlExpression, condition)
+                : ConvertToValue(sqlExpression, condition);
 
-        private Expression ConvertToValue(SqlExpression sqlExpression, bool condition)
-        {
-            if (!condition)
-                return sqlExpression;
+        private SqlExpression ConvertToSearchCondition(SqlExpression sqlExpression, bool condition)
+            => condition
+                ? sqlExpression
+                : BuildCompareToExpression(sqlExpression);
 
-            var caseWhenClause = new CaseWhenClause(sqlExpression, Factory.ApplyDefaultTypeMapping(Factory.Constant(true)));
-            return Factory.Case(new[] { caseWhenClause }, Factory.Constant(false));
-        }
+        private SqlExpression ConvertToValue(SqlExpression sqlExpression, bool condition)
+            => condition
+                ? _sqlExpressionFactory.Case(
+                    new[]
+                    {
+                    new CaseWhenClause(
+                        SimplifyNegatedBinary(sqlExpression),
+                        _sqlExpressionFactory.ApplyDefaultTypeMapping(_sqlExpressionFactory.Constant(true)))
+                    },
+                    _sqlExpressionFactory.Constant(false))
+                : sqlExpression;
 
         private SqlExpression BuildCompareToExpression(SqlExpression sqlExpression)
+            => sqlExpression is SqlConstantExpression { Value: bool boolValue }
+                ? _sqlExpressionFactory.Equal(
+                    boolValue
+                        ? _sqlExpressionFactory.Constant(1)
+                        : _sqlExpressionFactory.Constant(0),
+                    _sqlExpressionFactory.Constant(1))
+                : _sqlExpressionFactory.Equal(
+                    sqlExpression,
+                    _sqlExpressionFactory.Constant(true));
+
+        private SqlExpression SimplifyNegatedBinary(SqlExpression sqlExpression)
         {
-            return Factory.Equal(sqlExpression, Factory.Constant(true));
+            if (sqlExpression is SqlUnaryExpression { OperatorType: ExpressionType.Not } sqlUnaryExpression
+                && sqlUnaryExpression.Type == typeof(bool)
+                && sqlUnaryExpression.Operand is SqlBinaryExpression
+                {
+                    OperatorType: ExpressionType.Equal
+                } sqlBinaryOperand)
+            {
+                if (sqlBinaryOperand.Left.Type == typeof(bool)
+                    && sqlBinaryOperand.Right.Type == typeof(bool)
+                    && (sqlBinaryOperand.Left is SqlConstantExpression
+                        || sqlBinaryOperand.Right is SqlConstantExpression))
+                {
+                    var constant = sqlBinaryOperand.Left as SqlConstantExpression ?? (SqlConstantExpression)sqlBinaryOperand.Right;
+                    if (sqlBinaryOperand.Left is SqlConstantExpression)
+                    {
+                        return _sqlExpressionFactory.MakeBinary(
+                            ExpressionType.Equal,
+                            _sqlExpressionFactory.Constant(!(bool)constant.Value!, constant.TypeMapping),
+                            sqlBinaryOperand.Right,
+                            sqlBinaryOperand.TypeMapping)!;
+                    }
+
+                    return _sqlExpressionFactory.MakeBinary(
+                        ExpressionType.Equal,
+                        sqlBinaryOperand.Left,
+                        _sqlExpressionFactory.Constant(!(bool)constant.Value!, constant.TypeMapping),
+                        sqlBinaryOperand.TypeMapping)!;
+                }
+
+                return _sqlExpressionFactory.MakeBinary(
+                    sqlBinaryOperand.OperatorType == ExpressionType.Equal
+                        ? ExpressionType.NotEqual
+                        : ExpressionType.Equal,
+                    sqlBinaryOperand.Left,
+                    sqlBinaryOperand.Right,
+                    sqlBinaryOperand.TypeMapping)!;
+            }
+
+            return sqlExpression;
         }
 
         protected override Expression VisitCase(CaseExpression caseExpression)
@@ -46,7 +102,7 @@ namespace Actian.EFCore.Query.Internal
 
             var testIsCondition = caseExpression.Operand == null;
             _isSearchCondition = false;
-            var operand = (SqlExpression)Visit(caseExpression.Operand!);
+            var operand = (SqlExpression?)Visit(caseExpression.Operand);
             var whenClauses = new List<CaseWhenClause>();
             foreach (var whenClause in caseExpression.WhenClauses)
             {
@@ -58,16 +114,37 @@ namespace Actian.EFCore.Query.Internal
             }
 
             _isSearchCondition = false;
-            var elseResult = (SqlExpression)Visit(caseExpression.ElseResult!);
+            var elseResult = (SqlExpression?)Visit(caseExpression.ElseResult);
 
             _isSearchCondition = parentSearchCondition;
 
-            return ApplyConversion(caseExpression.Update(operand, whenClauses, elseResult), condition: false);
+            return ApplyConversion(_sqlExpressionFactory.Case(operand, whenClauses, elseResult, caseExpression), condition: false);
+        }
+
+        protected override Expression VisitCollate(CollateExpression collateExpression)
+        {
+            var parentSearchCondition = _isSearchCondition;
+            _isSearchCondition = false;
+            var operand = (SqlExpression)Visit(collateExpression.Operand);
+            _isSearchCondition = parentSearchCondition;
+
+            return ApplyConversion(collateExpression.Update(operand), condition: false);
         }
 
         protected override Expression VisitColumn(ColumnExpression columnExpression)
+            => ApplyConversion(columnExpression, condition: false);
+
+        protected override Expression VisitDelete(DeleteExpression deleteExpression)
+            => deleteExpression.Update(deleteExpression.Table, (SelectExpression)Visit(deleteExpression.SelectExpression));
+
+        protected override Expression VisitDistinct(DistinctExpression distinctExpression)
         {
-            return ApplyConversion(columnExpression, condition: false);
+            var parentSearchCondition = _isSearchCondition;
+            _isSearchCondition = false;
+            var operand = (SqlExpression)Visit(distinctExpression.Operand);
+            _isSearchCondition = parentSearchCondition;
+
+            return ApplyConversion(distinctExpression.Update(operand), condition: false);
         }
 
         protected override Expression VisitExists(ExistsExpression existsExpression)
@@ -128,7 +205,7 @@ namespace Actian.EFCore.Query.Internal
             _isSearchCondition = false;
             var match = (SqlExpression)Visit(likeExpression.Match);
             var pattern = (SqlExpression)Visit(likeExpression.Pattern);
-            var escapeChar = (SqlExpression)Visit(likeExpression.EscapeChar!);
+            var escapeChar = (SqlExpression?)Visit(likeExpression.EscapeChar);
             _isSearchCondition = parentSearchCondition;
 
             return ApplyConversion(likeExpression.Update(match, pattern, escapeChar), condition: true);
@@ -136,64 +213,36 @@ namespace Actian.EFCore.Query.Internal
 
         protected override Expression VisitSelect(SelectExpression selectExpression)
         {
-            var changed = false;
             var parentSearchCondition = _isSearchCondition;
 
-            var projections = new List<ProjectionExpression>();
             _isSearchCondition = false;
-            foreach (var item in selectExpression.Projection)
-            {
-                var updatedProjection = (ProjectionExpression)Visit(item);
-                projections.Add(updatedProjection);
-                changed |= updatedProjection != item;
-            }
 
-            var tables = new List<TableExpressionBase>();
-            foreach (var table in selectExpression.Tables)
-            {
-                var newTable = (TableExpressionBase)Visit(table);
-                changed |= newTable != table;
-                tables.Add(newTable);
-            }
-
-            _isSearchCondition = true;
-            var predicate = (SqlExpression?)Visit(selectExpression.Predicate);
-            changed |= predicate != selectExpression.Predicate;
-
-            var groupBy = new List<SqlExpression>();
-            _isSearchCondition = false;
-            foreach (var groupingKey in selectExpression.GroupBy)
-            {
-                var newGroupingKey = (SqlExpression)Visit(groupingKey);
-                changed |= newGroupingKey != groupingKey;
-                groupBy.Add(newGroupingKey);
-            }
-
-            _isSearchCondition = true;
-            var havingExpression = (SqlExpression?)Visit(selectExpression.Having);
-            changed |= havingExpression != selectExpression.Having;
-
-            var orderings = new List<OrderingExpression>();
-            _isSearchCondition = false;
-            foreach (var ordering in selectExpression.Orderings)
-            {
-                var orderingExpression = (SqlExpression)Visit(ordering.Expression);
-                changed |= orderingExpression != ordering.Expression;
-                orderings.Add(ordering.Update(orderingExpression));
-            }
-
+            var projections = this.VisitAndConvert(selectExpression.Projection);
+            var tables = this.VisitAndConvert(selectExpression.Tables);
+            var groupBy = this.VisitAndConvert(selectExpression.GroupBy);
+            var orderings = this.VisitAndConvert(selectExpression.Orderings);
             var offset = (SqlExpression?)Visit(selectExpression.Offset);
-            changed |= offset != selectExpression.Offset;
-
             var limit = (SqlExpression?)Visit(selectExpression.Limit);
-            changed |= limit != selectExpression.Limit;
+
+            _isSearchCondition = true;
+
+            var predicate = (SqlExpression?)Visit(selectExpression.Predicate);
+            var havingExpression = (SqlExpression?)Visit(selectExpression.Having);
 
             _isSearchCondition = parentSearchCondition;
 
-            return changed
-                ? selectExpression.Update(
-                    projections, tables, predicate, groupBy, havingExpression, orderings, limit, offset)
-                : selectExpression;
+            return selectExpression.Update(tables, predicate, groupBy, havingExpression, projections, orderings, offset, limit);
+        }
+
+        protected override Expression VisitAtTimeZone(AtTimeZoneExpression atTimeZoneExpression)
+        {
+            var parentSearchCondition = _isSearchCondition;
+            _isSearchCondition = false;
+            var operand = (SqlExpression)Visit(atTimeZoneExpression.Operand);
+            var timeZone = (SqlExpression)Visit(atTimeZoneExpression.TimeZone);
+            _isSearchCondition = parentSearchCondition;
+
+            return atTimeZoneExpression.Update(operand, timeZone);
         }
 
         protected override Expression VisitSqlBinary(SqlBinaryExpression sqlBinaryExpression)
@@ -217,15 +266,55 @@ namespace Actian.EFCore.Query.Internal
 
             _isSearchCondition = parentIsSearchCondition;
 
+            if (!parentIsSearchCondition
+                && (newLeft.Type == typeof(bool) || newLeft.Type.IsEnum || newLeft.Type.IsInteger())
+                && (newRight.Type == typeof(bool) || newRight.Type.IsEnum || newRight.Type.IsInteger())
+                && sqlBinaryExpression.OperatorType is ExpressionType.NotEqual or ExpressionType.Equal)
+            {
+                // "lhs != rhs" is the same as "CAST(lhs ^ rhs AS BIT)", except that
+                // the first is a boolean, the second is a BIT
+                var result = _sqlExpressionFactory.MakeBinary(
+                    ExpressionType.ExclusiveOr,
+                    newLeft,
+                    newRight,
+                    null)!;
+
+                if (result.Type != typeof(bool))
+                {
+                    result = _sqlExpressionFactory.Convert(result, typeof(bool), sqlBinaryExpression.TypeMapping);
+                }
+
+                // "lhs == rhs" is the same as "NOT(lhs != rhs)" aka "~(lhs ^ rhs)"
+                if (sqlBinaryExpression.OperatorType is ExpressionType.Equal)
+                {
+                    result = _sqlExpressionFactory.MakeUnary(
+                        ExpressionType.OnesComplement,
+                        result,
+                        result.Type,
+                        result.TypeMapping
+                    )!;
+                }
+
+                return result;
+            }
+
+            if (sqlBinaryExpression.OperatorType is ExpressionType.NotEqual or ExpressionType.Equal
+                && newLeft is SqlUnaryExpression { OperatorType: ExpressionType.OnesComplement } negatedLeft
+                && newRight is SqlUnaryExpression { OperatorType: ExpressionType.OnesComplement } negatedRight)
+            {
+                newLeft = negatedLeft.Operand;
+                newRight = negatedRight.Operand;
+            }
+
             sqlBinaryExpression = sqlBinaryExpression.Update(newLeft, newRight);
-            var condition = sqlBinaryExpression.OperatorType == ExpressionType.AndAlso
-                || sqlBinaryExpression.OperatorType == ExpressionType.OrElse
-                || sqlBinaryExpression.OperatorType == ExpressionType.Equal
-                || sqlBinaryExpression.OperatorType == ExpressionType.NotEqual
-                || sqlBinaryExpression.OperatorType == ExpressionType.GreaterThan
-                || sqlBinaryExpression.OperatorType == ExpressionType.GreaterThanOrEqual
-                || sqlBinaryExpression.OperatorType == ExpressionType.LessThan
-                || sqlBinaryExpression.OperatorType == ExpressionType.LessThanOrEqual;
+            var condition = sqlBinaryExpression.OperatorType is ExpressionType.AndAlso
+                or ExpressionType.OrElse
+                or ExpressionType.Equal
+                or ExpressionType.NotEqual
+                or ExpressionType.GreaterThan
+                or ExpressionType.GreaterThanOrEqual
+                or ExpressionType.LessThan
+                or ExpressionType.LessThanOrEqual;
 
             return ApplyConversion(sqlBinaryExpression, condition);
         }
@@ -236,9 +325,35 @@ namespace Actian.EFCore.Query.Internal
             bool resultCondition;
             switch (sqlUnaryExpression.OperatorType)
             {
-                case ExpressionType.Not:
+                case ExpressionType.Not
+                    when sqlUnaryExpression.Type == typeof(bool):
+                {
+                    // when possible, avoid converting to/from predicate form
+                    if (!_isSearchCondition && sqlUnaryExpression.Operand is not (ExistsExpression or InExpression or LikeExpression))
+                    {
+                        var negatedOperand = (SqlExpression)Visit(sqlUnaryExpression.Operand);
+
+                        if (negatedOperand is SqlUnaryExpression { OperatorType: ExpressionType.OnesComplement } unary)
+                        {
+                            return unary.Operand;
+                        }
+
+                        return _sqlExpressionFactory.MakeUnary(
+                            ExpressionType.OnesComplement,
+                            negatedOperand,
+                            negatedOperand.Type,
+                            negatedOperand.TypeMapping
+                        )!;
+                    }
+
                     _isSearchCondition = true;
                     resultCondition = true;
+                    break;
+                }
+
+                case ExpressionType.Not:
+                    _isSearchCondition = false;
+                    resultCondition = false;
                     break;
 
                 case ExpressionType.Convert:
@@ -254,19 +369,24 @@ namespace Actian.EFCore.Query.Internal
                     break;
 
                 default:
-                    throw new InvalidOperationException("Unknown operator type encountered in SqlUnaryExpression.");
+                    throw new InvalidOperationException(
+                        RelationalStrings.UnsupportedOperatorForSqlExpression(
+                            sqlUnaryExpression.OperatorType, typeof(SqlUnaryExpression)));
             }
 
             var operand = (SqlExpression)Visit(sqlUnaryExpression.Operand);
+
             _isSearchCondition = parentSearchCondition;
 
-            return ApplyConversion(sqlUnaryExpression.Update(operand), condition: resultCondition);
+            return SimplifyNegatedBinary(
+                ApplyConversion(
+                    sqlUnaryExpression.Update(operand),
+                    condition: resultCondition));
         }
 
         protected override Expression VisitSqlConstant(SqlConstantExpression sqlConstantExpression)
-        {
-            return ApplyConversion(sqlConstantExpression, condition: false);
-        }
+            => ApplyConversion(sqlConstantExpression, condition: false);
+
 
         protected override Expression VisitSqlFragment(SqlFragmentExpression sqlFragmentExpression)
             => sqlFragmentExpression;
@@ -275,26 +395,42 @@ namespace Actian.EFCore.Query.Internal
         {
             var parentSearchCondition = _isSearchCondition;
             _isSearchCondition = false;
-            var instance = (SqlExpression)Visit(sqlFunctionExpression.Instance!);
-            var arguments = new SqlExpression[sqlFunctionExpression.Arguments!.Count];
-            for (var i = 0; i < arguments.Length; i++)
+            var instance = (SqlExpression?)Visit(sqlFunctionExpression.Instance);
+            SqlExpression[]? arguments = default;
+            if (!sqlFunctionExpression.IsNiladic)
             {
-                arguments[i] = (SqlExpression)Visit(sqlFunctionExpression.Arguments[i]);
+                arguments = new SqlExpression[sqlFunctionExpression.Arguments.Count];
+                for (var i = 0; i < arguments.Length; i++)
+                {
+                    arguments[i] = (SqlExpression)Visit(sqlFunctionExpression.Arguments[i]);
+                }
             }
 
             _isSearchCondition = parentSearchCondition;
             var newFunction = sqlFunctionExpression.Update(instance, arguments);
 
-            var condition = string.Equals(sqlFunctionExpression.Name, "FREETEXT")
-                || string.Equals(sqlFunctionExpression.Name, "CONTAINS");
+            var condition = sqlFunctionExpression.Name is "FREETEXT" or "CONTAINS";
 
             return ApplyConversion(newFunction, condition);
         }
 
-        protected override Expression VisitSqlParameter(SqlParameterExpression sqlParameterExpression)
+        protected override Expression VisitTableValuedFunction(TableValuedFunctionExpression tableValuedFunctionExpression)
         {
-            return ApplyConversion(sqlParameterExpression, condition: false);
+            var parentSearchCondition = _isSearchCondition;
+            _isSearchCondition = false;
+
+            var arguments = new SqlExpression[tableValuedFunctionExpression.Arguments.Count];
+            for (var i = 0; i < arguments.Length; i++)
+            {
+                arguments[i] = (SqlExpression)Visit(tableValuedFunctionExpression.Arguments[i]);
+            }
+
+            _isSearchCondition = parentSearchCondition;
+            return tableValuedFunctionExpression.Update(arguments);
         }
+
+        protected override Expression VisitSqlParameter(SqlParameterExpression sqlParameterExpression)
+            => ApplyConversion(sqlParameterExpression, condition: false);
 
         protected override Expression VisitTable(TableExpression tableExpression)
             => tableExpression;
@@ -308,7 +444,12 @@ namespace Actian.EFCore.Query.Internal
 
         protected override Expression VisitOrdering(OrderingExpression orderingExpression)
         {
+            var parentSearchCondition = _isSearchCondition;
+            _isSearchCondition = false;
+
             var expression = (SqlExpression)Visit(orderingExpression.Expression);
+
+            _isSearchCondition = parentSearchCondition;
 
             return orderingExpression.Update(expression);
         }
@@ -367,7 +508,7 @@ namespace Actian.EFCore.Query.Internal
             return leftJoinExpression.Update(table, joinPredicate);
         }
 
-        protected Expression VisitSubSelect(ScalarSubqueryExpression scalarSubqueryExpression)
+        protected override Expression VisitScalarSubquery(ScalarSubqueryExpression scalarSubqueryExpression)
         {
             var parentSearchCondition = _isSearchCondition;
             var subquery = (SelectExpression)Visit(scalarSubqueryExpression.Subquery);
@@ -380,12 +521,10 @@ namespace Actian.EFCore.Query.Internal
         {
             var parentSearchCondition = _isSearchCondition;
             _isSearchCondition = false;
-            var changed = false;
             var partitions = new List<SqlExpression>();
             foreach (var partition in rowNumberExpression.Partitions)
             {
                 var newPartition = (SqlExpression)Visit(partition);
-                changed |= newPartition != partition;
                 partitions.Add(newPartition);
             }
 
@@ -393,13 +532,27 @@ namespace Actian.EFCore.Query.Internal
             foreach (var ordering in rowNumberExpression.Orderings)
             {
                 var newOrdering = (OrderingExpression)Visit(ordering);
-                changed |= newOrdering != ordering;
                 orderings.Add(newOrdering);
             }
 
             _isSearchCondition = parentSearchCondition;
 
             return ApplyConversion(rowNumberExpression.Update(partitions, orderings), condition: false);
+        }
+
+        protected override Expression VisitRowValue(RowValueExpression rowValueExpression)
+        {
+            var parentSearchCondition = _isSearchCondition;
+            _isSearchCondition = false;
+
+            var values = new SqlExpression[rowValueExpression.Values.Count];
+            for (var i = 0; i < values.Length; i++)
+            {
+                values[i] = (SqlExpression)Visit(rowValueExpression.Values[i]);
+            }
+
+            _isSearchCondition = parentSearchCondition;
+            return rowValueExpression.Update(values);
         }
 
         protected override Expression VisitExcept(ExceptExpression exceptExpression)
@@ -451,7 +604,7 @@ namespace Actian.EFCore.Query.Internal
                 }
                 else if (!ReferenceEquals(newValue, columnValueSetter.Value))
                 {
-                    columnValueSetters = new List<ColumnValueSetter>();
+                    columnValueSetters = [];
                     for (var j = 0; j < i; j++)
                     {
                         columnValueSetters.Add(updateExpression.ColumnValueSetters[j]);
@@ -472,64 +625,26 @@ namespace Actian.EFCore.Query.Internal
         {
             var parentSearchCondition = _isSearchCondition;
             _isSearchCondition = false;
-
-            var rowValues = new RowValueExpression[valuesExpression.RowValues.Count];
-            for (var i = 0; i < rowValues.Length; i++)
+            switch (valuesExpression)
             {
-                rowValues[i] = (RowValueExpression)Visit(valuesExpression.RowValues[i]);
+                case { RowValues: not null }:
+                    var rowValues = new RowValueExpression[valuesExpression.RowValues!.Count];
+                    for (var i = 0; i < rowValues.Length; i++)
+                    {
+                        rowValues[i] = (RowValueExpression)Visit(valuesExpression.RowValues[i]);
+                    }
+
+                    _isSearchCondition = parentSearchCondition;
+                    return valuesExpression.Update(rowValues);
+
+                case { ValuesParameter: not null }:
+                    var valuesParameter = (SqlParameterExpression)Visit(valuesExpression.ValuesParameter);
+                    _isSearchCondition = parentSearchCondition;
+                    return valuesExpression.Update(valuesParameter);
+
+                default:
+                    throw new UnreachableException();
             }
-
-            _isSearchCondition = parentSearchCondition;
-            return valuesExpression.Update(rowValues);
-        }
-
-        protected override Expression VisitRowValue(RowValueExpression rowValueExpression)
-        {
-            var parentSearchCondition = _isSearchCondition;
-            _isSearchCondition = false;
-
-            var values = new SqlExpression[rowValueExpression.Values.Count];
-            for (var i = 0; i < values.Length; i++)
-            {
-                values[i] = (SqlExpression)Visit(rowValueExpression.Values[i]);
-            }
-
-            _isSearchCondition = parentSearchCondition;
-            return rowValueExpression.Update(values);
-        }
-
-        protected override Expression VisitDelete(DeleteExpression deleteExpression)
-            => deleteExpression.Update((SelectExpression)Visit(deleteExpression.SelectExpression));
-
-        protected override Expression VisitAtTimeZone(AtTimeZoneExpression atTimeZoneExpression)
-        {
-            var parentSearchCondition = _isSearchCondition;
-            _isSearchCondition = false;
-            var operand = (SqlExpression)Visit(atTimeZoneExpression.Operand);
-            var timeZone = (SqlExpression)Visit(atTimeZoneExpression.TimeZone);
-            _isSearchCondition = parentSearchCondition;
-
-            return atTimeZoneExpression.Update(operand, timeZone);
-        }
-
-        protected override Expression VisitCollate([NotNull] CollateExpression collateExpression)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override Expression VisitDistinct([NotNull] DistinctExpression distinctExpression)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override Expression VisitTableValuedFunction([NotNull] TableValuedFunctionExpression tableValuedFunctionExpression)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override Expression VisitScalarSubquery([NotNull] ScalarSubqueryExpression scalarSubqueryExpression)
-        {
-            throw new NotImplementedException();
         }
     }
 }

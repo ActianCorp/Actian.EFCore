@@ -19,7 +19,7 @@ namespace Actian.EFCore.TestUtilities
         public override void Delete()
         {
             // Actian.Client can not create or delete databases. So clean instead.
-            Connection.Context.Database.EnsureClean();
+            _connection.Context.Database.EnsureClean();
         }
 
         public override Task DeleteAsync(CancellationToken cancellationToken = default)

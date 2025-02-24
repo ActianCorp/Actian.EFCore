@@ -1,18 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFrameworks>net9.0</TargetFrameworks>
     <Description>Entity Framework Core provider for Actian</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <Company>Actian Corporation</Company>
     <Authors>Actian Corporation</Authors>
-    <Copyright>©2024 Actian Corporation. All Rights Reserved.</Copyright>
+    <Copyright>©2025 Actian Corporation. All Rights Reserved.</Copyright>
     <Product>Actian Entity Framework Core Provider</Product>
     <Description>Actian Entity Framework Core Provider</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 
-    <VersionPrefix>8.0.0</VersionPrefix>
+    <VersionPrefix>9.0.0</VersionPrefix>
     <MinClientVersion>4.3</MinClientVersion>
 
     <RepositoryType>git</RepositoryType>
@@ -24,6 +24,7 @@
     <PackageTags>Actian;ActianX;Ingres;Entity Framework Core;entity-framework-core;EF;Data;O/RM;ORM;EntityFramework;EntityFrameworkCore;EFCore</PackageTags>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <NoWarn>$(NoWarn);EF9100</NoWarn>  <!-- Precompiled query is experimental -->
   </PropertyGroup>
 
 
@@ -34,7 +35,7 @@
 
   <!-- Language configuration -->
   <PropertyGroup>
-    <LangVersion>11.0</LangVersion>
+    <LangVersion>12.0</LangVersion>
     <!--<TreatWarningsAsErrors>true</TreatWarningsAsErrors>-->
 
     <!-- The version property specified contains SemVer 2.0.0 components or SemVer 1.0.0 components that may not be supported on NuGet clients older than v4.3 -->
@@ -54,12 +55,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Actian.Client" Version="8.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="8.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
+    <PackageReference Include="Actian.Client" Version="8.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
     <PackageReference Include="Sprache" Version="2.3.1" />
+    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -87,6 +88,15 @@
 
   <ItemGroup>
     <Compile Include="..\Shared\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.EntityFrameworkCore">
+      <HintPath>..\..\..\efcore9\artifacts\bin\EFCore\Debug\net8.0\Microsoft.EntityFrameworkCore.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.EntityFrameworkCore.Relational">
+      <HintPath>..\..\..\efcore9\artifacts\bin\EFCore.Relational\Debug\net8.0\Microsoft.EntityFrameworkCore.Relational.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>

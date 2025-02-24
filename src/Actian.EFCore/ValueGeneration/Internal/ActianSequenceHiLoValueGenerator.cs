@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System.Globalization;
+using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Actian.EFCore.Storage.Internal;
 using Actian.EFCore.Update.Internal;
@@ -34,23 +36,36 @@ namespace Actian.EFCore.ValueGeneration.Internal
             _commandLogger = commandLogger;
         }
 
-        private RelationalCommandParameterObject RelationalCommandParameterObject => new RelationalCommandParameterObject(
-            _connection,
-            parameterValues: null,
-            readerColumns: null,
-            context: null,
-            _commandLogger
-        );
+        protected override long GetNewLowValue()
+            => (long)Convert.ChangeType(
+                _rawSqlCommandBuilder
+                    .Build(_sqlGenerator.GenerateNextSequenceValueOperation(_sequence.Name, _sequence.Schema))
+                    .ExecuteScalar(
+                        new RelationalCommandParameterObject(
+                            _connection,
+                            parameterValues: null,
+                            readerColumns: null,
+                            context: null,
+                            _commandLogger, CommandSource.ValueGenerator)),
+                typeof(long),
+                CultureInfo.InvariantCulture)!;
 
         /// <inheritdoc />
-        protected override long GetNewLowValue() => _rawSqlCommandBuilder
-            .Build(_sqlGenerator.GenerateNextSequenceValueOperation(_sequence.Name, _sequence.Schema))
-            .ExecuteScalar<long>(RelationalCommandParameterObject);
-
-        /// <inheritdoc />
-        protected override async Task<long> GetNewLowValueAsync(CancellationToken cancellationToken = default) => await _rawSqlCommandBuilder
-            .Build(_sqlGenerator.GenerateNextSequenceValueOperation(_sequence.Name, _sequence.Schema))
-            .ExecuteScalarAsync<long>(RelationalCommandParameterObject, cancellationToken);
+        protected override async Task<long> GetNewLowValueAsync(CancellationToken cancellationToken = default)
+            => (long)Convert.ChangeType(
+                await _rawSqlCommandBuilder
+                    .Build(_sqlGenerator.GenerateNextSequenceValueOperation(_sequence.Name, _sequence.Schema))
+                    .ExecuteScalarAsync(
+                        new RelationalCommandParameterObject(
+                            _connection,
+                            parameterValues: null,
+                            readerColumns: null,
+                            context: null,
+                            _commandLogger, CommandSource.ValueGenerator),
+                        cancellationToken)
+                    .ConfigureAwait(false),
+                typeof(long),
+                CultureInfo.InvariantCulture)!;
 
         /// <inheritdoc />
         public override bool GeneratesTemporaryValues => false;

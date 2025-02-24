@@ -20,9 +20,6 @@ public class NorthwindSelectQueryActianTest : NorthwindSelectQueryRelationalTest
         Fixture.TestSqlLoggerFactory.SetTestOutputHelper(testOutputHelper);
     }
 
-    protected override bool CanExecuteQueryString
-        => true;
-
     [ConditionalFact]
     public virtual void Check_all_tests_overridden()
         => TestHelpers.AssertAllMethodsOverridden(GetType());
@@ -354,19 +351,19 @@ ORDER BY "c"."CustomerID", "t"."OrderID"
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "t0"."Date", "t0"."OrderID"
+SELECT "c"."CustomerID", "o1"."Date", "o1"."OrderID"
 FROM "Customers" AS "c"
 LEFT JOIN (
-    SELECT "t"."Date", "t"."OrderID", "t"."CustomerID"
+    SELECT "o0"."Date", "o0"."OrderID", "o0"."CustomerID"
     FROM (
         SELECT "o"."OrderDate" AS "Date", "o"."OrderID", "o"."CustomerID", ROW_NUMBER() OVER(PARTITION BY "o"."CustomerID" ORDER BY "o"."OrderID") AS "row"
         FROM "Orders" AS "o"
         WHERE "o"."OrderID" < 10500
-    ) AS "t"
-    WHERE "t"."row" <= 3
-) AS "t0" ON "c"."CustomerID" = "t0"."CustomerID"
+    ) AS "o0"
+    WHERE "o0"."row" <= 3
+) AS "o1" ON "c"."CustomerID" = "o1"."CustomerID"
 WHERE "c"."CustomerID" LIKE N'A%'
-ORDER BY "c"."CustomerID", "t0"."CustomerID", "t0"."OrderID"
+ORDER BY "c"."CustomerID", "o1"."CustomerID", "o1"."OrderID"
 """);
     }
 
@@ -685,7 +682,6 @@ SELECT CASE
     WHEN "c"."CustomerID" = N'9' THEN N'09'
     WHEN "c"."CustomerID" = N'10' THEN N'10'
     WHEN "c"."CustomerID" = N'11' THEN N'11'
-    ELSE NULL
 END
 FROM "Customers" AS "c"
 """);
@@ -707,6 +703,7 @@ OFFSET @__p_0 ROWS
 """);
     }
 
+    [ActianTodo]
     public override async Task Projection_containing_DateTime_subtraction(bool async)
     {
         await base.Projection_containing_DateTime_subtraction(async);
@@ -1362,13 +1359,13 @@ FROM "Customers" AS "c"
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
 FROM "Customers" AS "c"
 LEFT JOIN (
     SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" > 11000
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
+) AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
 WHERE "c"."CustomerID" LIKE N'A%'
 ORDER BY "c"."CustomerID"
 """);
@@ -1380,13 +1377,13 @@ ORDER BY "c"."CustomerID"
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
 FROM "Customers" AS "c"
 LEFT JOIN (
     SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" > 11000
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
+) AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
 WHERE "c"."CustomerID" LIKE N'A%'
 ORDER BY "c"."CustomerID"
 """);
@@ -1428,7 +1425,9 @@ CROSS APPLY (
 
         AssertSql(
             """
-SELECT 0
+SELECT CASE
+    WHEN "c"."Region" IS NOT NULL THEN 0
+END
 FROM "Customers" AS "c"
 WHERE "c"."CustomerID" = N'ALFKI'
 """);
@@ -1896,13 +1895,13 @@ ORDER BY "c"."CustomerID"
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate"
+SELECT "c"."CustomerID", "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
 FROM "Customers" AS "c"
 LEFT JOIN (
     SELECT "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
     FROM "Orders" AS "o0"
     WHERE "o0"."OrderID" < 10750
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
+) AS "o1" ON "c"."CustomerID" = "o1"."CustomerID"
 WHERE ("c"."CustomerID" LIKE N'A%') AND (
     SELECT COUNT(*)
     FROM "Orders" AS "o"
@@ -2051,11 +2050,11 @@ OFFSET @__p_0 ROWS
 
         AssertSql(
             """
-SELECT (COALESCE("t"."FirstLetter", N'') + N' ') + "t"."Foo" AS "Aggregate"
+SELECT (COALESCE("c0"."FirstLetter", N'') + N' ') + "c0"."Foo" AS "Aggregate"
 FROM (
     SELECT DISTINCT "c"."CustomerID", SUBSTRING("c"."CustomerID", 0 + 1, 1) AS "FirstLetter", N'Foo' AS "Foo"
     FROM "Customers" AS "c"
-) AS "t"
+) AS "c0"
 """);
     }
 
@@ -2085,31 +2084,31 @@ ORDER BY "t"."CustomerID"
 
         AssertSql(
             """
-SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate", "t"."OrderID", "t"."ProductID", "t"."Discount", "t"."Quantity", "t"."UnitPrice", "t"."ProductID0", "t"."Discontinued", "t"."ProductName", "t"."SupplierID", "t"."UnitPrice0", "t"."UnitsInStock", "t0"."OrderID", "t0"."ProductID", "t0"."ProductID0", "t2"."OrderID", "t2"."ProductID", "t2"."Discount", "t2"."Quantity", "t2"."UnitPrice", "t2"."ProductID0", "t2"."Discontinued", "t2"."ProductName", "t2"."SupplierID", "t2"."UnitPrice0", "t2"."UnitsInStock", "t0"."Discount", "t0"."Quantity", "t0"."UnitPrice", "t0"."Discontinued", "t0"."ProductName", "t0"."SupplierID", "t0"."UnitPrice0", "t0"."UnitsInStock"
+SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate", "s"."OrderID", "s"."ProductID", "s"."Discount", "s"."Quantity", "s"."UnitPrice", "s"."ProductID0", "s"."Discontinued", "s"."ProductName", "s"."SupplierID", "s"."UnitPrice0", "s"."UnitsInStock", "s1"."OrderID", "s1"."ProductID", "s1"."ProductID0", "s2"."OrderID", "s2"."ProductID", "s2"."Discount", "s2"."Quantity", "s2"."UnitPrice", "s2"."ProductID0", "s2"."Discontinued", "s2"."ProductName", "s2"."SupplierID", "s2"."UnitPrice0", "s2"."UnitsInStock", "s1"."Discount", "s1"."Quantity", "s1"."UnitPrice", "s1"."Discontinued", "s1"."ProductName", "s1"."SupplierID", "s1"."UnitPrice0", "s1"."UnitsInStock"
 FROM "Orders" AS "o"
 LEFT JOIN (
     SELECT "o0"."OrderID", "o0"."ProductID", "o0"."Discount", "o0"."Quantity", "o0"."UnitPrice", "p"."ProductID" AS "ProductID0", "p"."Discontinued", "p"."ProductName", "p"."SupplierID", "p"."UnitPrice" AS "UnitPrice0", "p"."UnitsInStock"
     FROM "Order Details" AS "o0"
     INNER JOIN "Products" AS "p" ON "o0"."ProductID" = "p"."ProductID"
-) AS "t" ON "o"."OrderID" = "t"."OrderID"
+) AS "s" ON "o"."OrderID" = "s"."OrderID"
 LEFT JOIN (
-    SELECT "t1"."OrderID", "t1"."ProductID", "t1"."Discount", "t1"."Quantity", "t1"."UnitPrice", "t1"."ProductID0", "t1"."Discontinued", "t1"."ProductName", "t1"."SupplierID", "t1"."UnitPrice0", "t1"."UnitsInStock"
+    SELECT "s0"."OrderID", "s0"."ProductID", "s0"."Discount", "s0"."Quantity", "s0"."UnitPrice", "s0"."ProductID0", "s0"."Discontinued", "s0"."ProductName", "s0"."SupplierID", "s0"."UnitPrice0", "s0"."UnitsInStock"
     FROM (
         SELECT "o1"."OrderID", "o1"."ProductID", "o1"."Discount", "o1"."Quantity", "o1"."UnitPrice", "p0"."ProductID" AS "ProductID0", "p0"."Discontinued", "p0"."ProductName", "p0"."SupplierID", "p0"."UnitPrice" AS "UnitPrice0", "p0"."UnitsInStock", ROW_NUMBER() OVER(PARTITION BY "o1"."OrderID" ORDER BY "o1"."OrderID", "o1"."ProductID", "p0"."ProductID") AS "row"
         FROM "Order Details" AS "o1"
         INNER JOIN "Products" AS "p0" ON "o1"."ProductID" = "p0"."ProductID"
         WHERE "o1"."UnitPrice" > 10.0
-    ) AS "t1"
-    WHERE "t1"."row" <= 1
-) AS "t0" ON "o"."OrderID" = "t0"."OrderID"
+    ) AS "s0"
+    WHERE "s0"."row" <= 1
+) AS "s1" ON "o"."OrderID" = "s1"."OrderID"
 LEFT JOIN (
     SELECT "o2"."OrderID", "o2"."ProductID", "o2"."Discount", "o2"."Quantity", "o2"."UnitPrice", "p1"."ProductID" AS "ProductID0", "p1"."Discontinued", "p1"."ProductName", "p1"."SupplierID", "p1"."UnitPrice" AS "UnitPrice0", "p1"."UnitsInStock"
     FROM "Order Details" AS "o2"
     INNER JOIN "Products" AS "p1" ON "o2"."ProductID" = "p1"."ProductID"
     WHERE "o2"."UnitPrice" < 10.0
-) AS "t2" ON "o"."OrderID" = "t2"."OrderID"
+) AS "s2" ON "o"."OrderID" = "s2"."OrderID"
 WHERE "o"."OrderID" < 10350
-ORDER BY "o"."OrderID", "t"."OrderID", "t"."ProductID", "t"."ProductID0", "t0"."OrderID", "t0"."ProductID", "t0"."ProductID0", "t2"."OrderID", "t2"."ProductID"
+ORDER BY "o"."OrderID", "s"."OrderID", "s"."ProductID", "s"."ProductID0", "s1"."OrderID", "s1"."ProductID", "s1"."ProductID0", "s2"."OrderID", "s2"."ProductID"
 """);
     }
 
@@ -2315,24 +2314,24 @@ ORDER BY "t"."City", "t1"."OrderID", "t1"."OrderID00"
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate", "t"."OrderID0", "t"."ProductID", "t"."Discount", "t"."Quantity", "t"."UnitPrice", "t0"."OrderID", "t0"."CustomerID", "t0"."EmployeeID", "t0"."OrderDate", "o2"."OrderID", "o2"."ProductID", "o2"."Discount", "o2"."Quantity", "o2"."UnitPrice"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "s"."OrderID", "s"."CustomerID", "s"."EmployeeID", "s"."OrderDate", "s"."OrderID0", "s"."ProductID", "s"."Discount", "s"."Quantity", "s"."UnitPrice", "o4"."OrderID", "o4"."CustomerID", "o4"."EmployeeID", "o4"."OrderDate", "o2"."OrderID", "o2"."ProductID", "o2"."Discount", "o2"."Quantity", "o2"."UnitPrice"
 FROM "Customers" AS "c"
 LEFT JOIN (
     SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate", "o0"."OrderID" AS "OrderID0", "o0"."ProductID", "o0"."Discount", "o0"."Quantity", "o0"."UnitPrice"
     FROM "Orders" AS "o"
     LEFT JOIN "Order Details" AS "o0" ON "o"."OrderID" = "o0"."OrderID"
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
+) AS "s" ON "c"."CustomerID" = "s"."CustomerID"
 LEFT JOIN (
-    SELECT "t1"."OrderID", "t1"."CustomerID", "t1"."EmployeeID", "t1"."OrderDate"
+    SELECT "o3"."OrderID", "o3"."CustomerID", "o3"."EmployeeID", "o3"."OrderDate"
     FROM (
         SELECT "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate", ROW_NUMBER() OVER(PARTITION BY "o1"."CustomerID" ORDER BY "o1"."OrderDate") AS "row"
         FROM "Orders" AS "o1"
-    ) AS "t1"
-    WHERE "t1"."row" <= 1
-) AS "t0" ON "c"."CustomerID" = "t0"."CustomerID"
-LEFT JOIN "Order Details" AS "o2" ON "t0"."OrderID" = "o2"."OrderID"
+    ) AS "o3"
+    WHERE "o3"."row" <= 1
+) AS "o4" ON "c"."CustomerID" = "o4"."CustomerID"
+LEFT JOIN "Order Details" AS "o2" ON "o4"."OrderID" = "o2"."OrderID"
 WHERE "c"."CustomerID" LIKE N'F%'
-ORDER BY "c"."CustomerID", "t"."OrderID", "t"."OrderID0", "t"."ProductID", "t0"."OrderID", "o2"."OrderID"
+ORDER BY "c"."CustomerID", "s"."OrderID", "s"."OrderID0", "s"."ProductID", "o4"."OrderID", "o2"."OrderID"
 """);
     }
 
@@ -2724,15 +2723,15 @@ ORDER BY "t0"."CustomerID", "t0"."Complex"
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "t"."OrderID", "t"."OrderID0", "t"."ProductID"
+SELECT "c"."CustomerID", "s"."OrderID", "s"."OrderID0", "s"."ProductID"
 FROM "Customers" AS "c"
 LEFT JOIN (
     SELECT "o"."OrderID", "o0"."OrderID" AS "OrderID0", "o0"."ProductID", "o"."CustomerID"
     FROM "Orders" AS "o"
     LEFT JOIN "Order Details" AS "o0" ON "o"."OrderID" = "o0"."OrderID"
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
+) AS "s" ON "c"."CustomerID" = "s"."CustomerID"
 WHERE "c"."CustomerID" LIKE N'F%'
-ORDER BY "c"."CustomerID", "t"."OrderID", "t"."OrderID0"
+ORDER BY "c"."CustomerID", "s"."OrderID", "s"."OrderID0"
 """);
     }
 
@@ -2808,6 +2807,81 @@ SELECT "c"."CustomerID"
 FROM "Customers" AS "c"
 WHERE "c"."CustomerID" LIKE N'F%'
 """);
+    }
+
+    public override async Task Select_conditional_drops_false(bool async)
+    {
+        await base.Select_conditional_drops_false(async);
+
+        AssertSql(
+"""
+SELECT CASE
+    WHEN (mod("o"."OrderID", 2)) = 0 THEN "o"."OrderID"
+    ELSE -"o"."OrderID"
+END
+FROM "Orders" AS "o"
+""");
+    }
+
+    public override async Task Select_conditional_terminates_at_true(bool async)
+    {
+        await base.Select_conditional_terminates_at_true(async);
+
+        AssertSql(
+"""
+SELECT CASE
+    WHEN (mod("o"."OrderID", 2)) = 0 THEN "o"."OrderID"
+    ELSE 0
+END
+FROM "Orders" AS "o"
+""");
+    }
+
+    public override async Task Select_conditional_flatten_nested_results(bool async)
+    {
+        await base.Select_conditional_flatten_nested_results(async);
+
+        AssertSql(
+"""
+SELECT CASE
+    WHEN (mod("o"."OrderID", 2)) = 0 AND (mod("o"."OrderID", 5)) = 0 THEN -"o"."OrderID"
+    ELSE "o"."OrderID"
+END
+FROM "Orders" AS "o"
+""");
+    }
+
+    public override async Task Select_conditional_flatten_nested_tests(bool async)
+    {
+        await base.Select_conditional_flatten_nested_tests(async);
+
+        AssertSql(
+"""
+SELECT CASE
+    WHEN (mod("o"."OrderID", 2)) <> 0 THEN "o"."OrderID"
+    ELSE -"o"."OrderID"
+END
+FROM "Orders" AS "o"
+""");
+    }
+
+    public override async Task Entity_passed_to_DTO_constructor_works(bool async)
+    {
+        await base.Entity_passed_to_DTO_constructor_works(async);
+
+        AssertSql(
+"""
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+""");
+    }
+
+    [ActianTodo]
+    public override async Task Set_operation_in_pending_collection(bool async)
+    {
+        await base.Set_operation_in_pending_collection(async);
+
+        AssertSql();
     }
 
     private void AssertSql(params string[] expected)

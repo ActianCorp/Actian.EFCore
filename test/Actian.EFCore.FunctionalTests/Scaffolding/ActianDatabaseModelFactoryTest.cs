@@ -771,28 +771,28 @@ CREATE TABLE db2.DependentTable (
                     // ReSharper disable once PossibleNullReferenceException
                     Assert.Equal("db2", sequence.Schema);
 
-                    Assert.Single(dbModel.Tables.Where(t => t is { Schema: "db.2", Name: "quotedtablename" }));
-                    Assert.Empty(dbModel.Tables.Where(t => t is { Schema: "db.2", Name: "table.with.dot" }));
-                    Assert.Single(dbModel.Tables.Where(t => t is { Schema: "db.2", Name: "simpletablename" }));
-                    Assert.Single(dbModel.Tables.Where(t => t is { Schema: "db.2", Name: "justtablename" }));
+                    Assert.Single(dbModel.Tables, t => t is { Schema: "db.2", Name: "quotedtablename" });
+                    Assert.DoesNotContain(dbModel.Tables, t => t is { Schema: "db.2", Name: "table.with.dot" });
+                    Assert.Single(dbModel.Tables, t => t is { Schema: "db.2", Name: "simpletablename" });
+                    Assert.Single(dbModel.Tables, t => t is { Schema: "db.2", Name: "justtablename" });
 
-                    Assert.Empty(dbModel.Tables.Where(t => t is { Schema: "dbo", Name: "quotedtablename" }));
-                    Assert.Single(dbModel.Tables.Where(t => t is { Schema: "dbo", Name: "table.with.dot" }));
-                    Assert.Single(dbModel.Tables.Where(t => t is { Schema: "dbo", Name: "simpletablename" }));
-                    Assert.Single(dbModel.Tables.Where(t => t is { Schema: "dbo", Name: "justtablename" }));
+                    Assert.DoesNotContain(dbModel.Tables, t => t is { Schema: "dbo", Name: "quotedtablename" });
+                    Assert.Single(dbModel.Tables, t => t is { Schema: "dbo", Name: "table.with.dot" });
+                    Assert.Single(dbModel.Tables, t => t is { Schema: "dbo", Name: "simpletablename" });
+                    Assert.Single(dbModel.Tables, t => t is { Schema: "dbo", Name: "justtablename" });
 
-                    Assert.Single(dbModel.Tables.Where(t => t is { Schema: "db2", Name: "quotedtablename" }));
-                    Assert.Single(dbModel.Tables.Where(t => t is { Schema: "db2", Name: "table.with.dot" }));
-                    Assert.Single(dbModel.Tables.Where(t => t is { Schema: "db2", Name: "simpletablename" }));
-                    Assert.Single(dbModel.Tables.Where(t => t is { Schema: "db2", Name: "justtablename" }));
+                    Assert.Single(dbModel.Tables, t => t is { Schema: "db2", Name: "quotedtablename" });
+                    Assert.Single(dbModel.Tables, t => t is { Schema: "db2", Name: "table.with.dot" });
+                    Assert.Single(dbModel.Tables, t => t is { Schema: "db2", Name: "simpletablename" });
+                    Assert.Single(dbModel.Tables, t => t is { Schema: "db2", Name: "justtablename" });
 
-                    var principalTable = Assert.Single(dbModel.Tables.Where(t => t is { Schema: "db2", Name: "principaltable" }));
+                    var principalTable = Assert.Single(dbModel.Tables, t => t is { Schema: "db2", Name: "principaltable" });
                     // ReSharper disable once PossibleNullReferenceException
                     Assert.NotNull(principalTable.PrimaryKey);
                     Assert.Single(principalTable.UniqueConstraints);
                     Assert.Single(principalTable.Indexes);
 
-                    var dependentTable = Assert.Single(dbModel.Tables.Where(t => t is { Schema: "db2", Name: "dependenttable" }));
+                    var dependentTable = Assert.Single(dbModel.Tables, t => t is { Schema: "db2", Name: "dependenttable" });
                     // ReSharper disable once PossibleNullReferenceException
                     Assert.Single(dependentTable.ForeignKeys);
                 },
@@ -872,7 +872,7 @@ CREATE TABLE Blogs (
                 Enumerable.Empty<string>(),
                 (dbModel, scaffoldingFactory) =>
                 {
-                    var table = Assert.Single(dbModel.Tables.Where(t => t.Name == "blogs"));
+                    var table = Assert.Single(dbModel.Tables, t => t.Name == "blogs");
 
                     // ReSharper disable once PossibleNullReferenceException
                     Assert.True((bool)table[ActianAnnotationNames.MemoryOptimized]!);
@@ -902,8 +902,8 @@ CREATE TABLE Blogs (
                             Assert.Equal("blogs", c.Table.Name);
                         });
 
-                    Assert.Single(table.Columns.Where(c => c.Name == "id"));
-                    Assert.Single(table.Columns.Where(c => c.Name == "name"));
+                    Assert.Single(table.Columns, c => c.Name == "id");
+                    Assert.Single(table.Columns, c => c.Name == "name");
                 },
                 "DROP TABLE Blogs");
 
@@ -932,8 +932,8 @@ SELECT
                             Assert.Equal("blogsview", c.Table.Name);
                         });
 
-                    Assert.Single(table.Columns.Where(c => c.Name == "id"));
-                    Assert.Single(table.Columns.Where(c => c.Name == "name"));
+                    Assert.Single(table.Columns, c => c.Name == "id");
+                    Assert.Single(table.Columns, c => c.Name == "name");
                 },
                 "DROP VIEW BlogsView;");
 
@@ -1014,8 +1014,8 @@ CREATE INDEX IX_INDEX on IndexTable ( IndexProperty );",
                             Assert.Equal("indextable", c.Table.Name);
                         });
 
-                    Assert.Single(table.Indexes.Where(c => c.Name == "ix_name"));
-                    Assert.Single(table.Indexes.Where(c => c.Name == "ix_index"));
+                    Assert.Single(table.Indexes, c => c.Name == "ix_name");
+                    Assert.Single(table.Indexes, c => c.Name == "ix_index");
                 },
                 "DROP TABLE IndexTable;");
 
@@ -1173,7 +1173,7 @@ CREATE TABLE TypeAlias (
                 Enumerable.Empty<string>(),
                 (dbModel, scaffoldingFactory) =>
                 {
-                    var column = Assert.Single(dbModel.Tables.Single().Columns.Where(c => c.Name == "typeAliasColumn"));
+                    var column = Assert.Single(dbModel.Tables.Single().Columns, c => c.Name == "typeAliasColumn");
 
                     // ReSharper disable once PossibleNullReferenceException
                     Assert.Equal("nvarchar(max)", column.StoreType);
@@ -1195,7 +1195,7 @@ CREATE TABLE TypeAlias (
                 Enumerable.Empty<string>(),
                 (dbModel, scaffoldingFactory) =>
                 {
-                    var column = Assert.Single(dbModel.Tables.Single().Columns.Where(c => c.Name == "typeAliasColumn"));
+                    var column = Assert.Single(dbModel.Tables.Single().Columns, c => c.Name == "typeAliasColumn");
 
                     // ReSharper disable once PossibleNullReferenceException
                     Assert.Equal("nvarchar(128)", column.StoreType);
@@ -2725,7 +2725,7 @@ CREATE TABLE DependentTable (
 
                     Assert.Equal(2, foreignKeys.Count);
 
-                    var principalFk = Assert.Single(foreignKeys.Where(f => f.PrincipalTable.Name == "principaltable"));
+                    var principalFk = Assert.Single(foreignKeys, f => f.PrincipalTable.Name == "principaltable");
 
                     // ReSharper disable once PossibleNullReferenceException
                     Assert.Equal("dbo", principalFk.Table.Schema);
@@ -2738,7 +2738,7 @@ CREATE TABLE DependentTable (
                         new List<string> { "id" }, principalFk.PrincipalColumns.Select(ic => ic.Name).ToList());
                     Assert.Equal(ReferentialAction.Cascade, principalFk.OnDelete);
 
-                    var anotherPrincipalFk = Assert.Single(foreignKeys.Where(f => f.PrincipalTable.Name == "anotherprincipaltable"));
+                    var anotherPrincipalFk = Assert.Single(foreignKeys, f => f.PrincipalTable.Name == "anotherprincipaltable");
 
                     // ReSharper disable once PossibleNullReferenceException
                     Assert.Equal("dbo", anotherPrincipalFk.Table.Schema);

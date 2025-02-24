@@ -22,9 +22,6 @@ public class NorthwindGroupByQueryActianTest : NorthwindGroupByQueryRelationalTe
         Fixture.TestSqlLoggerFactory.SetTestOutputHelper(testOutputHelper);
     }
 
-    protected override bool CanExecuteQueryString
-        => true;
-
     [ConditionalFact]
     public virtual void Check_all_tests_overridden()
         => TestHelpers.AssertAllMethodsOverridden(GetType());
@@ -263,12 +260,12 @@ GROUP BY "o"."CustomerID"
 
         AssertSql(
             """
-SELECT "t"."Name", "t"."CustomerID" AS "Value", COUNT(*) AS "Count"
+SELECT "o0"."Name", "o0"."CustomerID" AS "Value", COUNT(*) AS "Count"
 FROM (
     SELECT "o"."CustomerID", N'CustomerID' AS "Name"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Name", "t"."CustomerID"
+) AS "o0"
+GROUP BY "o0"."Name", "o0"."CustomerID"
 """);
     }
 
@@ -647,12 +644,12 @@ GROUP BY "o"."CustomerID", "o"."EmployeeID"
 
         AssertSql(
             """
-SELECT COALESCE(SUM("t"."OrderID"), 0) AS "Sum", MIN("t"."OrderID") AS "Min", "t"."Key", MAX("t"."OrderID") AS "Max", AVG(CAST("t"."OrderID" AS float)) AS "Avg"
+SELECT COALESCE(SUM("o0"."OrderID"), 0) AS "Sum", MIN("o0"."OrderID") AS "Min", "o0"."Key", MAX("o0"."OrderID") AS "Max", AVG(CAST("o0"."OrderID" AS float)) AS "Avg"
 FROM (
     SELECT "o"."OrderID", 2 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
@@ -662,12 +659,12 @@ GROUP BY "t"."Key"
 
         AssertSql(
             """
-SELECT COALESCE(SUM("t"."OrderID"), 0) AS "Sum"
+SELECT COALESCE(SUM("o0"."OrderID"), 0) AS "Sum"
 FROM (
     SELECT "o"."OrderID", 2 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
@@ -677,12 +674,12 @@ GROUP BY "t"."Key"
 
         AssertSql(
             """
-SELECT COALESCE(SUM("t"."OrderID"), 0) AS "Sum"
+SELECT COALESCE(SUM("o0"."OrderID"), 0) AS "Sum"
 FROM (
     SELECT "o"."OrderID", 2 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
@@ -692,12 +689,12 @@ GROUP BY "t"."Key"
 
         AssertSql(
             """
-SELECT COALESCE(SUM("t"."OrderID"), 0) AS "Sum"
+SELECT COALESCE(SUM("o0"."OrderID"), 0) AS "Sum"
 FROM (
     SELECT "o"."OrderID", 2 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
@@ -707,13 +704,13 @@ GROUP BY "t"."Key"
 
         AssertSql(
             """
-SELECT COALESCE(SUM("t"."OrderID"), 0) AS "Sum", MIN("t"."OrderID") AS "Min", "t"."Key" AS "Random", MAX("t"."OrderID") AS "Max", AVG(CAST("t"."OrderID" AS float)) AS "Avg"
+SELECT COALESCE(SUM("o0"."OrderID"), 0) AS "Sum", MIN("o0"."OrderID") AS "Min", "o0"."Key" AS "Random", MAX("o0"."OrderID") AS "Max", AVG(CAST("o0"."OrderID" AS float)) AS "Avg"
 FROM (
     SELECT "o"."OrderID", 2 AS "Key"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" > 10500
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
@@ -723,12 +720,12 @@ GROUP BY "t"."Key"
 
         AssertSql(
             """
-SELECT COALESCE(SUM("t"."OrderID"), 0) AS "Sum", "t"."Key"
+SELECT COALESCE(SUM("o0"."OrderID"), 0) AS "Sum", "o0"."Key"
 FROM (
     SELECT "o"."OrderID", 2 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
@@ -739,20 +736,20 @@ GROUP BY "t"."Key"
         AssertSql(
             """
 SELECT MIN(CASE
-    WHEN 1 = "t"."Key" THEN "t"."OrderDate"
+    WHEN 1 = "o0"."Key" THEN "o0"."OrderDate"
 END) AS "Min", MAX(CASE
-    WHEN 1 = "t"."Key" THEN "t"."OrderDate"
+    WHEN 1 = "o0"."Key" THEN "o0"."OrderDate"
 END) AS "Max", COALESCE(SUM(CASE
-    WHEN 1 = "t"."Key" THEN "t"."OrderID"
+    WHEN 1 = "o0"."Key" THEN "o0"."OrderID"
 END), 0) AS "Sum", AVG(CASE
-    WHEN 1 = "t"."Key" THEN CAST("t"."OrderID" AS float)
+    WHEN 1 = "o0"."Key" THEN CAST("o0"."OrderID" AS float)
 END) AS "Average"
 FROM (
     SELECT "o"."OrderID", "o"."OrderDate", 1 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
-ORDER BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
+ORDER BY "o0"."Key"
 """);
     }
 
@@ -1122,12 +1119,12 @@ GROUP BY "t"."OrderMonth", "t"."CustomerID"
 
         AssertSql(
             """
-SELECT COALESCE(SUM("t"."OrderID"), 0)
+SELECT COALESCE(SUM("o0"."OrderID"), 0)
 FROM (
     SELECT "o"."OrderID", 1 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
@@ -1137,12 +1134,12 @@ GROUP BY "t"."Key"
 
         AssertSql(
             """
-SELECT COALESCE(SUM("t"."OrderID"), 0) AS "Sum"
+SELECT COALESCE(SUM("o0"."OrderID"), 0) AS "Sum"
 FROM (
     SELECT "o"."OrderID", 1 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
@@ -1224,12 +1221,12 @@ GROUP BY "t"."CustomerID"
 
         AssertSql(
             """
-SELECT "t"."CustomerID" AS "Key", COUNT(*) AS "c"
+SELECT "o0"."CustomerID" AS "Key", COUNT(*) AS "c"
 FROM (
     SELECT DISTINCT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."CustomerID"
+) AS "o0"
+GROUP BY "o0"."CustomerID"
 """);
     }
 
@@ -1239,12 +1236,12 @@ GROUP BY "t"."CustomerID"
 
         AssertSql(
             """
-SELECT "t"."EmployeeID" AS "Key", COUNT(*) AS "c"
+SELECT "o0"."EmployeeID" AS "Key", COUNT(*) AS "c"
 FROM (
     SELECT DISTINCT "o"."OrderID", "o"."EmployeeID"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."EmployeeID"
+) AS "o0"
+GROUP BY "o0"."EmployeeID"
 """);
     }
 
@@ -1459,7 +1456,7 @@ GROUP BY "o0"."CustomerID", "p"."ProductName"
 
         AssertSql(
             """
-SELECT "t"."City" AS "Key", COUNT(*) AS "Total"
+SELECT "u"."City" AS "Key", COUNT(*) AS "Total"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
@@ -1468,8 +1465,8 @@ FROM (
     SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM "Customers" AS "c0"
     WHERE "c0"."City" = N'México D.F.'
-) AS "t"
-GROUP BY "t"."City"
+) AS "u"
+GROUP BY "u"."City"
 """);
     }
 
@@ -1505,12 +1502,12 @@ GROUP BY "c"."CustomerID"
 
         AssertSql(
             """
-SELECT "t"."CustomerID" AS "Key", COUNT(*) AS "Count"
+SELECT "o0"."CustomerID" AS "Key", COUNT(*) AS "Count"
 FROM (
     SELECT DISTINCT "o"."CustomerID", "o"."OrderID"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."CustomerID"
+) AS "o0"
+GROUP BY "o0"."CustomerID"
 """);
     }
 
@@ -1520,13 +1517,13 @@ GROUP BY "t"."CustomerID"
 
         AssertSql(
             """
-SELECT "t"."Key", COUNT(*) AS "Count"
+SELECT "s"."Key", COUNT(*) AS "Count"
 FROM (
     SELECT SUBSTRING("c"."CustomerID", 0 + 1, 1) AS "Key"
     FROM "Orders" AS "o"
     LEFT JOIN "Customers" AS "c" ON "o"."CustomerID" = "c"."CustomerID"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "s"
+GROUP BY "s"."Key"
 """);
     }
 
@@ -1740,12 +1737,12 @@ HAVING COUNT(*) > 4
 
         AssertSql(
             """
-SELECT "t"."Key" AS "Name", COUNT(*) AS "Count"
+SELECT "o0"."Key" AS "Name", COUNT(*) AS "Count"
 FROM (
     SELECT N'Order' AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 HAVING COUNT(*) > 0
 """);
     }
@@ -1770,15 +1767,15 @@ ORDER BY COUNT(*), "o"."CustomerID"
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
 FROM (
     SELECT "o"."CustomerID", MAX("o"."OrderID") AS "LastOrderID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 5
-) AS "t"
-INNER JOIN "Customers" AS "c" ON "t"."CustomerID" = "c"."CustomerID"
-INNER JOIN "Orders" AS "o0" ON "t"."LastOrderID" = "o0"."OrderID"
+) AS "o0"
+INNER JOIN "Customers" AS "c" ON "o0"."CustomerID" = "c"."CustomerID"
+INNER JOIN "Orders" AS "o1" ON "o0"."LastOrderID" = "o1"."OrderID"
 """);
     }
 
@@ -1791,11 +1788,11 @@ INNER JOIN "Orders" AS "o0" ON "t"."LastOrderID" = "o0"."OrderID"
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 INNER JOIN (
-    SELECT "o"."CustomerID", MAX("o"."OrderID") AS "LastOrderID"
+    SELECT "o"."CustomerID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 5
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
+) AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
 """);
     }
 
@@ -1808,11 +1805,11 @@ INNER JOIN (
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 LEFT JOIN (
-    SELECT "o"."CustomerID", MAX("o"."OrderID") AS "LastOrderID"
+    SELECT "o"."CustomerID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 5
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
+) AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
 """);
     }
 
@@ -1822,15 +1819,15 @@ LEFT JOIN (
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
 FROM "Customers" AS "c"
 INNER JOIN (
     SELECT "o"."CustomerID", MAX("o"."OrderID") AS "LastOrderID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 5
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
-INNER JOIN "Orders" AS "o0" ON "t"."LastOrderID" = "o0"."OrderID"
+) AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
+INNER JOIN "Orders" AS "o1" ON "o0"."LastOrderID" = "o1"."OrderID"
 """);
     }
 
@@ -1840,14 +1837,14 @@ INNER JOIN "Orders" AS "o0" ON "t"."LastOrderID" = "o0"."OrderID"
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "t"."LastOrderID"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o0"."LastOrderID"
 FROM "Customers" AS "c"
 INNER JOIN (
     SELECT "o"."CustomerID", MAX("o"."OrderID") AS "LastOrderID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 5
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
+) AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
 """);
     }
 
@@ -1857,15 +1854,15 @@ INNER JOIN (
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "t"."LastOrderID", "o0"."OrderID"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o0"."LastOrderID", "o1"."OrderID"
 FROM "Customers" AS "c"
 INNER JOIN (
     SELECT "o"."CustomerID", MAX("o"."OrderID") AS "LastOrderID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 5
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
-INNER JOIN "Orders" AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
+) AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
+INNER JOIN "Orders" AS "o1" ON "c"."CustomerID" = "o1"."CustomerID"
 """);
     }
 
@@ -1896,14 +1893,14 @@ INNER JOIN (
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "t"."LastOrderID"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o0"."LastOrderID"
 FROM "Customers" AS "c"
 LEFT JOIN (
     SELECT "o"."CustomerID", MAX("o"."OrderID") AS "LastOrderID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 5
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
+) AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
 WHERE "c"."CustomerID" LIKE N'A%'
 """);
     }
@@ -1914,18 +1911,18 @@ WHERE "c"."CustomerID" LIKE N'A%'
 
         AssertSql(
             """
-SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate", "t0"."CustomerID", "t0"."Address", "t0"."City", "t0"."CompanyName", "t0"."ContactName", "t0"."ContactTitle", "t0"."Country", "t0"."Fax", "t0"."Phone", "t0"."PostalCode", "t0"."Region"
+SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate", "s"."CustomerID", "s"."Address", "s"."City", "s"."CompanyName", "s"."ContactName", "s"."ContactTitle", "s"."Country", "s"."Fax", "s"."Phone", "s"."PostalCode", "s"."Region"
 FROM "Orders" AS "o"
 INNER JOIN (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
     INNER JOIN (
-        SELECT "o0"."CustomerID", MAX("o0"."OrderID") AS "LastOrderID"
+        SELECT "o0"."CustomerID"
         FROM "Orders" AS "o0"
         GROUP BY "o0"."CustomerID"
         HAVING COUNT(*) > 5
-    ) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
-) AS "t0" ON "o"."CustomerID" = "t0"."CustomerID"
+    ) AS "o1" ON "c"."CustomerID" = "o1"."CustomerID"
+) AS "s" ON "o"."CustomerID" = "s"."CustomerID"
 WHERE "o"."OrderID" < 10400
 """);
     }
@@ -1936,14 +1933,14 @@ WHERE "o"."OrderID" < 10400
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "t"."LastOrderID"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o0"."LastOrderID"
 FROM "Customers" AS "c"
 INNER JOIN (
     SELECT "o"."CustomerID" AS "Key", MAX("o"."OrderID") AS "LastOrderID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 5
-) AS "t" ON "c"."CustomerID" = "t"."Key"
+) AS "o0" ON "c"."CustomerID" = "o0"."Key"
 """);
     }
 
@@ -1989,13 +1986,13 @@ GROUP BY "o"."CustomerID"
 
         AssertSql(
             """
-SELECT "t"."CustomerID" AS "Key", COUNT(*) AS "c"
+SELECT "o0"."CustomerID" AS "Key", COUNT(*) AS "c"
 FROM (
     SELECT DISTINCT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."CustomerID"
-ORDER BY "t"."CustomerID"
+) AS "o0"
+GROUP BY "o0"."CustomerID"
+ORDER BY "o0"."CustomerID"
 """);
     }
 
@@ -2362,22 +2359,22 @@ GROUP BY "e"."Title"
 
         AssertSql(
             """
-SELECT "t0"."EmployeeID", "t0"."City", "t0"."Country", "t0"."FirstName", "t0"."ReportsTo", "t0"."Title"
+SELECT "e3"."EmployeeID", "e3"."City", "e3"."Country", "e3"."FirstName", "e3"."ReportsTo", "e3"."Title"
 FROM (
     SELECT "e"."Title"
     FROM "Employees" AS "e"
     WHERE "e"."Title" = N'Sales Representative' AND "e"."EmployeeID" = 1
     GROUP BY "e"."Title"
-) AS "t"
+) AS "e1"
 LEFT JOIN (
-    SELECT "t1"."EmployeeID", "t1"."City", "t1"."Country", "t1"."FirstName", "t1"."ReportsTo", "t1"."Title"
+    SELECT "e2"."EmployeeID", "e2"."City", "e2"."Country", "e2"."FirstName", "e2"."ReportsTo", "e2"."Title"
     FROM (
         SELECT "e0"."EmployeeID", "e0"."City", "e0"."Country", "e0"."FirstName", "e0"."ReportsTo", "e0"."Title", ROW_NUMBER() OVER(PARTITION BY "e0"."Title" ORDER BY "e0"."EmployeeID") AS "row"
         FROM "Employees" AS "e0"
         WHERE "e0"."Title" = N'Sales Representative' AND "e0"."EmployeeID" = 1
-    ) AS "t1"
-    WHERE "t1"."row" <= 1
-) AS "t0" ON "t"."Title" = "t0"."Title"
+    ) AS "e2"
+    WHERE "e2"."row" <= 1
+) AS "e3" ON "e1"."Title" = "e3"."Title"
 """);
     }
 
@@ -2404,14 +2401,14 @@ GROUP BY "e"."EmployeeID"
 
         AssertSql(
             """
-SELECT "t"."City", "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
+SELECT "c1"."City", "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
     SELECT "c"."City"
     FROM "Customers" AS "c"
     GROUP BY "c"."City"
-) AS "t"
-LEFT JOIN "Customers" AS "c0" ON "t"."City" = "c0"."City"
-ORDER BY "t"."City"
+) AS "c1"
+LEFT JOIN "Customers" AS "c0" ON "c1"."City" = "c0"."City"
+ORDER BY "c1"."City"
 """);
     }
 
@@ -2421,14 +2418,14 @@ ORDER BY "t"."City"
 
         AssertSql(
             """
-SELECT "t"."City", "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
+SELECT "c1"."City", "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
     SELECT "c"."City"
     FROM "Customers" AS "c"
     GROUP BY "c"."City"
-) AS "t"
-LEFT JOIN "Customers" AS "c0" ON "t"."City" = "c0"."City"
-ORDER BY "t"."City"
+) AS "c1"
+LEFT JOIN "Customers" AS "c0" ON "c1"."City" = "c0"."City"
+ORDER BY "c1"."City"
 """);
     }
 
@@ -2438,18 +2435,18 @@ ORDER BY "t"."City"
 
         AssertSql(
             """
-SELECT "t"."City", "t0"."CustomerID", "t0"."Address", "t0"."City", "t0"."CompanyName", "t0"."ContactName", "t0"."ContactTitle", "t0"."Country", "t0"."Fax", "t0"."Phone", "t0"."PostalCode", "t0"."Region"
+SELECT "c1"."City", "c2"."CustomerID", "c2"."Address", "c2"."City", "c2"."CompanyName", "c2"."ContactName", "c2"."ContactTitle", "c2"."Country", "c2"."Fax", "c2"."Phone", "c2"."PostalCode", "c2"."Region"
 FROM (
     SELECT "c"."City"
     FROM "Customers" AS "c"
     GROUP BY "c"."City"
-) AS "t"
+) AS "c1"
 LEFT JOIN (
     SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM "Customers" AS "c0"
     WHERE "c0"."CustomerID" LIKE N'A%'
-) AS "t0" ON "t"."City" = "t0"."City"
-ORDER BY "t"."City"
+) AS "c2" ON "c1"."City" = "c2"."City"
+ORDER BY "c1"."City"
 """);
     }
 
@@ -2459,14 +2456,14 @@ ORDER BY "t"."City"
 
         AssertSql(
             """
-SELECT "t"."City", "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
+SELECT "c1"."City", "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
     SELECT "c"."City"
     FROM "Customers" AS "c"
     GROUP BY "c"."City"
-) AS "t"
-LEFT JOIN "Customers" AS "c0" ON "t"."City" = "c0"."City"
-ORDER BY "t"."City", "c0"."CustomerID"
+) AS "c1"
+LEFT JOIN "Customers" AS "c0" ON "c1"."City" = "c0"."City"
+ORDER BY "c1"."City", "c0"."CustomerID"
 """);
     }
 
@@ -2485,10 +2482,10 @@ ORDER BY "t"."City", "c0"."CustomerID"
             """
 SELECT COUNT(*)
 FROM (
-    SELECT "o"."CustomerID"
+    SELECT 1
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
+) AS "o0"
 """);
     }
 
@@ -2500,10 +2497,10 @@ FROM (
             """
 SELECT COUNT(*)
 FROM (
-    SELECT "o"."CustomerID"
+    SELECT 1
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
+) AS "o0"
 """);
     }
 
@@ -2551,21 +2548,21 @@ GROUP BY "o"."CustomerID"
 
         AssertSql(
             """
-SELECT MIN("t"."c")
+SELECT MIN("o0"."c")
 FROM (
     SELECT COALESCE(SUM("o"."OrderID"), 0) AS "c"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
+) AS "o0"
 """,
-            //
-            """
-SELECT MAX("t"."c")
+                //
+                """
+SELECT MAX("o0"."c")
 FROM (
     SELECT COALESCE(SUM("o"."OrderID"), 0) AS "c"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
+) AS "o0"
 """);
     }
     
@@ -2630,10 +2627,10 @@ END
             """
 SELECT COUNT(*)
 FROM (
-    SELECT "o"."CustomerID"
+    SELECT 1
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
+) AS "o0"
 """);
     }
 
@@ -2645,11 +2642,11 @@ FROM (
             """
 SELECT COUNT(*)
 FROM (
-    SELECT "o"."CustomerID"
+    SELECT 1
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 1
-) AS "t"
+) AS "o0"
 """);
     }
 
@@ -2661,10 +2658,10 @@ FROM (
             """
 SELECT COUNT(*)
 FROM (
-    SELECT "o"."CustomerID"
+    SELECT 1
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
+) AS "o0"
 """);
     }
 
@@ -2676,11 +2673,11 @@ FROM (
             """
 SELECT COUNT(*)
 FROM (
-    SELECT "o"."CustomerID"
+    SELECT 1
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 1
-) AS "t"
+) AS "o0"
 """);
     }
 
@@ -2795,10 +2792,10 @@ WHERE "o"."OrderDate" IS NOT NULL
             """
 SELECT COUNT(*)
 FROM (
-    SELECT "o"."CustomerID"
+    SELECT 1
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
+) AS "o0"
 """);
     }
 
@@ -2820,12 +2817,12 @@ GROUP BY "c"."City"
 
         AssertSql(
             """
-SELECT "t"."Renamed" AS "Key", COUNT(*) AS "Count"
+SELECT "c0"."Renamed" AS "Key", COUNT(*) AS "Count"
 FROM (
     SELECT DISTINCT "c"."City" AS "Renamed", "c"."CustomerID"
     FROM "Customers" AS "c"
-) AS "t"
-GROUP BY "t"."Renamed"
+) AS "c0"
+GROUP BY "c0"."Renamed"
 """);
     }
 
@@ -2849,12 +2846,12 @@ ORDER BY "o"."OrderDate"
 
         AssertSql(
             """
-SELECT N'TotalAmount' AS "Name", COALESCE(SUM(CAST("t"."OrderID" AS decimal(18,2))), 0.0) AS "Value"
+SELECT N'TotalAmount' AS "Name", COALESCE(SUM(CAST("o0"."OrderID" AS decimal(18,2))), 0.0) AS "Value"
 FROM (
     SELECT "o"."OrderID", 1 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
@@ -3049,13 +3046,13 @@ GROUP BY "o"."CustomerID"
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "t"."Count"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o0"."Count"
 FROM (
     SELECT "o"."CustomerID" AS "Key", COUNT(*) AS "Count"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
-INNER JOIN "Customers" AS "c" ON "t"."Key" = "c"."CustomerID"
+) AS "o0"
+INNER JOIN "Customers" AS "c" ON "o0"."Key" = "c"."CustomerID"
 """);
     }
 
@@ -3070,8 +3067,8 @@ FROM (
     SELECT "o"."CustomerID" AS "Key", MAX("o"."OrderDate") AS "LastOrderDate"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
-INNER JOIN "Orders" AS "o0" ON ("t"."Key" = "o0"."CustomerID" OR ("t"."Key" IS NULL AND "o0"."CustomerID" IS NULL)) AND ("t"."LastOrderDate" = "o0"."OrderDate" OR ("t"."LastOrderDate" IS NULL AND "o0"."OrderDate" IS NULL))
+) AS "o1"
+INNER JOIN "Orders" AS "o0" ON ("o1"."Key" = "o0"."CustomerID" OR ("o1"."Key" IS NULL AND "o0"."CustomerID" IS NULL)) AND ("o1"."LastOrderDate" = "o0"."OrderDate" OR ("o1"."LastOrderDate" IS NULL AND "o0"."OrderDate" IS NULL))
 """);
     }
 
@@ -3181,9 +3178,9 @@ FROM (
     SELECT MIN("o"."OrderID") AS "c"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
+) AS "o1"
 CROSS JOIN "Orders" AS "o0"
-WHERE "o0"."OrderID" = "t"."c"
+WHERE "o0"."OrderID" = "o1"."c"
 """);
     }
 
@@ -3210,14 +3207,14 @@ WHERE "o0"."OrderID" = "t"."c"
 
         AssertSql(
             """
-SELECT "t"."CustomerID", "o0"."CustomerID", "o0"."OrderID"
+SELECT "o1"."CustomerID", "o0"."CustomerID", "o0"."OrderID"
 FROM (
     SELECT "o"."CustomerID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
-LEFT JOIN "Orders" AS "o0" ON "t"."CustomerID" = "o0"."CustomerID"
-ORDER BY "t"."CustomerID"
+) AS "o1"
+LEFT JOIN "Orders" AS "o0" ON "o1"."CustomerID" = "o0"."CustomerID"
+ORDER BY "o1"."CustomerID"
 """);
     }
 
@@ -3562,15 +3559,15 @@ ORDER BY "t"."City", "t0"."ProductID"
 
         AssertSql(
             """
-SELECT "t"."CustomerID", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+SELECT "c0"."CustomerID", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM (
     SELECT "c"."CustomerID"
     FROM "Customers" AS "c"
     GROUP BY "c"."CustomerID"
     HAVING "c"."CustomerID" LIKE N'F%'
-) AS "t"
-LEFT JOIN "Orders" AS "o" ON "t"."CustomerID" = "o"."CustomerID"
-ORDER BY "t"."CustomerID"
+) AS "c0"
+LEFT JOIN "Orders" AS "o" ON "c0"."CustomerID" = "o"."CustomerID"
+ORDER BY "c0"."CustomerID"
 """);
     }
 
@@ -3580,15 +3577,15 @@ ORDER BY "t"."CustomerID"
 
         AssertSql(
             """
-SELECT "t"."CustomerID", "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
+SELECT "o1"."CustomerID", "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
 FROM (
     SELECT "o"."CustomerID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING "o"."CustomerID" LIKE N'F%'
-) AS "t"
-LEFT JOIN "Orders" AS "o0" ON "t"."CustomerID" = "o0"."CustomerID"
-ORDER BY "t"."CustomerID"
+) AS "o1"
+LEFT JOIN "Orders" AS "o0" ON "o1"."CustomerID" = "o0"."CustomerID"
+ORDER BY "o1"."CustomerID"
 """);
     }
 
@@ -3730,12 +3727,12 @@ ORDER BY "c"."City", "c"."Region"
 
         AssertSql(
             """
-SELECT "t"."City", "t"."Region", "t"."Constant", "t"."CustomerID", "t"."Address", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode"
+SELECT "c0"."City", "c0"."Region", "c0"."Constant", "c0"."CustomerID", "c0"."Address", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", 1 AS "Constant"
     FROM "Customers" AS "c"
-) AS "t"
-ORDER BY "t"."City", "t"."Region", "t"."Constant"
+) AS "c0"
+ORDER BY "c0"."City", "c0"."Region", "c0"."Constant"
 """);
     }
 
@@ -3745,12 +3742,12 @@ ORDER BY "t"."City", "t"."Region", "t"."Constant"
 
         AssertSql(
             """
-SELECT "t"."City", "t"."Constant", "t"."CustomerID", "t"."Address", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT "c0"."City", "c0"."Constant", "c0"."CustomerID", "c0"."Address", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", 1 AS "Constant"
     FROM "Customers" AS "c"
-) AS "t"
-ORDER BY "t"."City", "t"."Constant"
+) AS "c0"
+ORDER BY "c0"."City", "c0"."Constant"
 """);
     }
 
@@ -3800,13 +3797,13 @@ ORDER BY "c"."City", "c"."CustomerID"
 
         AssertSql(
             """
-SELECT "c"."City", "c"."CustomerID", "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate"
+SELECT "c"."City", "c"."CustomerID", "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
 FROM "Customers" AS "c"
 LEFT JOIN (
     SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" < 11000
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
+) AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
 WHERE "c"."Country" = N'USA'
 ORDER BY "c"."City", "c"."CustomerID"
 """);
@@ -3818,21 +3815,21 @@ ORDER BY "c"."City", "c"."CustomerID"
 
         AssertSql(
             """
-SELECT "c"."City", "c"."CustomerID", "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate", "t0"."OrderID", "t0"."CustomerID", "t0"."EmployeeID", "t0"."OrderDate"
+SELECT "c"."City", "c"."CustomerID", "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate", "o3"."OrderID", "o3"."CustomerID", "o3"."EmployeeID", "o3"."OrderDate"
 FROM "Customers" AS "c"
 LEFT JOIN (
     SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" < 11000
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
+) AS "o1" ON "c"."CustomerID" = "o1"."CustomerID"
 LEFT JOIN (
-    SELECT "t1"."OrderID", "t1"."CustomerID", "t1"."EmployeeID", "t1"."OrderDate"
+    SELECT "o2"."OrderID", "o2"."CustomerID", "o2"."EmployeeID", "o2"."OrderDate"
     FROM (
         SELECT "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate", ROW_NUMBER() OVER(PARTITION BY "o0"."CustomerID" ORDER BY "o0"."OrderDate" DESC) AS "row"
         FROM "Orders" AS "o0"
-    ) AS "t1"
-    WHERE "t1"."row" <= 1
-) AS "t0" ON "c"."CustomerID" = "t0"."CustomerID"
+    ) AS "o2"
+    WHERE "o2"."row" <= 1
+) AS "o3" ON "c"."CustomerID" = "o3"."CustomerID"
 WHERE "c"."Country" = N'USA'
 ORDER BY "c"."City", "c"."CustomerID"
 """);
@@ -3893,29 +3890,29 @@ ORDER BY "c"."City", "c"."CustomerID"
 
         AssertSql(
             """
-SELECT "t0"."Key", "t1"."OrderID", "t1"."CustomerID", "t1"."EmployeeID", "t1"."OrderDate", "t1"."CustomerID0"
+SELECT "s1"."Key", "s3"."OrderID", "s3"."CustomerID", "s3"."EmployeeID", "s3"."OrderDate", "s3"."CustomerID0"
 FROM (
-    SELECT "t"."Key"
+    SELECT "s"."Key"
     FROM (
         SELECT SUBSTRING("c"."CustomerID", 0 + 1, 1) AS "Key"
         FROM "Orders" AS "o"
         LEFT JOIN "Customers" AS "c" ON "o"."CustomerID" = "c"."CustomerID"
-    ) AS "t"
-    GROUP BY "t"."Key"
-) AS "t0"
+    ) AS "s"
+    GROUP BY "s"."Key"
+) AS "s1"
 LEFT JOIN (
-    SELECT "t2"."OrderID", "t2"."CustomerID", "t2"."EmployeeID", "t2"."OrderDate", "t2"."CustomerID0", "t2"."Key"
+    SELECT "s2"."OrderID", "s2"."CustomerID", "s2"."EmployeeID", "s2"."OrderDate", "s2"."CustomerID0", "s2"."Key"
     FROM (
-        SELECT "t3"."OrderID", "t3"."CustomerID", "t3"."EmployeeID", "t3"."OrderDate", "t3"."CustomerID0", "t3"."Key", ROW_NUMBER() OVER(PARTITION BY "t3"."Key" ORDER BY "t3"."OrderID", "t3"."CustomerID0") AS "row"
+        SELECT "s0"."OrderID", "s0"."CustomerID", "s0"."EmployeeID", "s0"."OrderDate", "s0"."CustomerID0", "s0"."Key", ROW_NUMBER() OVER(PARTITION BY "s0"."Key" ORDER BY "s0"."OrderID", "s0"."CustomerID0") AS "row"
         FROM (
             SELECT "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate", "c0"."CustomerID" AS "CustomerID0", SUBSTRING("c0"."CustomerID", 0 + 1, 1) AS "Key"
             FROM "Orders" AS "o0"
             LEFT JOIN "Customers" AS "c0" ON "o0"."CustomerID" = "c0"."CustomerID"
-        ) AS "t3"
-    ) AS "t2"
-    WHERE 1 < "t2"."row" AND "t2"."row" <= 3
-) AS "t1" ON "t0"."Key" = "t1"."Key"
-ORDER BY "t0"."Key", "t1"."OrderID"
+        ) AS "s0"
+    ) AS "s2"
+    WHERE 1 < "s2"."row" AND "s2"."row" <= 3
+) AS "s3" ON "s1"."Key" = "s3"."Key"
+ORDER BY "s1"."Key", "s3"."OrderID"
 """);
     }
 

@@ -13,9 +13,8 @@ namespace Actian.EFCore.TestUtilities
 {
     internal class TestMigrationCommandExecutor : MigrationCommandExecutor
     {
-        public TestMigrationCommandExecutor(ITestOutputHelper output)
+        public TestMigrationCommandExecutor(IExecutionStrategy executionStrategy) : base(executionStrategy)
         {
-            Output = output;
         }
 
         public ITestOutputHelper Output { get; private set; }

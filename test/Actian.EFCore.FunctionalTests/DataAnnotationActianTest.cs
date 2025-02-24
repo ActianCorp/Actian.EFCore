@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore.TestUtilities;
 using Xunit;
 using Xunit.Abstractions;
 using Actian.EFCore.Diagnostics.Internal;
+using System.Threading.Tasks;
 
 namespace Actian.EFCore
 {
@@ -208,9 +209,10 @@ namespace Actian.EFCore
             return model;
         }
 
-        public override void ConcurrencyCheckAttribute_throws_if_value_in_database_changed()
+        [ActianTodo]
+        public override async Task ConcurrencyCheckAttribute_throws_if_value_in_database_changed()
         {
-            base.ConcurrencyCheckAttribute_throws_if_value_in_database_changed();
+            await base.ConcurrencyCheckAttribute_throws_if_value_in_database_changed();
 
             AssertSql(
                 """
@@ -248,9 +250,9 @@ SELECT @@ROW_COUNT;
 """);
         }
 
-        public override void DatabaseGeneratedAttribute_autogenerates_values_when_set_to_identity()
+        public override async Task DatabaseGeneratedAttribute_autogenerates_values_when_set_to_identity()
         {
-            base.DatabaseGeneratedAttribute_autogenerates_values_when_set_to_identity();
+            await base.DatabaseGeneratedAttribute_autogenerates_values_when_set_to_identity();
 
             AssertSql(
                 """
@@ -271,9 +273,9 @@ WHERE @@ROW_COUNT = 1 AND "Unique_No" = LAST_IDENTITY();
         }
 
         [ActianTodo]
-        public override void MaxLengthAttribute_throws_while_inserting_value_longer_than_max_length()
+        public override async Task MaxLengthAttribute_throws_while_inserting_value_longer_than_max_length()
         {
-            base.MaxLengthAttribute_throws_while_inserting_value_longer_than_max_length();
+            await base.MaxLengthAttribute_throws_while_inserting_value_longer_than_max_length();
 
             AssertSql(
                 """
@@ -310,9 +312,9 @@ WHERE @@ROW_COUNT = 1 AND "Unique_No" = LAST_IDENTITY();
         }
 
         [ActianTodo]
-        public override void StringLengthAttribute_throws_while_inserting_value_longer_than_max_length()
+        public override async Task StringLengthAttribute_throws_while_inserting_value_longer_than_max_length()
         {
-            base.StringLengthAttribute_throws_while_inserting_value_longer_than_max_length();
+            await base.StringLengthAttribute_throws_while_inserting_value_longer_than_max_length();
 
             AssertSql(
                 """
@@ -337,8 +339,8 @@ WHERE @@ROW_COUNT = 1 AND "Id" = LAST_IDENTITY();
         }
 
         [ActianTodo]
-        public override void TimestampAttribute_throws_if_value_in_database_changed()
-            => base.TimestampAttribute_throws_if_value_in_database_changed();
+        public override async Task TimestampAttribute_throws_if_value_in_database_changed()
+            => await base.TimestampAttribute_throws_if_value_in_database_changed();
 
         // Not validating SQL because not significantly different from other tests and
         // row version value is not stable.

@@ -5,16 +5,12 @@ namespace Actian.EFCore.Query.Internal
 {
     public class ActianQueryTranslationPostprocessorFactory : IQueryTranslationPostprocessorFactory
     {
-        private readonly IRelationalTypeMappingSource _typeMappingSource;
-
         public ActianQueryTranslationPostprocessorFactory(
             QueryTranslationPostprocessorDependencies dependencies,
-            RelationalQueryTranslationPostprocessorDependencies relationalDependencies,
-            IRelationalTypeMappingSource typeMappingSource)
+            RelationalQueryTranslationPostprocessorDependencies relationalDependencies)
         {
             Dependencies = dependencies;
             RelationalDependencies = relationalDependencies;
-            _typeMappingSource = typeMappingSource;
         }
 
         /// <summary>
@@ -28,6 +24,6 @@ namespace Actian.EFCore.Query.Internal
         protected virtual RelationalQueryTranslationPostprocessorDependencies RelationalDependencies { get; }
 
         public virtual QueryTranslationPostprocessor Create(QueryCompilationContext queryCompilationContext)
-            => new ActianQueryTranslationPostprocessor(Dependencies, RelationalDependencies, queryCompilationContext, _typeMappingSource);
+            => new ActianQueryTranslationPostprocessor(Dependencies, RelationalDependencies, (ActianQueryCompilationContext)queryCompilationContext);
     }
 }

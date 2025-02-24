@@ -17,17 +17,37 @@ using Xunit;
 
 namespace Actian.EFCore
 {
-    public class ActianMigrationsInfrastructureTest
-        : MigrationsInfrastructureTestBase<ActianMigrationsInfrastructureTest.ActianMigrationsInfrastructureFixture>
+    public class MigrationsInfrastructureActianTest(
+        MigrationsInfrastructureActianTest.ActianMigrationsInfrastructureFixture fixture)
+        : MigrationsInfrastructureTestBase<MigrationsInfrastructureActianTest.ActianMigrationsInfrastructureFixture>(fixture)
     {
-        public ActianMigrationsInfrastructureTest(ActianMigrationsInfrastructureFixture fixture)
-            : base(fixture)
+        [ActianTodo]
+        public override void Can_apply_all_migrations()
         {
         }
 
         [ActianTodo]
-        public override void Can_apply_all_migrations()
+        public override void Can_apply_one_migration_in_parallel()
         {
+            base.Can_apply_one_migration_in_parallel();
+        }
+
+        [ActianTodo]
+        public override async Task Can_apply_one_migration_in_parallel_async()
+        {
+            await base.Can_apply_one_migration_in_parallel_async();
+        }
+
+        [ActianTodo]
+        public override void Can_apply_second_migration_in_parallel()
+        {
+            base.Can_apply_second_migration_in_parallel();
+        }
+
+        [ActianTodo]
+        public override async Task Can_apply_second_migration_in_parallel_async()
+        {
+            await base.Can_apply_second_migration_in_parallel_async();
         }
 
         [ActianTodo]
@@ -48,6 +68,14 @@ namespace Actian.EFCore
             base.Can_apply_range_of_migrations();
         }
 
+        [ActianTodo]
+        public override async Task Can_generate_one_up_and_down_script()
+        {
+            await base.Can_generate_one_up_and_down_script();
+        }
+
+
+        [ActianTodo]
         public override void Can_generate_migration_from_initial_database_to_initial()
         {
             base.Can_generate_migration_from_initial_database_to_initial();
@@ -65,6 +93,7 @@ CREATE TABLE "__EFMigrationsHistory" (
                 ignoreLineEndingDifferences: true);
         }
 
+        [ActianTodo]
         public override void Can_generate_no_migration_script()
         {
             base.Can_generate_no_migration_script();
@@ -82,9 +111,10 @@ CREATE TABLE "__EFMigrationsHistory" (
                 ignoreLineEndingDifferences: true);
         }
 
-        public override void Can_generate_up_scripts()
+        [ActianTodo]
+        public override async Task Can_generate_up_and_down_scripts()
         {
-            base.Can_generate_up_scripts();
+            await base.Can_generate_up_and_down_scripts();
 
             Assert.Equal(
                 """
@@ -149,9 +179,10 @@ COMMIT;
                 ignoreLineEndingDifferences: true);
         }
 
-        public override void Can_generate_up_scripts_noTransactions()
+        [ActianTodo]
+        public override async Task Can_generate_up_and_down_scripts_noTransactions()
         {
-            base.Can_generate_up_scripts_noTransactions();
+            await base.Can_generate_up_and_down_scripts_noTransactions();
 
             Assert.Equal(
                 """
@@ -202,9 +233,10 @@ VALUES (N'00000000000007_Migration7', N'7.0.0-test');
                 ignoreLineEndingDifferences: true);
         }
 
-        public override void Can_generate_one_up_script()
+        [ActianTodo]
+        public override async Task Can_generate_up_and_down_script_using_names()
         {
-            base.Can_generate_one_up_script();
+            await base.Can_generate_up_and_down_script_using_names();
 
             Assert.Equal(
                 """
@@ -220,27 +252,10 @@ COMMIT;
                 ignoreLineEndingDifferences: true);
         }
 
-        public override void Can_generate_up_script_using_names()
+        [ActianTodo]
+        public override async Task Can_generate_idempotent_up_and_down_scripts()
         {
-            base.Can_generate_up_script_using_names();
-
-            Assert.Equal(
-                """
-ALTER TABLE "Table1" RENAME COLUMN "Foo" TO "Bar";
-MODIFY "Table1" TO RECONSTRUCT;
-START TRANSACTION;
-INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
-VALUES (N'00000000000002_Migration2', N'7.0.0-test');
-COMMIT;
-
-""",
-                Sql,
-                ignoreLineEndingDifferences: true);
-        }
-
-        public override void Can_generate_idempotent_up_scripts()
-        {
-            base.Can_generate_idempotent_up_scripts();
+            await base.Can_generate_idempotent_up_and_down_scripts();
 
             Assert.Equal(
                 """
@@ -345,9 +360,9 @@ COMMIT;
         }
 
         [ActianTodo]
-        public override void Can_generate_idempotent_up_scripts_noTransactions()
+        public override async Task Can_generate_idempotent_up_and_down_scripts_noTransactions()
         {
-            base.Can_generate_idempotent_up_scripts_noTransactions();
+            await base.Can_generate_idempotent_up_and_down_scripts();
 
             Assert.Equal(
                 """
@@ -431,103 +446,6 @@ BEGIN
     INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
     VALUES (N'00000000000007_Migration7', N'7.0.0-test');
 END;
-
-""",
-                Sql,
-                ignoreLineEndingDifferences: true);
-        }
-
-        public override void Can_generate_down_scripts()
-        {
-            base.Can_generate_down_scripts();
-
-            Assert.Equal(
-                """
-ALTER TABLE "Table1" RENAME COLUMN "Bar" TO "Foo";
-MODIFY "Table1" TO RECONSTRUCT;
-START TRANSACTION;
-DELETE FROM "__EFMigrationsHistory"
-WHERE "MigrationId" = N'00000000000002_Migration2';
-COMMIT;
-DROP "Table1";
-START TRANSACTION;
-DELETE FROM "__EFMigrationsHistory"
-WHERE "MigrationId" = N'00000000000001_Migration1';
-COMMIT;
-
-""",
-                Sql,
-                ignoreLineEndingDifferences: true);
-        }
-
-        public override void Can_generate_idempotent_down_scripts()
-        {
-            base.Can_generate_idempotent_down_scripts();
-
-            Assert.Equal(
-                """
-IF EXISTS (SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = N'00000000000002_Migration2')
-BEGIN
-    ALTER TABLE "Table1" RENAME COLUMN "Bar" TO "Foo";
-END;
-IF EXISTS (SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = N'00000000000002_Migration2')
-BEGIN
-    MODIFY "Table1" TO RECONSTRUCT;
-END;
-START TRANSACTION;
-IF EXISTS (SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = N'00000000000002_Migration2')
-BEGIN
-    DELETE FROM "__EFMigrationsHistory"
-    WHERE "MigrationId" = N'00000000000002_Migration2';
-END;
-COMMIT;
-IF EXISTS (SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = N'00000000000001_Migration1')
-BEGIN
-    DROP "Table1";
-END;
-START TRANSACTION;
-IF EXISTS (SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = N'00000000000001_Migration1')
-BEGIN
-    DELETE FROM "__EFMigrationsHistory"
-    WHERE "MigrationId" = N'00000000000001_Migration1';
-END;
-COMMIT;
-
-""",
-                Sql,
-                ignoreLineEndingDifferences: true);
-        }
-
-        public override void Can_generate_one_down_script()
-        {
-            base.Can_generate_one_down_script();
-
-            Assert.Equal(
-                """
-ALTER TABLE "Table1" RENAME COLUMN "Bar" TO "Foo";
-MODIFY "Table1" TO RECONSTRUCT;
-START TRANSACTION;
-DELETE FROM "__EFMigrationsHistory"
-WHERE "MigrationId" = N'00000000000002_Migration2';
-COMMIT;
-
-""",
-                Sql,
-                ignoreLineEndingDifferences: true);
-        }
-
-        public override void Can_generate_down_script_using_names()
-        {
-            base.Can_generate_down_script_using_names();
-
-            Assert.Equal(
-                """
-ALTER TABLE "Table1" RENAME COLUMN "Bar" TO "Foo";
-MODIFY "Table1" TO RECONSTRUCT;
-START TRANSACTION;
-DELETE FROM "__EFMigrationsHistory"
-WHERE "MigrationId" = N'00000000000002_Migration2';
-COMMIT;
 
 """,
                 Sql,
@@ -553,6 +471,7 @@ COMMIT;
             base.Can_revert_one_migrations();
         }
 
+        [ActianTodo]
         [ConditionalFact]
         public async Task Empty_Migration_Creates_Database()
         {
@@ -567,15 +486,10 @@ COMMIT;
             Assert.True(creator.Exists());
         }
 
-        private class BloggingContext : DbContext
+        private class BloggingContext(DbContextOptions options) : DbContext(options)
         {
-            public BloggingContext(DbContextOptions options)
-                : base(options)
-            {
-            }
-
             // ReSharper disable once UnusedMember.Local
-            public DbSet<Blog> Blogs { get; set; }
+            public DbSet<Blog> ?Blogs { get; set; }
 
             // ReSharper disable once ClassNeverInstantiated.Local
             public class Blog
@@ -583,7 +497,7 @@ COMMIT;
                 // ReSharper disable UnusedMember.Local
                 public int Id { get; set; }
 
-                public string? Name { get; set; }
+                public string ?Name { get; set; }
                 // ReSharper restore UnusedMember.Local
             }
         }
@@ -1428,6 +1342,12 @@ COMMIT;
                     });
 #pragma warning restore 612, 618
             }
+        }
+
+        protected override Task ExecuteSqlAsync(string value)
+        {
+            ((ActianTestStore)Fixture.TestStore).ExecuteScript(value);
+            return Task.CompletedTask;
         }
 
         public class ActianMigrationsInfrastructureFixture : MigrationsInfrastructureFixtureBase

@@ -628,5 +628,32 @@ namespace Actian.EFCore.Update.Internal
             => commandStringBuilder
                 .Append("@@ROW_COUNT = ")
                 .Append(expectedRowsAffected.ToString(CultureInfo.InvariantCulture));
+
+        /// <summary>
+        ///     Appends a SQL command for selecting affected data.
+        /// </summary>
+        /// <param name="commandStringBuilder">The builder to which the SQL should be appended.</param>
+        /// <param name="name">The name of the table.</param>
+        /// <param name="schema">The table schema, or <see langword="null" /> to use the default schema.</param>
+        /// <param name="readOperations">The operations representing the data to be read.</param>
+        /// <param name="conditionOperations">The operations used to generate the <c>WHERE</c> clause for the select.</param>
+        /// <param name="commandPosition">The ordinal of the command for which rows affected it being returned.</param>
+        /// <returns>The <see cref="ResultSetMapping" /> for this command.</returns>
+        protected override ResultSetMapping AppendSelectAffectedCommand(
+            StringBuilder commandStringBuilder,
+            string name,
+            string? schema,
+            IReadOnlyList<IColumnModification> readOperations,
+            IReadOnlyList<IColumnModification> conditionOperations,
+            int commandPosition)
+        {
+            AppendSelectCommandHeader(commandStringBuilder, readOperations);
+            AppendFromClause(commandStringBuilder, name, schema);
+            AppendWhereAffectedClause(commandStringBuilder, conditionOperations);
+            commandStringBuilder.AppendLine(SqlGenerationHelper.StatementTerminator)
+                .AppendLine();
+
+            return ResultSetMapping.LastInResultSet;
+        }
     }
 }

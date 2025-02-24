@@ -164,52 +164,34 @@ namespace Actian.EFCore
 
         public override async Task SaveChanges_can_be_used_with_AutoTransactionBehavior_Always(bool async)
         {
-            if (!async)
-                await base.SaveChanges_can_be_used_with_AutoTransactionBehavior_Always(async);
-            else
-                Assert.True(async);
+            await base.SaveChanges_can_be_used_with_AutoTransactionBehavior_Always(async);
         }
 
         public override async Task SaveChanges_can_be_used_with_AutoTransactionBehavior_Never(bool async)
         {
-            if (!async)
-                await base.SaveChanges_can_be_used_with_AutoTransactionBehavior_Never(async);
-            else
-                Assert.True(async);
+            await base.SaveChanges_can_be_used_with_AutoTransactionBehavior_Never(async);
         }
 
         public override async Task SaveChanges_can_be_used_with_AutoTransactionsEnabled_false(bool async)
         {
-            if (!async)
-                await base.SaveChanges_can_be_used_with_AutoTransactionsEnabled_false(async);
-            else
-                Assert.True(async);
+            await base.SaveChanges_can_be_used_with_AutoTransactionsEnabled_false(async);
         }
 
         public override async Task SaveChanges_can_be_used_with_no_savepoint(bool async)
         {
-            if (!async)
-                await base.SaveChanges_can_be_used_with_no_savepoint(async);
-            else
-                Assert.True(async);
+            await base.SaveChanges_can_be_used_with_no_savepoint(async);
         }
 
         public override async Task SaveChanges_does_not_close_connection_opened_by_user(bool async)
         {
-            if (!async)
-                await base.SaveChanges_does_not_close_connection_opened_by_user(async);
-            else
-                Assert.True(async);
+            await base.SaveChanges_does_not_close_connection_opened_by_user(async);
         }
 
         public override async Task SaveChanges_false_uses_explicit_transaction_without_committing_or_accepting_changes(
             bool async,
             AutoTransactionBehavior autoTransactionBehavior)
         {
-            if (!async)
-                await base.SaveChanges_false_uses_explicit_transaction_without_committing_or_accepting_changes(async, autoTransactionBehavior);
-            else
-                Assert.True(async);
+            await base.SaveChanges_false_uses_explicit_transaction_without_committing_or_accepting_changes(async, autoTransactionBehavior);
         }
 
         [ActianTodo]
@@ -268,10 +250,7 @@ namespace Actian.EFCore
             bool async,
             AutoTransactionBehavior autoTransactionBehavior)
         {
-            if (!async)
-                await base.SaveChanges_uses_explicit_transaction_without_committing(async, autoTransactionBehavior);
-            else
-                Assert.True(async);
+            await base.SaveChanges_uses_explicit_transaction_without_committing(async, autoTransactionBehavior);
         }
 
         [ActianTodo]
@@ -288,10 +267,7 @@ namespace Actian.EFCore
 
         public override async Task UseTransaction_is_no_op_if_same_DbTransaction_is_used(bool async)
         {
-            if (!async)
-                await base.UseTransaction_is_no_op_if_same_DbTransaction_is_used(async);
-            else
-                Assert.True(async);
+            await base.UseTransaction_is_no_op_if_same_DbTransaction_is_used(async);
         }
 
         [ActianTodo]
@@ -326,21 +302,6 @@ namespace Actian.EFCore
         {
             protected override ITestStoreFactory TestStoreFactory
                 => ActianTestStoreFactory.Instance;
-
-            protected override void Seed(PoolableDbContext context)
-            {
-                base.Seed(context);
-            }
-
-            public override void Reseed()
-            {
-                using var context = CreateContext();
-                context.Set<TransactionCustomer>().RemoveRange(context.Set<TransactionCustomer>());
-                context.Set<TransactionOrder>().RemoveRange(context.Set<TransactionOrder>());
-                context.SaveChanges();
-
-                base.Seed(context);
-            }
 
             public override DbContextOptionsBuilder AddOptions(DbContextOptionsBuilder builder)
             {
