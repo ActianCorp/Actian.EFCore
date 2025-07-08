@@ -1,5 +1,4 @@
 ﻿using Actian.EFCore.Infrastructure.Internal;
-using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Query;
 
 namespace Actian.EFCore.Query.Internal
@@ -20,7 +19,7 @@ namespace Actian.EFCore.Query.Internal
                 //new ActianDateDiffFunctionsTranslator(sqlExpressionFactory),
                 //new ActianFullTextSearchFunctionsTranslator(sqlExpressionFactory),
                 //new ActianIsDateFunctionTranslator(sqlExpressionFactory),
-                //new ActianMathTranslator(sqlExpressionFactory),
+                new ActianMathTranslator(sqlExpressionFactory),
                 //new ActianNewGuidTranslator(sqlExpressionFactory),
                 //new ActianObjectToStringTranslator(sqlExpressionFactory),
                 new ActianStringMethodTranslator(sqlExpressionFactory, actianSingletonOptions)
