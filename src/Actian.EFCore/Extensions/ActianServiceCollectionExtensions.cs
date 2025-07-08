@@ -112,6 +112,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 .TryAdd<IQuerySqlGeneratorFactory, ActianQuerySqlGeneratorFactory>()
                 .TryAdd<IRelationalSqlTranslatingExpressionVisitorFactory, ActianSqlTranslatingExpressionVisitorFactory>()
                 .TryAdd<IQueryTranslationPostprocessorFactory, ActianQueryTranslationPostprocessorFactory>()
+                .TryAdd<IRelationalParameterBasedSqlProcessorFactory, ActianParameterBasedSqlProcessorFactory>()
                 .TryAdd<ISingletonOptions, IActianSingletonOptions>(p => p.GetRequiredService<IActianSingletonOptions>())
                 .TryAddProviderSpecificServices(b => b
                     .TryAddSingleton<IActianSingletonOptions, ActianSingletonOptions>()
