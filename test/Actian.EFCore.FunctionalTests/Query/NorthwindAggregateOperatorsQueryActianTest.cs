@@ -40,7 +40,6 @@ public class NorthwindAggregateOperatorsQueryActianTest : NorthwindAggregateOper
         AssertSql();
     }
 
-    [ActianTodo]
     public override async Task Contains_with_local_tuple_array_closure(bool async)
         => await AssertTranslationFailed(() => base.Contains_with_local_tuple_array_closure(async));
 
@@ -56,14 +55,13 @@ WHERE "c"."CustomerID" IN (N'ALFKI', N'WRONG')
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_over_keyless_entity_throws(bool async)
     {
         await base.Contains_over_keyless_entity_throws(async);
 
         AssertSql(
             """
-SELECT TOP(1) "m"."Address", "m"."City", "m"."CompanyName", "m"."ContactName", "m"."ContactTitle"
+SELECT FIRST 1 "m"."Address", "m"."City", "m"."CompanyName", "m"."ContactName", "m"."ContactTitle"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region" FROM "Customers" AS "c"
 ) AS "m"
@@ -153,60 +151,57 @@ WHERE "o"."OrderID" = 10248
 """);
     }
 
-    [ActianTodo]
     public override async Task Average_after_default_if_empty_does_not_throw(bool async)
     {
         await base.Average_after_default_if_empty_does_not_throw(async);
 
         AssertSql(
             """
-SELECT AVG(CAST(COALESCE("t"."OrderID", 0) AS float))
+SELECT AVG(CAST(COALESCE("o0"."OrderID", 0) AS float))
 FROM (
-    SELECT NULL AS "empty"
+    SELECT 1
 ) AS "e"
 LEFT JOIN (
     SELECT "o"."OrderID"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" = 10243
-) AS "t" ON 1 = 1
+) AS "o0" ON 1 = 1
 """);
     }
 
-    [ActianTodo]
     public override async Task Max_after_default_if_empty_does_not_throw(bool async)
     {
         await base.Max_after_default_if_empty_does_not_throw(async);
 
         AssertSql(
             """
-SELECT MAX(COALESCE("t"."OrderID", 0))
+SELECT MAX(COALESCE("o0"."OrderID", 0))
 FROM (
-    SELECT NULL AS "empty"
+    SELECT 1
 ) AS "e"
 LEFT JOIN (
     SELECT "o"."OrderID"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" = 10243
-) AS "t" ON 1 = 1
+) AS "o0" ON 1 = 1
 """);
     }
 
-    [ActianTodo]
     public override async Task Min_after_default_if_empty_does_not_throw(bool async)
     {
         await base.Min_after_default_if_empty_does_not_throw(async);
 
         AssertSql(
             """
-SELECT MIN(COALESCE("t"."OrderID", 0))
+SELECT MIN(COALESCE("o0"."OrderID", 0))
 FROM (
-    SELECT NULL AS "empty"
+    SELECT 1
 ) AS "e"
 LEFT JOIN (
     SELECT "o"."OrderID"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" = 10243
-) AS "t" ON 1 = 1
+) AS "o0" ON 1 = 1
 """);
     }
 
@@ -466,7 +461,6 @@ FROM "Orders" AS "o"
         AssertSql();
     }
 
-    [ActianTodo]
     public override async Task OrderBy_client_Take(bool async)
     {
         await base.OrderBy_client_Take(async);
@@ -475,7 +469,7 @@ FROM "Orders" AS "o"
             """
 @__p_0='10'
 
-SELECT TOP(@__p_0) "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
+SELECT FIRST @__p_0 "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
 ORDER BY (SELECT 1)
 """);
@@ -615,7 +609,6 @@ ORDER BY "c"."ContactName"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_All(bool async)
     {
         await base.Select_All(async);
@@ -626,8 +619,8 @@ SELECT CASE
     WHEN NOT EXISTS (
         SELECT 1
         FROM "Orders" AS "o"
-        WHERE "o"."CustomerID" <> N'ALFKI' OR "o"."CustomerID" IS NULL) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "o"."CustomerID" <> N'ALFKI' OR "o"."CustomerID" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
@@ -1281,125 +1274,81 @@ WHERE "c"."CustomerID" IN (
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_with_local_array_closure(bool async)
     {
         await base.Contains_with_local_array_closure(async);
 
         AssertSql(
             """
-@__ids_0='["ABCDE","ALFKI"]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
 """,
-            //
-            """
-@__ids_0='["ABCDE"]' (Size = 4000)
-
+                //
+                """
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE "c"."CustomerID" = N'ABCDE'
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_with_subquery_and_local_array_closure(bool async)
     {
         await base.Contains_with_subquery_and_local_array_closure(async);
 
         AssertSql(
             """
-@__ids_0='["London","Buenos Aires"]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 WHERE EXISTS (
     SELECT 1
     FROM "Customers" AS "c0"
-    WHERE "c0"."City" IN (
-        SELECT "i"."value"
-        FROM OPENJSON(@__ids_0) WITH ("value" nvarchar(15) '$') AS "i"
-    ) AND "c0"."CustomerID" = "c"."CustomerID")
+    WHERE "c0"."City" IN (N'London', N'Buenos Aires') AND "c0"."CustomerID" = "c"."CustomerID")
 """,
-            //
-            """
-@__ids_0='["London"]' (Size = 4000)
-
+                //
+                """
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 WHERE EXISTS (
     SELECT 1
     FROM "Customers" AS "c0"
-    WHERE "c0"."City" IN (
-        SELECT "i"."value"
-        FROM OPENJSON(@__ids_0) WITH ("value" nvarchar(15) '$') AS "i"
-    ) AND "c0"."CustomerID" = "c"."CustomerID")
+    WHERE "c0"."City" = N'London' AND "c0"."CustomerID" = "c"."CustomerID")
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_with_local_uint_array_closure(bool async)
     {
         await base.Contains_with_local_uint_array_closure(async);
 
         AssertSql(
             """
-@__ids_0='[0,1]' (Size = 4000)
-
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
-WHERE "e"."EmployeeID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" int '$') AS "i"
-)
+WHERE "e"."EmployeeID" IN (0, 1)
 """,
-            //
-            """
-@__ids_0='[0]' (Size = 4000)
-
+                //
+                """
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
-WHERE "e"."EmployeeID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" int '$') AS "i"
-)
+WHERE "e"."EmployeeID" = 0
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_with_local_nullable_uint_array_closure(bool async)
     {
         await base.Contains_with_local_nullable_uint_array_closure(async);
 
         AssertSql(
             """
-@__ids_0='[0,1]' (Size = 4000)
-
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
-WHERE "e"."EmployeeID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" int '$') AS "i"
-)
+WHERE "e"."EmployeeID" IN (0, 1)
 """,
-            //
-            """
-@__ids_0='[0]' (Size = 4000)
-
+                //
+                """
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
-WHERE "e"."EmployeeID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" int '$') AS "i"
-)
+WHERE "e"."EmployeeID" = 0
 """);
     }
 
@@ -1415,57 +1364,39 @@ WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_with_local_list_closure(bool async)
     {
         await base.Contains_with_local_list_closure(async);
 
         AssertSql(
             """
-@__ids_0='["ABCDE","ALFKI"]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_with_local_object_list_closure(bool async)
     {
         await base.Contains_with_local_object_list_closure(async);
 
         AssertSql(
             """
-@__ids_0='["ABCDE","ALFKI"]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_with_local_list_closure_all_null(bool async)
     {
         await base.Contains_with_local_list_closure_all_null(async);
 
         AssertSql(
             """
-@__ids_0='[null,null]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE 0 = 1
 """);
     }
 
@@ -1481,126 +1412,81 @@ WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_with_local_list_inline_closure_mix(bool async)
     {
         await base.Contains_with_local_list_inline_closure_mix(async);
 
         AssertSql(
             """
-@__p_0='["ABCDE","ALFKI"]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "p"."value"
-    FROM OPENJSON(@__p_0) WITH ("value" nchar(5) '$') AS "p"
-)
+WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
 """,
-            //
-            """
-@__p_0='["ABCDE","ANATR"]' (Size = 4000)
-
+                //
+                """
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "p"."value"
-    FROM OPENJSON(@__p_0) WITH ("value" nchar(5) '$') AS "p"
-)
+WHERE "c"."CustomerID" IN (N'ABCDE', N'ANATR')
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_with_local_non_primitive_list_inline_closure_mix(bool async)
     {
         await base.Contains_with_local_non_primitive_list_inline_closure_mix(async);
 
         AssertSql(
             """
-@__Select_0='["ABCDE","ALFKI"]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "s"."value"
-    FROM OPENJSON(@__Select_0) WITH ("value" nchar(5) '$') AS "s"
-)
+WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
 """,
-            //
-            """
-@__Select_0='["ABCDE","ANATR"]' (Size = 4000)
-
+                //
+                """
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "s"."value"
-    FROM OPENJSON(@__Select_0) WITH ("value" nchar(5) '$') AS "s"
-)
+WHERE "c"."CustomerID" IN (N'ABCDE', N'ANATR')
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_with_local_enumerable_closure(bool async)
     {
         await base.Contains_with_local_enumerable_closure(async);
 
         AssertSql(
             """
-@__ids_0='["ABCDE","ALFKI"]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
 """,
-//
-"""
-@__ids_0='["ABCDE"]' (Size = 4000)
-
+                //
+                """
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE "c"."CustomerID" = N'ABCDE'
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_with_local_object_enumerable_closure(bool async)
     {
         await base.Contains_with_local_object_enumerable_closure(async);
 
         AssertSql(
             """
-@__ids_0='["ABCDE","ALFKI"]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_with_local_enumerable_closure_all_null(bool async)
     {
         await base.Contains_with_local_enumerable_closure_all_null(async);
 
         AssertSql(
             """
-@__ids_0='[]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE 0 = 1
 """);
     }
 
@@ -1624,68 +1510,45 @@ WHERE "c"."CustomerID" IN (
         AssertSql();
     }
 
-    [ActianTodo]
     public override async Task Contains_with_local_ordered_enumerable_closure(bool async)
     {
         await base.Contains_with_local_ordered_enumerable_closure(async);
 
         AssertSql(
             """
-@__ids_0='["ABCDE","ALFKI"]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
 """,
-//
-"""
-@__ids_0='["ABCDE"]' (Size = 4000)
-
+                //
+                """
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE "c"."CustomerID" = N'ABCDE'
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_with_local_object_ordered_enumerable_closure(bool async)
     {
         await base.Contains_with_local_object_ordered_enumerable_closure(async);
 
         AssertSql(
             """
-@__ids_0='["ABCDE","ALFKI"]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_with_local_ordered_enumerable_closure_all_null(bool async)
     {
         await base.Contains_with_local_ordered_enumerable_closure_all_null(async);
 
         AssertSql(
             """
-@__ids_0='[null,null]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE 0 = 1
 """);
     }
 
@@ -1701,32 +1564,21 @@ WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_with_local_ordered_enumerable_inline_closure_mix(bool async)
     {
         await base.Contains_with_local_ordered_enumerable_inline_closure_mix(async);
 
         AssertSql(
             """
-@__Order_0='["ABCDE","ALFKI"]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "o"."value"
-    FROM OPENJSON(@__Order_0) WITH ("value" nchar(5) '$') AS "o"
-)
+WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
 """,
-//
-"""
-@__Order_0='["ABCDE","ANATR"]' (Size = 4000)
-
+                //
+                """
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "o"."value"
-    FROM OPENJSON(@__Order_0) WITH ("value" nchar(5) '$') AS "o"
-)
+WHERE "c"."CustomerID" IN (N'ABCDE', N'ANATR')
 """);
     }
 
@@ -1760,7 +1612,6 @@ WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_with_local_ordered_read_only_collection_all_null(bool async)
     {
         await base.Contains_with_local_ordered_read_only_collection_all_null(async);
@@ -1803,57 +1654,39 @@ WHERE "c"."CustomerID" IN (N'ABCDE', N'ANATR')
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_with_local_non_primitive_list_closure_mix(bool async)
     {
         await base.Contains_with_local_non_primitive_list_closure_mix(async);
 
         AssertSql(
             """
-@__Select_0='["ABCDE","ALFKI"]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "s"."value"
-    FROM OPENJSON(@__Select_0) WITH ("value" nchar(5) '$') AS "s"
-)
+WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_with_local_collection_false(bool async)
     {
         await base.Contains_with_local_collection_false(async);
 
         AssertSql(
             """
-@__ids_0='["ABCDE","ALFKI"]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" NOT IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE "c"."CustomerID" NOT IN (N'ABCDE', N'ALFKI')
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_with_local_collection_complex_predicate_and(bool async)
     {
         await base.Contains_with_local_collection_complex_predicate_and(async);
 
         AssertSql(
             """
-@__ids_0='["ABCDE","ALFKI"]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ALFKI', N'ABCDE') AND "c"."CustomerID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE "c"."CustomerID" IN (N'ALFKI', N'ABCDE') AND "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
 """);
     }
 
@@ -1882,39 +1715,27 @@ WHERE "c"."CustomerID" IN (N'ALFKI', N'ABCDE') AND "c"."CustomerID" IN (
     //FROM "Customers" AS "c"
     //WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI') AND "c"."CustomerID" NOT IN (N'ALFKI', N'ABCDE')");
 
-    [ActianTodo]
     public override async Task Contains_with_local_collection_sql_injection(bool async)
     {
         await base.Contains_with_local_collection_sql_injection(async);
 
         AssertSql(
             """
-@__ids_0='["ALFKI","ABC\u0027)); GO; DROP TABLE Orders; GO; --"]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-) OR "c"."CustomerID" IN (N'ALFKI', N'ABCDE')
+WHERE "c"."CustomerID" IN (N'ALFKI', N'ABC'')); GO; DROP TABLE Orders; GO; --') OR "c"."CustomerID" IN (N'ALFKI', N'ABCDE')
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_with_local_collection_empty_closure(bool async)
     {
         await base.Contains_with_local_collection_empty_closure(async);
 
         AssertSql(
             """
-@__ids_0='[]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE 0 = 1
 """);
     }
 
@@ -1929,26 +1750,24 @@ FROM "Customers" AS "c"
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_top_level(bool async)
     {
         await base.Contains_top_level(async);
 
         AssertSql(
             """
-@__p_0='ALFKI' (Size = 5) (DbType = StringFixedLength)
+@__p_0='ALFKI'
 
 SELECT CASE
     WHEN @__p_0 IN (
         SELECT "c"."CustomerID"
         FROM "Customers" AS "c"
-    ) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    ) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_with_local_anonymous_type_array_closure(bool async)
     {
         // Aggregates. Issue #15937.
@@ -2019,7 +1838,6 @@ WHERE "o"."CustomerID" LIKE N'A%'
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_Take_Last_gives_correct_result(bool async)
     {
         await base.OrderBy_Take_Last_gives_correct_result(async);
@@ -2028,17 +1846,16 @@ WHERE "o"."CustomerID" LIKE N'A%'
             """
 @__p_0='20'
 
-SELECT TOP(1) "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT FIRST 1 "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+    SELECT FIRST @__p_0 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
     ORDER BY "c"."CustomerID"
-) AS "t"
-ORDER BY "t"."CustomerID" DESC
+) AS "c0"
+ORDER BY "c0"."CustomerID" DESC
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_Skip_Last_gives_correct_result(bool async)
     {
         await base.OrderBy_Skip_Last_gives_correct_result(async);
@@ -2047,25 +1864,24 @@ ORDER BY "t"."CustomerID" DESC
             """
 @__p_0='20'
 
-SELECT TOP(1) "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT FIRST 1 "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
     ORDER BY "c"."CustomerID"
-    OFFSET @__p_0 ROWS
-) AS "t"
-ORDER BY "t"."CustomerID" DESC
+    OFFSET @__p_0
+) AS "c0"
+ORDER BY "c0"."CustomerID" DESC
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_over_entityType_should_rewrite_to_identity_equality(bool async)
     {
         await base.Contains_over_entityType_should_rewrite_to_identity_equality(async);
 
         AssertSql(
             """
-SELECT TOP(2) "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+SELECT FIRST 2 "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM "Orders" AS "o"
 WHERE "o"."OrderID" = 10248
 """,
@@ -2077,8 +1893,8 @@ SELECT CASE
     WHEN EXISTS (
         SELECT 1
         FROM "Orders" AS "o"
-        WHERE "o"."CustomerID" = N'VINET' AND "o"."OrderID" = @__entity_equality_p_0_OrderID) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "o"."CustomerID" = N'VINET' AND "o"."OrderID" = @__entity_equality_p_0_OrderID) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
@@ -2197,18 +2013,16 @@ WHERE "c"."CustomerID" = N'ALFKI'
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_over_entityType_with_null_should_rewrite_to_false(bool async)
     {
         await base.Contains_over_entityType_with_null_should_rewrite_to_false(async);
 
         AssertSql(
             """
-SELECT CAST(0 AS bit)
+SELECT CAST(0 AS boolean)
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_over_entityType_with_null_should_rewrite_to_identity_equality_subquery(bool async)
     {
         await base.Contains_over_entityType_with_null_should_rewrite_to_identity_equality_subquery(async);
@@ -2221,7 +2035,6 @@ WHERE 0 = 1
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_over_entityType_with_null_in_projection(bool async)
     {
         await base.Contains_over_entityType_with_null_in_projection(async);
@@ -2277,19 +2090,18 @@ WHERE CASE
     WHEN EXISTS (
         SELECT 1
         FROM "Orders" AS "o0"
-        WHERE "o0"."CustomerID" = N'VINET' AND "o0"."EmployeeID" IS NULL) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "o0"."CustomerID" = N'VINET' AND "o0"."EmployeeID" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END = CASE
     WHEN EXISTS (
         SELECT 1
         FROM "Orders" AS "o1"
-        WHERE ("o1"."CustomerID" <> N'VINET' OR "o1"."CustomerID" IS NULL) AND "o1"."EmployeeID" IS NULL) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE ("o1"."CustomerID" <> N'VINET' OR "o1"."CustomerID" IS NULL) AND "o1"."EmployeeID" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_over_nullable_scalar_with_null_in_subquery_translated_correctly(bool async)
     {
         await base.Contains_over_nullable_scalar_with_null_in_subquery_translated_correctly(async);
@@ -2300,21 +2112,20 @@ SELECT CASE
     WHEN EXISTS (
         SELECT 1
         FROM "Orders" AS "o0"
-        WHERE "o0"."CustomerID" = N'VINET' AND "o0"."EmployeeID" IS NULL) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "o0"."CustomerID" = N'VINET' AND "o0"."EmployeeID" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 FROM "Orders" AS "o"
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_over_non_nullable_scalar_with_null_in_subquery_simplifies_to_false(bool async)
     {
         await base.Contains_over_non_nullable_scalar_with_null_in_subquery_simplifies_to_false(async);
 
         AssertSql(
             """
-SELECT CAST(0 AS bit)
+SELECT CAST(0 AS boolean)
 FROM "Orders" AS "o"
 """);
     }
@@ -2371,21 +2182,15 @@ FROM "Employees" AS "e"
 """);
     }
 
-    [ActianTodo]
     public override async Task Where_subquery_any_equals_operator(bool async)
     {
         await base.Where_subquery_any_equals_operator(async);
 
         AssertSql(
             """
-@__ids_0='["ABCDE","ALFKI","ANATR"]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI', N'ANATR')
 """);
     }
 
@@ -2401,68 +2206,45 @@ WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI', N'ANATR')
 """);
     }
 
-    [ActianTodo]
     public override async Task Where_subquery_any_equals_static(bool async)
     {
         await base.Where_subquery_any_equals_static(async);
 
         AssertSql(
             """
-@__ids_0='["ABCDE","ALFKI","ANATR"]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI', N'ANATR')
 """);
     }
 
-    [ActianTodo]
     public override async Task Where_subquery_where_any(bool async)
     {
         await base.Where_subquery_where_any(async);
 
         AssertSql(
             """
-@__ids_0='["ABCDE","ALFKI","ANATR"]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."City" = N'México D.F.' AND "c"."CustomerID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE "c"."City" = N'México D.F.' AND "c"."CustomerID" IN (N'ABCDE', N'ALFKI', N'ANATR')
 """,
-            //
-            """
-@__ids_0='["ABCDE","ALFKI","ANATR"]' (Size = 4000)
-
+                //
+                """
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."City" = N'México D.F.' AND "c"."CustomerID" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE "c"."City" = N'México D.F.' AND "c"."CustomerID" IN (N'ABCDE', N'ALFKI', N'ANATR')
 """);
     }
 
-    [ActianTodo]
     public override async Task Where_subquery_all_not_equals_operator(bool async)
     {
         await base.Where_subquery_all_not_equals_operator(async);
 
         AssertSql(
             """
-@__ids_0='["ABCDE","ALFKI","ANATR"]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" NOT IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE "c"."CustomerID" NOT IN (N'ABCDE', N'ALFKI', N'ANATR')
 """);
     }
 
@@ -2478,50 +2260,33 @@ WHERE "c"."CustomerID" NOT IN (N'ABCDE', N'ALFKI', N'ANATR')
 """);
     }
 
-    [ActianTodo]
     public override async Task Where_subquery_all_not_equals_static(bool async)
     {
         await base.Where_subquery_all_not_equals_static(async);
 
         AssertSql(
             """
-@__ids_0='["ABCDE","ALFKI","ANATR"]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" NOT IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE "c"."CustomerID" NOT IN (N'ABCDE', N'ALFKI', N'ANATR')
 """);
     }
 
-    [ActianTodo]
     public override async Task Where_subquery_where_all(bool async)
     {
         await base.Where_subquery_where_all(async);
 
         AssertSql(
             """
-@__ids_0='["ABCDE","ALFKI","ANATR"]' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."City" = N'México D.F.' AND "c"."CustomerID" NOT IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE "c"."City" = N'México D.F.' AND "c"."CustomerID" NOT IN (N'ABCDE', N'ALFKI', N'ANATR')
 """,
-            //
-            """
-@__ids_0='["ABCDE","ALFKI","ANATR"]' (Size = 4000)
-
+                //
+                """
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."City" = N'México D.F.' AND "c"."CustomerID" NOT IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" nchar(5) '$') AS "i"
-)
+WHERE "c"."City" = N'México D.F.' AND "c"."CustomerID" NOT IN (N'ABCDE', N'ALFKI', N'ANATR')
 """);
     }
 
@@ -2550,7 +2315,6 @@ FROM "Customers" AS "c"
 """);
     }
 
-    [ActianTodo]
     public override async Task DefaultIfEmpty_selects_only_required_columns(bool async)
     {
         await base.DefaultIfEmpty_selects_only_required_columns(async);
@@ -2559,7 +2323,7 @@ FROM "Customers" AS "c"
             """
 SELECT "p"."ProductName"
 FROM (
-    SELECT NULL AS "empty"
+    SELECT 1
 ) AS "e"
 LEFT JOIN "Products" AS "p" ON 1 = 1
 """);
@@ -2575,7 +2339,7 @@ LEFT JOIN "Products" AS "p" ON 1 = 1
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 WHERE "c"."CustomerID" LIKE N'F%' AND (
-    SELECT TOP(1) "o"."CustomerID"
+    SELECT FIRST 1 "o"."CustomerID"
     FROM "Orders" AS "o"
     WHERE "c"."CustomerID" = "o"."CustomerID"
     ORDER BY "o"."OrderID") = "c"."CustomerID"
@@ -2592,7 +2356,7 @@ WHERE "c"."CustomerID" LIKE N'F%' AND (
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 WHERE "c"."CustomerID" LIKE N'F%' AND (
-    SELECT TOP(1) "o"."CustomerID"
+    SELECT FIRST 1 "o"."CustomerID"
     FROM "Orders" AS "o"
     WHERE "c"."CustomerID" = "o"."CustomerID"
     ORDER BY "o"."OrderID") = "c"."CustomerID"
@@ -2646,7 +2410,6 @@ ORDER BY "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Count_after_client_projection(bool async)
     {
         await base.Count_after_client_projection(async);
@@ -2657,9 +2420,9 @@ ORDER BY "c"."CustomerID"
 
 SELECT COUNT(*)
 FROM (
-    SELECT TOP(@__p_0) "o"."OrderID"
+    SELECT FIRST @__p_0 1
     FROM "Orders" AS "o"
-) AS "t"
+) AS "o0"
 """);
     }
 
@@ -2669,7 +2432,7 @@ FROM (
 
         AssertSql(
             """
-SELECT TRUE
+SELECT CAST(1 AS boolean)
 """);
     }
 
@@ -2698,7 +2461,7 @@ GROUP BY "c"."Country"
 """);
     }
 
-    [ActianTodo]
+    [ActianTodo] // Expected: 0.076923076923076927 - Actual:   0.070000000000000007
     public override async Task Contains_inside_Average_without_GroupBy(bool async)
     {
         await base.Contains_inside_Average_without_GroupBy(async);

@@ -19,5 +19,6 @@ namespace Actian.EFCore.TestUtilities
         SupportsFunctions2017 = 1 << 11,
         SupportsJsonPathExpressions = 1 << 12,
         Todo,
+        BooleanExpession = 1 << 13,
     }
 }

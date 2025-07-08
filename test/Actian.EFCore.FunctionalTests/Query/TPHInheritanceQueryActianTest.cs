@@ -148,7 +148,6 @@ WHERE "a"."Discriminator" = N'Kiwi' AND "a"."CountryId" = 1
 """);
         }
 
-        [ActianTodo]
         public override async Task Can_use_is_kiwi_in_projection(bool async)
         {
             await base.Can_use_is_kiwi_in_projection(async);
@@ -156,8 +155,8 @@ WHERE "a"."Discriminator" = N'Kiwi' AND "a"."CountryId" = 1
             AssertSql(
                 """
 SELECT CASE
-    WHEN "a"."Discriminator" = N'Kiwi' THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "a"."Discriminator" = N'Kiwi' THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 FROM "Animals" AS "a"
 """);
@@ -329,21 +328,20 @@ WHERE "p"."Genus" = 0
 """);
         }
 
-        [ActianTodo]
         public override async Task Can_include_prey(bool async)
         {
             await base.Can_include_prey(async);
 
             AssertSql(
                 """
-SELECT "t"."Id", "t"."CountryId", "t"."Discriminator", "t"."Name", "t"."Species", "t"."EagleId", "t"."IsFlightless", "t"."Group", "a0"."Id", "a0"."CountryId", "a0"."Discriminator", "a0"."Name", "a0"."Species", "a0"."EagleId", "a0"."IsFlightless", "a0"."Group", "a0"."FoundOn"
+SELECT "a1"."Id", "a1"."CountryId", "a1"."Discriminator", "a1"."Name", "a1"."Species", "a1"."EagleId", "a1"."IsFlightless", "a1"."Group", "a0"."Id", "a0"."CountryId", "a0"."Discriminator", "a0"."Name", "a0"."Species", "a0"."EagleId", "a0"."IsFlightless", "a0"."Group", "a0"."FoundOn"
 FROM (
     SELECT FIRST 2 "a"."Id", "a"."CountryId", "a"."Discriminator", "a"."Name", "a"."Species", "a"."EagleId", "a"."IsFlightless", "a"."Group"
     FROM "Animals" AS "a"
     WHERE "a"."Discriminator" = N'Eagle'
-) AS "t"
-LEFT JOIN "Animals" AS "a0" ON "t"."Id" = "a0"."EagleId"
-ORDER BY "t"."Id"
+) AS "a1"
+LEFT JOIN "Animals" AS "a0" ON "a1"."Id" = "a0"."EagleId"
+ORDER BY "a1"."Id"
 """);
         }
 
@@ -422,7 +420,6 @@ WHERE "a"."Discriminator" = N'Kiwi'
         public override async Task Can_insert_update_delete()
             => await base.Can_insert_update_delete();
 
-        [ActianTodo]
         public override async Task Byte_enum_value_constant_used_in_projection(bool async)
         {
             await base.Byte_enum_value_constant_used_in_projection(async);
@@ -430,8 +427,8 @@ WHERE "a"."Discriminator" = N'Kiwi'
             AssertSql(
                 """
 SELECT CASE
-    WHEN "a"."IsFlightless" = CAST(1 AS bit) THEN CAST(0 AS tinyint)
-    ELSE CAST(1 AS tinyint)
+    WHEN "a"."IsFlightless" = CAST(1 AS boolean) THEN 0
+    ELSE 1
 END
 FROM "Animals" AS "a"
 WHERE "a"."Discriminator" = N'Kiwi'
@@ -485,7 +482,6 @@ WHERE ("t"."FoundOn" = CAST(0 AS tinyint)) AND "t"."FoundOn" IS NOT NULL
             AssertSql(" ");
         }
 
-        [ActianTodo]
         public override async Task Subquery_OfType(bool async)
         {
             await base.Subquery_OfType(async);
@@ -494,13 +490,13 @@ WHERE ("t"."FoundOn" = CAST(0 AS tinyint)) AND "t"."FoundOn" IS NOT NULL
                 """
 @__p_0='5'
 
-SELECT DISTINCT "t"."Id", "t"."CountryId", "t"."Discriminator", "t"."Name", "t"."Species", "t"."EagleId", "t"."IsFlightless", "t"."FoundOn"
+SELECT DISTINCT "a0"."Id", "a0"."CountryId", "a0"."Discriminator", "a0"."Name", "a0"."Species", "a0"."EagleId", "a0"."IsFlightless", "a0"."FoundOn"
 FROM (
-    SELECT TOP(@__p_0) "a"."Id", "a"."CountryId", "a"."Discriminator", "a"."Name", "a"."Species", "a"."EagleId", "a"."IsFlightless", "a"."FoundOn"
+    SELECT FIRST @__p_0 "a"."Id", "a"."CountryId", "a"."Discriminator", "a"."Name", "a"."Species", "a"."EagleId", "a"."IsFlightless", "a"."FoundOn"
     FROM "Animals" AS "a"
     ORDER BY "a"."Species"
-) AS "t"
-WHERE "t"."Discriminator" = N'Kiwi'
+) AS "a0"
+WHERE "a0"."Discriminator" = N'Kiwi'
 """);
         }
 
@@ -655,7 +651,6 @@ WHERE @@ROW_COUNT = 1 AND "Id" = LAST_IDENTITY();
 """);
         }
 
-        [ActianTodo]
         public override async Task Using_is_operator_on_multiple_type_with_no_result(bool async)
         {
             await base.Using_is_operator_on_multiple_type_with_no_result(async);
@@ -668,7 +663,6 @@ WHERE 0 = 1
 """);
         }
 
-        [ActianTodo]
         public override async Task Using_is_operator_with_of_type_on_multiple_type_with_no_result(bool async)
         {
             await base.Using_is_operator_with_of_type_on_multiple_type_with_no_result(async);
@@ -688,7 +682,6 @@ WHERE 0 = 1
             AssertSql();
         }
 
-        [ActianTodo]
         public override async Task GetType_in_hierarchy_in_abstract_base_type(bool async)
         {
             await base.GetType_in_hierarchy_in_abstract_base_type(async);
@@ -701,7 +694,6 @@ WHERE 0 = 1
 """);
         }
 
-        [ActianTodo]
         public override async Task GetType_in_hierarchy_in_intermediate_type(bool async)
         {
             await base.GetType_in_hierarchy_in_intermediate_type(async);

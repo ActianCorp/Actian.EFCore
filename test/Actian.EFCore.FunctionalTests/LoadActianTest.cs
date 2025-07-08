@@ -723,7 +723,6 @@ WHERE "s"."Id" = @__p_0
             AssertSql();
         }
 
-        [ActianTodo]
         public override async Task Load_many_to_one_reference_to_principal_using_Query_null_FK(EntityState state, bool async)
         {
             await base.Load_many_to_one_reference_to_principal_using_Query_null_FK(state, async);
@@ -736,7 +735,6 @@ WHERE 0 = 1
 """);
         }
 
-        [ActianTodo]
         public override async Task Load_one_to_one_reference_to_principal_using_Query_null_FK(EntityState state, bool async)
         {
             await base.Load_one_to_one_reference_to_principal_using_Query_null_FK(state, async);
@@ -1454,7 +1452,6 @@ WHERE "s"."ParentId" = @__p_0
             AssertSql();
         }
 
-        [ActianTodo]
         public override async Task Load_many_to_one_reference_to_principal_using_Query_null_FK_alternate_key(EntityState state, bool async)
         {
             await base.Load_many_to_one_reference_to_principal_using_Query_null_FK_alternate_key(state, async);
@@ -1467,7 +1464,6 @@ WHERE 0 = 1
 """);
         }
 
-        [ActianTodo]
         public override async Task Load_one_to_one_reference_to_principal_using_Query_null_FK_alternate_key(EntityState state, bool async)
         {
             await base.Load_one_to_one_reference_to_principal_using_Query_null_FK_alternate_key(state, async);
@@ -1616,7 +1612,6 @@ WHERE "s"."ParentId" = @__p_0
             AssertSql();
         }
 
-        [ActianTodo]
         public override async Task Load_many_to_one_reference_to_principal_using_Query_null_FK_shadow_fk(EntityState state, bool async)
         {
             await base.Load_many_to_one_reference_to_principal_using_Query_null_FK_shadow_fk(state, async);
@@ -1631,7 +1626,6 @@ WHERE 0 = 1
 """);
         }
 
-        [ActianTodo]
         public override async Task Load_one_to_one_reference_to_principal_using_Query_null_FK_shadow_fk(EntityState state, bool async)
         {
             await base.Load_one_to_one_reference_to_principal_using_Query_null_FK_shadow_fk(state, async);
@@ -1782,7 +1776,6 @@ WHERE "s"."ParentAlternateId" = @__p_0 AND "s"."ParentId" = @__p_1
             AssertSql();
         }
 
-        [ActianTodo]
         public override async Task Load_many_to_one_reference_to_principal_using_Query_null_FK_composite_key(EntityState state, bool async)
         {
             await base.Load_many_to_one_reference_to_principal_using_Query_null_FK_composite_key(state, async);
@@ -1795,7 +1788,6 @@ WHERE 0 = 1
 """);
         }
 
-        [ActianTodo]
         public override async Task Load_one_to_one_reference_to_principal_using_Query_null_FK_composite_key(EntityState state, bool async)
         {
             await base.Load_one_to_one_reference_to_principal_using_Query_null_FK_composite_key(state, async);

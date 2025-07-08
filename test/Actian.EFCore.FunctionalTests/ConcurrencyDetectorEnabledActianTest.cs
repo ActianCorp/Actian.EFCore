@@ -25,7 +25,6 @@ namespace Actian.EFCore
             Assert.Empty(Fixture.TestSqlLoggerFactory.SqlStatements);
         }
 
-        [ActianTodo]
         public override Task Any(bool async)
         {
             _ = ConcurrencyDetectorTest(
@@ -35,21 +34,18 @@ namespace Actian.EFCore
             return Task.CompletedTask;
         }
 
-        [ActianTodo]
         public override Task Count(bool async)
         {
             _ = ConcurrencyDetectorTest(async c => async ? await c.Products.CountAsync() : c.Products.Count());
             return Task.CompletedTask;
         }
 
-        [ActianTodo]
         public override Task Find(bool async)
         {
             _ = ConcurrencyDetectorTest(async c => async ? await c.Products.FindAsync(1) : c.Products.Find(1));
             return Task.CompletedTask;
         }
 
-        [ActianTodo]
         public override Task First(bool async)
         {
             _ = ConcurrencyDetectorTest(
@@ -59,7 +55,6 @@ namespace Actian.EFCore
             return Task.CompletedTask;
         }
 
-        [ActianTodo]
         public override Task FromSql(bool async)
         {
             _ = ConcurrencyDetectorTest(
@@ -69,7 +64,6 @@ namespace Actian.EFCore
             return Task.CompletedTask;
         }
 
-        [ActianTodo]
         public override Task Last(bool async)
         {
             _ = ConcurrencyDetectorTest(
@@ -98,7 +92,6 @@ namespace Actian.EFCore
             return Task.CompletedTask;
         }
 
-        [ActianTodo]
         public override Task Single(bool async)
         {
             _ = ConcurrencyDetectorTest(
@@ -108,7 +101,6 @@ namespace Actian.EFCore
             return Task.CompletedTask;
         }
 
-        [ActianTodo]
         public override Task ToList(bool async)
         {
             _ = ConcurrencyDetectorTest(async c => async ? await c.Products.ToListAsync() : c.Products.ToList());

@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Actian.EFCore.TestUtilities;
+using Microsoft.EntityFrameworkCore.TestModels.Northwind;
 using Microsoft.EntityFrameworkCore.TestUtilities;
 using Xunit;
 using Xunit.Abstractions;
@@ -23,7 +25,6 @@ public class NorthwindKeylessEntitiesQueryActianTest : NorthwindKeylessEntitiesQ
     public virtual void Check_all_tests_overridden()
         => TestHelpers.AssertAllMethodsOverridden(GetType());
 
-    [ActianTodo]
     public override async Task KeylessEntity_simple(bool async)
     {
         await base.KeylessEntity_simple(async);
@@ -34,7 +35,6 @@ SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."Cont
 """);
     }
 
-    [ActianTodo]
     public override async Task KeylessEntity_where_simple(bool async)
     {
         await base.KeylessEntity_where_simple(async);
@@ -135,7 +135,6 @@ WHERE EXISTS (
 """);
     }
 
-    [ActianTodo]
     public override async Task Auto_initialized_view_set(bool async)
     {
         await base.Auto_initialized_view_set(async);
@@ -146,14 +145,26 @@ SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."Cont
 """);
     }
 
-    [ActianTodo]
+    [ConditionalTheory]
+    [MemberData(nameof(IsAsyncData))]
     public override async Task KeylessEntity_groupby(bool async)
     {
-        await base.KeylessEntity_groupby(async);
+        await AssertQuery(
+            async,
+            ss => ss.Set<CustomerQuery>()
+                .GroupBy(cv => cv.City)
+                .Select(
+                    g => new
+                    {
+                        g.Key,
+                        Count = g.Count(),
+                        Sum = g.Sum(e => e.Address.Length)
+                    }),
+            elementSorter: e => (e.Key, e.Count, e.Sum));
 
         AssertSql(
             """
-SELECT "m"."City" AS "Key", COUNT(*) AS "Count", COALESCE(SUM(CAST(LEN("m"."Address") AS int)), 0) AS "Sum"
+SELECT "m"."City" AS "Key", COUNT(*) AS "Count", COALESCE(SUM(CAST(LENGTH("m"."Address") AS integer)), 0) AS "Sum"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region" FROM "Customers" AS "c"
 ) AS "m"
@@ -173,7 +184,6 @@ LEFT JOIN "Alphabetical list of products" AS "a" ON "o"."CustomerID" = "a"."Cate
 """);
     }
 
-    [ActianTodo]
     public override async Task Collection_correlated_with_keyless_entity_in_predicate_works(bool async)
     {
         await base.Collection_correlated_with_keyless_entity_in_predicate_works(async);
@@ -182,7 +192,7 @@ LEFT JOIN "Alphabetical list of products" AS "a" ON "o"."CustomerID" = "a"."Cate
             """
 @__p_0='2'
 
-SELECT TOP(@__p_0) "m"."City", "m"."ContactName"
+SELECT FIRST @__p_0 "m"."City", "m"."ContactName"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region" FROM "Customers" AS "c"
 ) AS "m"
@@ -237,7 +247,6 @@ WHERE "m"."CustomerID" = N'ALFKI'
 """);
     }
 
-    [ActianTodo]
     public override async Task Count_over_keyless_entity(bool async)
     {
         await base.Count_over_keyless_entity(async);
@@ -251,7 +260,6 @@ FROM (
 """);
     }
 
-    [ActianTodo]
     public override async Task Count_over_keyless_entity_with_pushdown(bool async)
     {
         await base.Count_over_keyless_entity_with_pushdown(async);
@@ -262,16 +270,15 @@ FROM (
 
 SELECT COUNT(*)
 FROM (
-    SELECT TOP(@__p_0) 1 AS empty
+    SELECT FIRST @__p_0 1
     FROM (
         SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region" FROM "Customers" AS "c"
     ) AS "m"
     ORDER BY "m"."ContactTitle"
-) AS "t"
+) AS "m0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Count_over_keyless_entity_with_pushdown_empty_projection(bool async)
     {
         await base.Count_over_keyless_entity_with_pushdown_empty_projection(async);
@@ -282,11 +289,11 @@ FROM (
 
 SELECT COUNT(*)
 FROM (
-    SELECT TOP(@__p_0) 1 AS empty
+    SELECT FIRST @__p_0 1
     FROM (
         SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region" FROM "Customers" AS "c"
     ) AS "m"
-) AS "t"
+) AS "m0"
 """);
     }
 
