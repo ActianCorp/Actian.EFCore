@@ -42,7 +42,6 @@ namespace Actian.EFCore.Query.Internal
                 Sql.AppendLine();
                 Sql.Append("OFFSET ");
                 Visit(selectExpression.Offset);
-                Sql.Append(" ROWS");
 
                 if (selectExpression.Limit != null)
                 {
