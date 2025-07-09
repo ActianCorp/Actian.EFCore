@@ -782,9 +782,9 @@ WHERE DATEDIFF(week, NULL, "o"."OrderDate") = 5
 
             AssertSql(
                 """
-SELECT CAST(ISDATE("o"."CustomerID") AS bit)
+SELECT CAST(ISDATE("o"."CustomerID") AS boolean)
 FROM "Orders" AS "o"
-WHERE CAST(ISDATE("o"."CustomerID") AS bit) = CAST(0 AS bit)
+WHERE CAST(ISDATE("o"."CustomerID") AS boolean) = CAST(0 AS boolean)
 """);
         }
 
@@ -802,9 +802,9 @@ WHERE CAST(ISDATE("o"."CustomerID") AS bit) = CAST(0 AS bit)
 
             AssertSql(
                 """
-SELECT CAST(ISDATE(CONVERT(varchar(100), "o"."OrderDate")) AS bit)
+SELECT CAST(ISDATE(CONVERT(varchar(100), "o"."OrderDate")) AS boolean)
 FROM "Orders" AS "o"
-WHERE CAST(ISDATE(CONVERT(varchar(100), "o"."OrderDate")) AS bit) = CAST(1 AS bit)
+WHERE CAST(ISDATE(CONVERT(varchar(100), "o"."OrderDate")) AS boolean) = CAST(1 AS boolean)
 """);
         }
 
@@ -824,7 +824,7 @@ WHERE CAST(ISDATE(CONVERT(varchar(100), "o"."OrderDate")) AS bit) = CAST(1 AS bi
                 """
 SELECT COUNT(*)
 FROM "Orders" AS "o"
-WHERE CAST(ISDATE(COALESCE("o"."CustomerID", N'') + CAST("o"."OrderID" AS nvarchar(max))) AS bit) = CAST(1 AS bit)
+WHERE CAST(ISDATE(COALESCE("o"."CustomerID", N'') + CAST("o"."OrderID" AS nvarchar(max))) AS boolean) = CAST(1 AS boolean)
 """);
         }
 
@@ -853,8 +853,8 @@ WHERE CAST(ISDATE(COALESCE("o"."CustomerID", N'') + CAST("o"."OrderID" AS nvarch
             AssertSql(
                 """
 SELECT CASE
-    WHEN ISNUMERIC(CONVERT(varchar(100), "o"."OrderDate")) = 1 THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN ISNUMERIC(CONVERT(varchar(100), "o"."OrderDate")) = 1 THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 FROM "Orders" AS "o"
 WHERE ISNUMERIC(CONVERT(varchar(100), "o"."OrderDate")) <> 1
@@ -876,8 +876,8 @@ WHERE ISNUMERIC(CONVERT(varchar(100), "o"."OrderDate")) <> 1
             AssertSql(
                 """
 SELECT CASE
-    WHEN ISNUMERIC(CONVERT(varchar(100), "o"."UnitPrice")) = 1 THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN ISNUMERIC(CONVERT(varchar(100), "o"."UnitPrice")) = 1 THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 FROM "Order Details" AS "o"
 WHERE ISNUMERIC(CONVERT(varchar(100), "o"."UnitPrice")) = 1

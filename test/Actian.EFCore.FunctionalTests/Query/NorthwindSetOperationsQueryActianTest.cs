@@ -91,7 +91,6 @@ WHERE "c0"."ContactName" LIKE N'%Thomas%'
 """);
     }
 
-    [ActianTodo]
     public override async Task Union_OrderBy_Skip_Take(bool async)
     {
         await base.Union_OrderBy_Skip_Take(async);
@@ -100,7 +99,7 @@ WHERE "c0"."ContactName" LIKE N'%Thomas%'
             """
 @__p_0='1'
 
-SELECT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT "u"."CustomerID", "u"."Address", "u"."City", "u"."CompanyName", "u"."ContactName", "u"."ContactTitle", "u"."Country", "u"."Fax", "u"."Phone", "u"."PostalCode", "u"."Region"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
@@ -109,9 +108,9 @@ FROM (
     SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM "Customers" AS "c0"
     WHERE "c0"."City" = N'London'
-) AS "t"
-ORDER BY "t"."ContactName"
-OFFSET @__p_0 ROWS FETCH NEXT @__p_0 ROWS ONLY
+) AS "u"
+ORDER BY "u"."ContactName"
+OFFSET @__p_0 FETCH NEXT @__p_0 ROWS ONLY
 """);
     }
 
@@ -135,7 +134,6 @@ WHERE "u"."ContactName" LIKE N'%Thomas%'
 """);
     }
 
-    [ActianTodo]
     public override async Task Union_Skip_Take_OrderBy_ThenBy_Where(bool async)
     {
         await base.Union_Skip_Take_OrderBy_ThenBy_Where(async);
@@ -144,9 +142,9 @@ WHERE "u"."ContactName" LIKE N'%Thomas%'
             """
 @__p_0='0'
 
-SELECT "t0"."CustomerID", "t0"."Address", "t0"."City", "t0"."CompanyName", "t0"."ContactName", "t0"."ContactTitle", "t0"."Country", "t0"."Fax", "t0"."Phone", "t0"."PostalCode", "t0"."Region"
+SELECT "u0"."CustomerID", "u0"."Address", "u0"."City", "u0"."CompanyName", "u0"."ContactName", "u0"."ContactTitle", "u0"."Country", "u0"."Fax", "u0"."Phone", "u0"."PostalCode", "u0"."Region"
 FROM (
-    SELECT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+    SELECT "u"."CustomerID", "u"."Address", "u"."City", "u"."CompanyName", "u"."ContactName", "u"."ContactTitle", "u"."Country", "u"."Fax", "u"."Phone", "u"."PostalCode", "u"."Region"
     FROM (
         SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
         FROM "Customers" AS "c"
@@ -155,12 +153,12 @@ FROM (
         SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
         FROM "Customers" AS "c0"
         WHERE "c0"."City" = N'London'
-    ) AS "t"
-    ORDER BY "t"."Region", "t"."City"
-    OFFSET @__p_0 ROWS
-) AS "t0"
-WHERE "t0"."ContactName" LIKE N'%Thomas%'
-ORDER BY "t0"."Region", "t0"."City"
+    ) AS "u"
+    ORDER BY "u"."Region", "u"."City"
+    OFFSET @__p_0
+) AS "u0"
+WHERE "u0"."ContactName" LIKE N'%Thomas%'
+ORDER BY "u0"."Region", "u0"."City"
 """);
     }
 
@@ -206,7 +204,6 @@ WHERE "c1"."ContactName" LIKE N'%Thomas%'
 """);
     }
 
-    [ActianTodo]
     public override async Task Union_Take_Union_Take(bool async)
     {
         await base.Union_Take_Union_Take(async);
@@ -215,13 +212,13 @@ WHERE "c1"."ContactName" LIKE N'%Thomas%'
             """
 @__p_0='1'
 
-SELECT "t2"."CustomerID", "t2"."Address", "t2"."City", "t2"."CompanyName", "t2"."ContactName", "t2"."ContactTitle", "t2"."Country", "t2"."Fax", "t2"."Phone", "t2"."PostalCode", "t2"."Region"
+SELECT "u2"."CustomerID", "u2"."Address", "u2"."City", "u2"."CompanyName", "u2"."ContactName", "u2"."ContactTitle", "u2"."Country", "u2"."Fax", "u2"."Phone", "u2"."PostalCode", "u2"."Region"
 FROM (
-    SELECT TOP(@__p_0) "t1"."CustomerID", "t1"."Address", "t1"."City", "t1"."CompanyName", "t1"."ContactName", "t1"."ContactTitle", "t1"."Country", "t1"."Fax", "t1"."Phone", "t1"."PostalCode", "t1"."Region"
+    SELECT FIRST @__p_0 "u1"."CustomerID", "u1"."Address", "u1"."City", "u1"."CompanyName", "u1"."ContactName", "u1"."ContactTitle", "u1"."Country", "u1"."Fax", "u1"."Phone", "u1"."PostalCode", "u1"."Region"
     FROM (
-        SELECT "t0"."CustomerID", "t0"."Address", "t0"."City", "t0"."CompanyName", "t0"."ContactName", "t0"."ContactTitle", "t0"."Country", "t0"."Fax", "t0"."Phone", "t0"."PostalCode", "t0"."Region"
+        SELECT "u0"."CustomerID", "u0"."Address", "u0"."City", "u0"."CompanyName", "u0"."ContactName", "u0"."ContactTitle", "u0"."Country", "u0"."Fax", "u0"."Phone", "u0"."PostalCode", "u0"."Region"
         FROM (
-            SELECT TOP(@__p_0) "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+            SELECT FIRST @__p_0 "u"."CustomerID", "u"."Address", "u"."City", "u"."CompanyName", "u"."ContactName", "u"."ContactTitle", "u"."Country", "u"."Fax", "u"."Phone", "u"."PostalCode", "u"."Region"
             FROM (
                 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
                 FROM "Customers" AS "c"
@@ -230,16 +227,16 @@ FROM (
                 SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
                 FROM "Customers" AS "c0"
                 WHERE "c0"."City" = N'London'
-            ) AS "t"
-            ORDER BY "t"."CustomerID"
-        ) AS "t0"
+            ) AS "u"
+            ORDER BY "u"."CustomerID"
+        ) AS "u0"
         UNION
         SELECT "c1"."CustomerID", "c1"."Address", "c1"."City", "c1"."CompanyName", "c1"."ContactName", "c1"."ContactTitle", "c1"."Country", "c1"."Fax", "c1"."Phone", "c1"."PostalCode", "c1"."Region"
         FROM "Customers" AS "c1"
         WHERE "c1"."City" = N'Mannheim'
-    ) AS "t1"
-) AS "t2"
-ORDER BY "t2"."CustomerID"
+    ) AS "u1"
+) AS "u2"
+ORDER BY "u2"."CustomerID"
 """);
     }
 
@@ -1028,7 +1025,6 @@ FROM "Orders" AS "o1"
 """);
     }
 
-    [ActianTodo]
     public override async Task Union_over_OrderBy_Take1(bool async)
     {
         await base.Union_over_OrderBy_Take1(async);
@@ -1037,12 +1033,12 @@ FROM "Orders" AS "o1"
             """
 @__p_0='5'
 
-SELECT "t"."OrderID"
+SELECT "o1"."OrderID"
 FROM (
-    SELECT TOP(@__p_0) "o"."OrderID"
+    SELECT FIRST @__p_0 "o"."OrderID"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderDate"
-) AS "t"
+) AS "o1"
 UNION
 SELECT "o0"."OrderID"
 FROM "Orders" AS "o0"
@@ -1063,7 +1059,6 @@ FROM "Orders" AS "o0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Union_over_OrderBy_Take2(bool async)
     {
         await base.Union_over_OrderBy_Take2(async);
@@ -1075,12 +1070,12 @@ FROM "Orders" AS "o0"
 SELECT "o"."OrderID"
 FROM "Orders" AS "o"
 UNION
-SELECT "t0"."OrderID"
+SELECT "o1"."OrderID"
 FROM (
-    SELECT TOP(@__p_0) "o0"."OrderID"
+    SELECT FIRST @__p_0 "o0"."OrderID"
     FROM "Orders" AS "o0"
     ORDER BY "o0"."OrderDate"
-) AS "t0"
+) AS "o1"
 """);
     }
 
@@ -1098,7 +1093,6 @@ FROM "Orders" AS "o0"
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_Take_Union(bool async)
     {
         await base.OrderBy_Take_Union(async);
@@ -1107,19 +1101,19 @@ FROM "Orders" AS "o0"
             """
 @__p_0='1'
 
-SELECT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT "c1"."CustomerID", "c1"."Address", "c1"."City", "c1"."CompanyName", "c1"."ContactName", "c1"."ContactTitle", "c1"."Country", "c1"."Fax", "c1"."Phone", "c1"."PostalCode", "c1"."Region"
 FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+    SELECT FIRST @__p_0 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
     ORDER BY "c"."ContactName"
-) AS "t"
+) AS "c1"
 UNION
-SELECT "t1"."CustomerID", "t1"."Address", "t1"."City", "t1"."CompanyName", "t1"."ContactName", "t1"."ContactTitle", "t1"."Country", "t1"."Fax", "t1"."Phone", "t1"."PostalCode", "t1"."Region"
+SELECT "c2"."CustomerID", "c2"."Address", "c2"."City", "c2"."CompanyName", "c2"."ContactName", "c2"."ContactTitle", "c2"."Country", "c2"."Fax", "c2"."Phone", "c2"."PostalCode", "c2"."Region"
 FROM (
-    SELECT TOP(@__p_0) "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
+    SELECT FIRST @__p_0 "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM "Customers" AS "c0"
     ORDER BY "c0"."ContactName"
-) AS "t1"
+) AS "c2"
 """);
     }
 

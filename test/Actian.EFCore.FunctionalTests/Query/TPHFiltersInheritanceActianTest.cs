@@ -56,7 +56,6 @@ WHERE "a"."Discriminator" = N'Kiwi' AND "a"."CountryId" = 1
 """);
         }
 
-        [ActianTodo]
         public override async Task Can_use_is_kiwi_in_projection(bool async)
         {
             await base.Can_use_is_kiwi_in_projection(async);
@@ -64,11 +63,10 @@ WHERE "a"."Discriminator" = N'Kiwi' AND "a"."CountryId" = 1
             AssertSql(
                 """
 SELECT CASE
-    WHEN "a"."Discriminator" = N'Kiwi' THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "a"."Discriminator" = N'Kiwi' THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 FROM "Animals" AS "a"
-WHERE "a"."CountryId" = 1
 """);
         }
 

@@ -24,6 +24,6 @@ namespace Actian.EFCore.Storage.Internal
 
         /// <inheritdoc />
         protected override string GenerateNonNullSqlLiteral(object value)
-            => (bool)value ? "TRUE" : "FALSE";
+            => $"CAST({base.GenerateNonNullSqlLiteral(value)} AS {StoreType})";
     }
 }

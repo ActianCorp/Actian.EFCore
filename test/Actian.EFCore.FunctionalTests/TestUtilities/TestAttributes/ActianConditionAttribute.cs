@@ -85,6 +85,11 @@ namespace Actian.EFCore.TestUtilities
                 isMet = false;
             }
 
+            if (Conditions.HasFlag(ActianCondition.BooleanExpession))
+            {
+                isMet = false;
+            }
+
             return ValueTask.FromResult(isMet);
         }
 

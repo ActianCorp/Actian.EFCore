@@ -86,6 +86,11 @@ public sealed class ActianConditionAttribute : Attribute, ITestCondition
             isMet = false;
         }
 
+        if (Conditions.HasFlag(ActianCondition.BooleanExpession))
+        {
+            isMet = false;
+        }
+
         return ValueTask.FromResult(isMet);
     }
 

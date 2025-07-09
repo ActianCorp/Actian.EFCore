@@ -66,7 +66,7 @@ namespace Actian.EFCore.Query.Internal
             typeof(ActianSqlTranslatingExpressionVisitor).GetTypeInfo().GetDeclaredMethod(nameof(ConstructLikePatternParameter))!;
 
         private const char LikeEscapeChar = '\\';
-        private const string LikeEscapeString = "\\";
+        private const string LikeEscapeString = @"\\";
 
         public ActianSqlTranslatingExpressionVisitor(
             RelationalSqlTranslatingExpressionVisitorDependencies dependencies,
@@ -293,7 +293,7 @@ namespace Actian.EFCore.Query.Internal
                                                 {
                                                 translatedInstance,
                                                 _sqlExpressionFactory.Function(
-                                                    "LEN",
+                                                    "LENGTH",
                                                     new[] { translatedPattern },
                                                     nullable: true,
                                                     argumentsPropagateNullability: new[] { true },
@@ -315,7 +315,7 @@ namespace Actian.EFCore.Query.Internal
                                         _sqlExpressionFactory.OrElse(
                                             _sqlExpressionFactory.GreaterThan(
                                                 _sqlExpressionFactory.Function(
-                                                    "CHARINDEX",
+                                                    "POSITION",
                                                     new[] { translatedPattern, translatedInstance },
                                                     nullable: true,
                                                     argumentsPropagateNullability: new[] { true, true },

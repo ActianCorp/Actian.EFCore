@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using Actian.EFCore.Infrastructure.Internal;
-using Actian.EFCore.Query.SqlExpressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Query;
@@ -153,7 +151,7 @@ namespace Actian.EFCore.Query.Internal
                             arguments[0],
                             _sqlExpressionFactory.Constant(1)),
                         _sqlExpressionFactory.Function(
-                            "LEN",
+                            "LENGTH",
                             new[] { instance },
                             nullable: true,
                             argumentsPropagateNullability: new[] { true },
@@ -263,7 +261,7 @@ namespace Actian.EFCore.Query.Internal
                     {
                     argument,
                     _sqlExpressionFactory.Function(
-                        "LEN",
+                        "LENGTH",
                         new[] { argument },
                         nullable: true,
                         argumentsPropagateNullability: new[] { true },
@@ -306,7 +304,7 @@ namespace Actian.EFCore.Query.Internal
                 || string.Equals(storeType, "varchar(max)", StringComparison.OrdinalIgnoreCase))
             {
                 charIndexExpression = _sqlExpressionFactory.Function(
-                    "CHARINDEX",
+                    "POSITION",
                     charIndexArguments,
                     nullable: true,
                     argumentsPropagateNullability,
@@ -317,7 +315,7 @@ namespace Actian.EFCore.Query.Internal
             else
             {
                 charIndexExpression = _sqlExpressionFactory.Function(
-                    "CHARINDEX",
+                    "POSITION",
                     charIndexArguments,
                     nullable: true,
                     argumentsPropagateNullability,

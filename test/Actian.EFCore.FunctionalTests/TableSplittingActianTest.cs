@@ -237,7 +237,7 @@ WHERE "v"."Name" = N'Trek Pro Fit Madone 6 Series'
 
             AssertSql(
                 """
-SELECT TOP(1) "v"."Name", "v"."Discriminator", "v"."SeatingCapacity", "v"."AttachedVehicleName", "v0"."Name", "v0"."Operator_Discriminator", "v0"."Operator_Name", "v0"."LicenseType", "t"."Name", "t"."Active", "t"."Type"
+SELECT FIRST 1 "v"."Name", "v"."Discriminator", "v"."SeatingCapacity", "v"."AttachedVehicleName", "v0"."Name", "v0"."Operator_Discriminator", "v0"."Operator_Name", "v0"."LicenseType", "t"."Name", "t"."Active", "t"."Type"
 FROM "Vehicles" AS "v"
 LEFT JOIN "Vehicles" AS "v0" ON "v"."Name" = "v0"."Name"
 LEFT JOIN (
@@ -269,8 +269,8 @@ SELECT CASE
     WHEN NOT EXISTS (
         SELECT 1
         FROM "Vehicles" AS "v"
-        WHERE "v"."SeatingCapacity" <> 1) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "v"."SeatingCapacity" <> 1) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
         }

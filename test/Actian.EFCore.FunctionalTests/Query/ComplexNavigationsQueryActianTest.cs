@@ -328,7 +328,6 @@ WHERE UPPER("l0"."Name") LIKE N'L%'
 """);
         }
 
-        [ActianTodo]
         public override async Task Method_call_on_optional_navigation_translates_to_null_conditional_properly_for_arguments(bool async)
         {
             await base.Method_call_on_optional_navigation_translates_to_null_conditional_properly_for_arguments(async);
@@ -338,7 +337,7 @@ WHERE UPPER("l0"."Name") LIKE N'L%'
 SELECT "l"."Id", "l"."Date", "l"."Name", "l"."OneToMany_Optional_Self_Inverse1Id", "l"."OneToMany_Required_Self_Inverse1Id", "l"."OneToOne_Optional_Self1Id"
 FROM "LevelOne" AS "l"
 LEFT JOIN "LevelTwo" AS "l0" ON "l"."Id" = "l0"."Level1_Optional_Id"
-WHERE "l0"."Name" IS NOT NULL AND LEFT("l0"."Name", LEN("l0"."Name")) = "l0"."Name"
+WHERE "l0"."Name" IS NOT NULL AND LEFT("l0"."Name", LENGTH("l0"."Name")) = "l0"."Name"
 """);
         }
 
@@ -1004,7 +1003,6 @@ WHERE ("l1"."Id" <> "l2"."Id" OR "l2"."Id" IS NULL) AND ("l2"."Id" <> 7 OR "l2".
 """);
         }
 
-        [ActianTodo]
         public override async Task Optional_navigation_projected_into_DTO(bool async)
         {
             await base.Optional_navigation_projected_into_DTO(async);
@@ -1012,8 +1010,8 @@ WHERE ("l1"."Id" <> "l2"."Id" OR "l2"."Id" IS NULL) AND ("l2"."Id" <> 7 OR "l2".
             AssertSql(
                 """
 SELECT "l"."Id", "l"."Name", CASE
-    WHEN "l0"."Id" IS NOT NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "l0"."Id" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END, "l0"."Id", "l0"."Name"
 FROM "LevelOne" AS "l"
 LEFT JOIN "LevelTwo" AS "l0" ON "l"."Id" = "l0"."Level1_Optional_Id"
@@ -2009,21 +2007,19 @@ INNER JOIN "LevelTwo" AS "l0" ON "l"."Id" = COALESCE((
 
             AssertSql(
                 """
-SELECT "l"."Id", "l"."Date", "l"."Name", "l"."OneToMany_Optional_Self_Inverse1Id", "l"."OneToMany_Required_Self_Inverse1Id", "l"."OneToOne_Optional_Self1Id"
+SELECT "l2"."Key"
 FROM "LevelOne" AS "l"
-LEFT JOIN "LevelTwo" AS "l0" ON "l"."Id" = "l0"."Level1_Optional_Id"
-WHERE 6 IN (
-    SELECT "t"."Id"
+INNER JOIN (
+    SELECT "l1"."Key", COALESCE(SUM("l1"."Id"), 0) AS "Sum"
     FROM (
-        SELECT DISTINCT "l1"."Id", "l1"."Level2_Optional_Id", "l1"."Level2_Required_Id", "l1"."Name", "l1"."OneToMany_Optional_Inverse3Id", "l1"."OneToMany_Optional_Self_Inverse3Id", "l1"."OneToMany_Required_Inverse3Id", "l1"."OneToMany_Required_Self_Inverse3Id", "l1"."OneToOne_Optional_PK_Inverse3Id", "l1"."OneToOne_Optional_Self3Id"
-        FROM "LevelThree" AS "l1"
-        WHERE "l0"."Id" IS NOT NULL AND "l0"."Id" = "l1"."OneToMany_Optional_Inverse3Id"
-    ) AS "t"
-)
+        SELECT "l0"."Id", mod("l0"."Id", 3) AS "Key"
+        FROM "LevelTwo" AS "l0"
+    ) AS "l1"
+    GROUP BY "l1"."Key"
+) AS "l2" ON "l"."Id" = "l2"."Key" AND "l2"."Sum" > 10
 """);
         }
 
-        [ActianTodo]
         public override async Task Contains_with_subquery_optional_navigation_scalar_distinct_and_constant_item(bool async)
         {
             await base.Contains_with_subquery_optional_navigation_scalar_distinct_and_constant_item(async);
@@ -2034,7 +2030,7 @@ SELECT "l"."Id", "l"."Date", "l"."Name", "l"."OneToMany_Optional_Self_Inverse1Id
 FROM "LevelOne" AS "l"
 LEFT JOIN "LevelTwo" AS "l0" ON "l"."Id" = "l0"."Level1_Optional_Id"
 WHERE 5 IN (
-    SELECT DISTINCT CAST(LEN("l1"."Name") AS int)
+    SELECT CAST(LENGTH("l1"."Name") AS integer)
     FROM "LevelThree" AS "l1"
     WHERE "l0"."Id" IS NOT NULL AND "l0"."Id" = "l1"."OneToMany_Optional_Inverse3Id"
 )
@@ -2606,7 +2602,6 @@ WHERE (
 """);
         }
 
-        [ActianTodo]
         public override async Task Where_on_multilevel_reference_in_subquery_with_outer_projection(bool async)
         {
             await base.Where_on_multilevel_reference_in_subquery_with_outer_projection(async);
@@ -2622,7 +2617,7 @@ INNER JOIN "LevelTwo" AS "l0" ON "l"."OneToMany_Required_Inverse3Id" = "l0"."Id"
 INNER JOIN "LevelOne" AS "l1" ON "l0"."Level1_Required_Id" = "l1"."Id"
 WHERE "l1"."Name" IN (N'L1 10', N'L1 01')
 ORDER BY "l"."Level2_Required_Id"
-OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
 """);
         }
 
@@ -2831,15 +2826,15 @@ FROM "LevelTwo" AS "l"
                 """
 SELECT CASE
     WHEN (
-        SELECT TOP(1) "l1"."Name"
+        SELECT FIRST 1 "l1"."Name"
         FROM "LevelTwo" AS "l0"
         INNER JOIN "LevelOne" AS "l1" ON "l0"."Level1_Required_Id" = "l1"."Id"
         ORDER BY "l0"."Id") = N'L1 02' AND (
-        SELECT TOP(1) "l1"."Name"
+        SELECT FIRST 1 "l1"."Name"
         FROM "LevelTwo" AS "l0"
         INNER JOIN "LevelOne" AS "l1" ON "l0"."Level1_Required_Id" = "l1"."Id"
-        ORDER BY "l0"."Id") IS NOT NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        ORDER BY "l0"."Id") IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 FROM "LevelTwo" AS "l"
 """);
@@ -2862,7 +2857,6 @@ FROM "LevelThree" AS "l"
 """);
         }
 
-        [ActianTodo]
         public override async Task Member_doesnt_get_pushed_down_into_subquery_with_result_operator(bool async)
         {
             await base.Member_doesnt_get_pushed_down_into_subquery_with_result_operator(async);
@@ -2870,19 +2864,18 @@ FROM "LevelThree" AS "l"
             AssertSql(
                 """
 SELECT (
-    SELECT "t"."Name"
+    SELECT "l1"."Name"
     FROM (
         SELECT DISTINCT "l0"."Id", "l0"."Level2_Optional_Id", "l0"."Level2_Required_Id", "l0"."Name", "l0"."OneToMany_Optional_Inverse3Id", "l0"."OneToMany_Optional_Self_Inverse3Id", "l0"."OneToMany_Required_Inverse3Id", "l0"."OneToMany_Required_Self_Inverse3Id", "l0"."OneToOne_Optional_PK_Inverse3Id", "l0"."OneToOne_Optional_Self3Id"
         FROM "LevelThree" AS "l0"
-    ) AS "t"
-    ORDER BY "t"."Id"
-    OFFSET 1 ROWS FETCH NEXT 1 ROWS ONLY)
+    ) AS "l1"
+    ORDER BY "l1"."Id"
+    OFFSET 1 FETCH NEXT 1 ROWS ONLY)
 FROM "LevelOne" AS "l"
 WHERE "l"."Id" < 3
 """);
         }
 
-        [ActianTodo]
         public override async Task Subquery_with_Distinct_Skip_FirstOrDefault_without_OrderBy(bool async)
         {
             await base.Subquery_with_Distinct_Skip_FirstOrDefault_without_OrderBy(async);
@@ -2890,13 +2883,12 @@ WHERE "l"."Id" < 3
             AssertSql(
                 """
 SELECT "l"."Id" AS "Key", (
-    SELECT "t"."Name"
+    SELECT "l1"."Name"
     FROM (
         SELECT DISTINCT "l0"."Id", "l0"."Level2_Optional_Id", "l0"."Level2_Required_Id", "l0"."Name", "l0"."OneToMany_Optional_Inverse3Id", "l0"."OneToMany_Optional_Self_Inverse3Id", "l0"."OneToMany_Required_Inverse3Id", "l0"."OneToMany_Required_Self_Inverse3Id", "l0"."OneToOne_Optional_PK_Inverse3Id", "l0"."OneToOne_Optional_Self3Id"
         FROM "LevelThree" AS "l0"
-    ) AS "t"
-    ORDER BY (SELECT 1)
-    OFFSET 1 ROWS FETCH NEXT 1 ROWS ONLY) AS "Subquery"
+    ) AS "l1"
+    OFFSET 1 FETCH NEXT 1 ROWS ONLY) AS "Subquery"
 FROM "LevelOne" AS "l"
 WHERE "l"."Id" < 3
 """);
@@ -3507,7 +3499,6 @@ FROM (
 """);
         }
 
-        [ActianTodo]
         public override async Task Include_with_all_method_include_gets_ignored(bool isAsnc)
         {
             await base.Include_with_all_method_include_gets_ignored(isAsnc);
@@ -3518,8 +3509,8 @@ SELECT CASE
     WHEN NOT EXISTS (
         SELECT 1
         FROM "LevelOne" AS "l"
-        WHERE "l"."Name" = N'Foo' AND "l"."Name" IS NOT NULL) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "l"."Name" = N'Foo') THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
         }
@@ -3862,7 +3853,6 @@ OUTER APPLY (
 """);
         }
 
-        [ActianTodo]
         public override async Task Contains_over_optional_navigation_with_null_constant(bool async)
         {
             await base.Contains_over_optional_navigation_with_null_constant(async);
@@ -3874,13 +3864,12 @@ SELECT CASE
         SELECT 1
         FROM "LevelOne" AS "l"
         LEFT JOIN "LevelTwo" AS "l0" ON "l"."Id" = "l0"."Level1_Optional_Id"
-        WHERE "l0"."Id" IS NULL) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "l0"."Id" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
         }
 
-        [ActianTodo]
         public override async Task Contains_over_optional_navigation_with_null_parameter(bool async)
         {
             await base.Contains_over_optional_navigation_with_null_parameter(async);
@@ -3892,8 +3881,8 @@ SELECT CASE
         SELECT 1
         FROM "LevelOne" AS "l"
         LEFT JOIN "LevelTwo" AS "l0" ON "l"."Id" = "l0"."Level1_Optional_Id"
-        WHERE "l0"."Id" IS NULL) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "l0"."Id" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
         }
@@ -3910,8 +3899,8 @@ SELECT "l"."Name", "l0"."Name" AS "OptionalName", CASE
         SELECT 1
         FROM "LevelOne" AS "l1"
         LEFT JOIN "LevelTwo" AS "l2" ON "l1"."Id" = "l2"."Level1_Optional_Id"
-        WHERE "l2"."Name" = "l0"."Name" OR ("l2"."Name" IS NULL AND "l0"."Name" IS NULL)) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "l2"."Name" = "l0"."Name" OR ("l2"."Name" IS NULL AND "l0"."Name" IS NULL)) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END AS "Contains"
 FROM "LevelOne" AS "l"
 LEFT JOIN "LevelTwo" AS "l0" ON "l"."Id" = "l0"."Level1_Optional_Id"
@@ -3930,8 +3919,8 @@ SELECT "l"."Name", "l0"."Name" AS "OptionalName", CASE
         SELECT 1
         FROM "LevelOne" AS "l2"
         LEFT JOIN "LevelTwo" AS "l3" ON "l2"."Id" = "l3"."Level1_Optional_Id"
-        WHERE "l3"."Id" = "l1"."Id" OR ("l3"."Id" IS NULL AND "l1"."Id" IS NULL)) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "l3"."Id" = "l1"."Id" OR ("l3"."Id" IS NULL AND "l1"."Id" IS NULL)) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END AS "Contains"
 FROM "LevelOne" AS "l"
 LEFT JOIN "LevelTwo" AS "l0" ON "l"."Id" = "l0"."Level1_Optional_Id"
@@ -3960,14 +3949,13 @@ HAVING (
 """);
         }
 
-        [ActianTodo]
         public override async Task Nested_object_constructed_from_group_key_properties(bool async)
         {
             await base.Nested_object_constructed_from_group_key_properties(async);
 
             AssertSql(
                 """
-SELECT "l"."Id", "l"."Name", "l"."Date", "l0"."Id", "l1"."Name", "l0"."Date", "l0"."Level1_Optional_Id", "l0"."Level1_Required_Id", COALESCE(SUM(CAST(LEN("l"."Name") AS int)), 0) AS "Aggregate"
+SELECT "l"."Id", "l"."Name", "l"."Date", "l0"."Id", "l1"."Name", "l0"."Date", "l0"."Level1_Optional_Id", "l0"."Level1_Required_Id", COALESCE(SUM(CAST(LENGTH("l"."Name") AS integer)), 0) AS "Aggregate"
 FROM "LevelOne" AS "l"
 LEFT JOIN "LevelTwo" AS "l0" ON "l"."Id" = "l0"."Level1_Optional_Id"
 LEFT JOIN "LevelTwo" AS "l1" ON "l"."Id" = "l1"."Level1_Required_Id"
@@ -4004,7 +3992,7 @@ HAVING MAX("l"."Id") < 2 OR MAX("l"."Id") > 2
 """);
         }
 
-        [ActianTodo]
+        [ActianTodo] //Expected: 1 Actual: 10
         public override async Task Member_over_null_check_ternary_and_nested_dto_type(bool async)
         {
             await base.Member_over_null_check_ternary_and_nested_dto_type(async);
@@ -4012,8 +4000,8 @@ HAVING MAX("l"."Id") < 2 OR MAX("l"."Id") > 2
             AssertSql(
                 """
 SELECT "l"."Id", "l"."Name", CASE
-    WHEN "l0"."Id" IS NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "l0"."Id" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END, "l0"."Id", "l0"."Name"
 FROM "LevelOne" AS "l"
 LEFT JOIN "LevelTwo" AS "l0" ON "l"."Id" = "l0"."Level1_Optional_Id"
@@ -4021,7 +4009,6 @@ ORDER BY "l0"."Name", "l"."Id"
 """);
         }
 
-        [ActianTodo]
         public override async Task Member_over_null_check_ternary_and_nested_anonymous_type(bool async)
         {
             await base.Member_over_null_check_ternary_and_nested_anonymous_type(async);
@@ -4029,11 +4016,11 @@ ORDER BY "l0"."Name", "l"."Id"
             AssertSql(
                 """
 SELECT "l"."Id", "l"."Name", CASE
-    WHEN "l0"."Id" IS NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "l0"."Id" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END, "l0"."Id", "l0"."Name", CASE
-    WHEN "l1"."Id" IS NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "l1"."Id" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END, "l1"."Id", "l1"."Name"
 FROM "LevelOne" AS "l"
 LEFT JOIN "LevelTwo" AS "l0" ON "l"."Id" = "l0"."Level1_Optional_Id"
@@ -4071,7 +4058,6 @@ ORDER BY "l"."Id", "t"."Id"
 """);
         }
 
-        [ActianTodo]
         public override async Task Multiple_conditionals_in_projection(bool async)
         {
             await base.Multiple_conditionals_in_projection(async);
@@ -4079,8 +4065,8 @@ ORDER BY "l"."Id", "t"."Id"
             AssertSql(
                 """
 SELECT "l"."Id", "l0"."Name", CASE
-    WHEN "l1"."Id" IS NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "l1"."Id" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 FROM "LevelTwo" AS "l"
 LEFT JOIN "LevelThree" AS "l0" ON "l"."Id" = "l0"."Level2_Optional_Id"
@@ -4088,26 +4074,22 @@ LEFT JOIN "LevelOne" AS "l1" ON "l"."Level1_Optional_Id" = "l1"."Id"
 """);
         }
 
-        [ActianTodo]
         public override async Task Composite_key_join_on_groupby_aggregate_projecting_only_grouping_key(bool async)
         {
             await base.Composite_key_join_on_groupby_aggregate_projecting_only_grouping_key(async);
 
             AssertSql(
                 """
-SELECT "t0"."Key"
+SELECT "l2"."Key"
 FROM "LevelOne" AS "l"
 INNER JOIN (
-    SELECT "t"."Key", COALESCE(SUM("t"."Id"), 0) AS "Sum"
+    SELECT "l1"."Key", COALESCE(SUM("l1"."Id"), 0) AS "Sum"
     FROM (
-        SELECT "l0"."Id", "l0"."Id" % 3 AS "Key"
+        SELECT "l0"."Id", mod("l0"."Id", 3) AS "Key"
         FROM "LevelTwo" AS "l0"
-    ) AS "t"
-    GROUP BY "t"."Key"
-) AS "t0" ON "l"."Id" = "t0"."Key" AND CAST(1 AS bit) = CASE
-    WHEN "t0"."Sum" > 10 THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END
+    ) AS "l1"
+    GROUP BY "l1"."Key"
+) AS "l2" ON "l"."Id" = "l2"."Key" AND "l2"."Sum" > 10
 """);
         }
 
@@ -4193,7 +4175,6 @@ ORDER BY "l"."Id", "l3"."Id"
 """);
         }
 
-        [ActianTodo]
         public override async Task Composite_key_join_on_groupby_aggregate_projecting_only_grouping_key2(bool async)
         {
             await base.Composite_key_join_on_groupby_aggregate_projecting_only_grouping_key2(async);
@@ -4205,14 +4186,14 @@ FROM "LevelOne" AS "l"
 INNER JOIN (
     SELECT "l1"."Key", COALESCE(SUM("l1"."Id"), 0) AS "Sum"
     FROM (
-        SELECT "l0"."Id", "l0"."Id" % 3 AS "Key"
+        SELECT "l0"."Id", mod("l0"."Id", 3) AS "Key"
         FROM "LevelTwo" AS "l0"
     ) AS "l1"
     GROUP BY "l1"."Key"
 ) AS "l2" ON "l"."Id" = "l2"."Key" AND CASE
-    WHEN "l2"."Sum" <= 10 THEN CAST(0 AS bit)
-    ELSE CAST(1 AS bit)
-END = CAST(1 AS bit)
+    WHEN "l2"."Sum" <= 10 THEN CAST(0 AS boolean)
+    ELSE CAST(1 AS boolean)
+END = CAST(1 AS boolean)
 """);
         }
 
@@ -4793,7 +4774,6 @@ ORDER BY "l"."Id", "s"."Id0"
 """);
         }
 
-        [ActianTodo]
         public override async Task Max_in_multi_level_nested_subquery(bool async)
         {
             await base.Max_in_multi_level_nested_subquery(async);
@@ -4804,7 +4784,7 @@ ORDER BY "l"."Id", "s"."Id0"
 
 SELECT "l4"."Id", "s"."Id", "s"."Id0", "s"."Id1", "s"."Result"
 FROM (
-    SELECT TOP(@__p_0) "l"."Id"
+    SELECT FIRST @__p_0 "l"."Id"
     FROM "LevelOne" AS "l"
     ORDER BY "l"."Id"
 ) AS "l4"
@@ -4813,8 +4793,8 @@ LEFT JOIN (
         WHEN COALESCE((
             SELECT MAX("l3"."Id")
             FROM "LevelFour" AS "l3"
-            WHERE "l1"."Id" IS NOT NULL AND "l1"."Id" = "l3"."OneToMany_Optional_Inverse4Id"), 0) > 1 THEN CAST(1 AS bit)
-        ELSE CAST(0 AS bit)
+            WHERE "l1"."Id" IS NOT NULL AND "l1"."Id" = "l3"."OneToMany_Optional_Inverse4Id"), 0) > 1 THEN CAST(1 AS boolean)
+        ELSE CAST(0 AS boolean)
     END AS "Result", "l0"."OneToMany_Optional_Inverse2Id"
     FROM "LevelTwo" AS "l0"
     LEFT JOIN "LevelThree" AS "l1" ON "l0"."Id" = "l1"."Level2_Required_Id"

@@ -30,5 +30,9 @@
         public static readonly string TestFailsForIngres = $@"
             This test fails for databases compatible with {ActianCompatibility.Ingres.AsString()}.
         ";
+
+        public static readonly string BooleanExpession = $@"
+            Boolean expresions are not supported in the WHERE clause.
+        ";
     }
 }
