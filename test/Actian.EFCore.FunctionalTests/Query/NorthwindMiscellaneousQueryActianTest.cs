@@ -1,3 +1,7 @@
+﻿// Copyright (c) 2024 Actian Corporation. All Rights Reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -25,12 +29,144 @@ public class NorthwindMiscellaneousQueryActianTest : NorthwindMiscellaneousQuery
         Fixture.TestSqlLoggerFactory.SetTestOutputHelper(testOutputHelper);
     }
 
-    protected override bool CanExecuteQueryString
-        => true;
-
     [ConditionalFact]
     public virtual void Check_all_tests_overridden()
         => TestHelpers.AssertAllMethodsOverridden(GetType());
+
+    public override async Task Any_on_distinct(bool async)
+    {
+        await base.Any_on_distinct(async);
+
+        AssertSql(
+"""
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE EXISTS (
+    SELECT 1
+    FROM "Orders" AS "o"
+    WHERE "c"."CustomerID" = "o"."CustomerID" AND ("o"."EmployeeID" <> 1 OR "o"."EmployeeID" IS NULL))
+""");
+    }
+
+    public override async Task Contains_on_distinct(bool async)
+    {
+        await base.Contains_on_distinct(async);
+
+        AssertSql(
+"""
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE 1 IN (
+    SELECT "o"."EmployeeID"
+    FROM "Orders" AS "o"
+    WHERE "c"."CustomerID" = "o"."CustomerID"
+)
+""");
+    }
+
+    public override async Task Select_Order(bool async)
+    {
+        await base.Select_Order(async);
+
+        AssertSql(
+"""
+SELECT "c"."CustomerID"
+FROM "Customers" AS "c"
+ORDER BY "c"."CustomerID"
+""");
+    }
+
+    public override async Task Select_OrderDescending(bool async)
+    {
+        await base.Select_OrderDescending(async);
+
+        AssertSql(
+"""
+SELECT "c"."CustomerID"
+FROM "Customers" AS "c"
+ORDER BY "c"."CustomerID" DESC
+""");
+    }
+
+    [ActianTodo]
+    public override async Task Where_Order_First(bool async)
+    {
+        await base.Where_Order_First(async);
+
+        AssertSql();
+    }
+
+    [ActianTodo]
+    public override Task IQueryable_captured_variable()
+        => AssertTranslationFailed(() => base.IQueryable_captured_variable());
+
+    public override async Task Where_bitwise_binary_xor(bool async)
+    {
+        await base.Where_bitwise_binary_xor(async);
+
+        AssertSql(
+"""
+SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+FROM "Orders" AS "o"
+WHERE (INT4("o"."OrderID") ^ INT4(1)) = 10249
+""");
+    }
+
+    public override async Task Funcletize_conditional_with_evaluatable_test(bool async)
+    {
+        await base.Funcletize_conditional_with_evaluatable_test(async);
+
+        AssertSql(
+"""
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+""");
+    }
+
+    [ActianTodo] //Collection was not empty
+    public override async Task Skip_1_Take_0_works_when_constant(bool async)
+    {
+        await base.Skip_1_Take_0_works_when_constant(async);
+
+        AssertSql();
+    }
+
+    [ActianTodo]
+    public override async Task Take_0_works_when_constant(bool async)
+    {
+        await base.Take_0_works_when_constant(async);
+
+        AssertSql();
+    }
+
+    public override async Task Compiler_generated_local_closure_produces_valid_parameter_name(bool async)
+    {
+        await base.Compiler_generated_local_closure_produces_valid_parameter_name(async);
+
+        AssertSql(
+"""
+@__customerId_0='ALFKI'
+@__details_City_1='Berlin'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" = @__customerId_0 AND "c"."City" = @__details_City_1
+""");
+    }
+
+    public override async Task Static_member_access_gets_parameterized_within_larger_evaluatable(bool async)
+    {
+        await base.Static_member_access_gets_parameterized_within_larger_evaluatable(async);
+
+        AssertSql(
+"""
+@__p_0='ALFKI'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" = @__p_0
+""");
+    }
 
     public override async Task Shaper_command_caching_when_parameter_names_different(bool async)
     {
@@ -68,7 +204,6 @@ WHERE "c"."City" IS NOT NULL
 """);
     }
 
-    [ActianTodo]
     public override async Task Lifting_when_subquery_nested_order_by_anonymous(bool async)
     {
         await base.Lifting_when_subquery_nested_order_by_anonymous(async);
@@ -80,19 +215,18 @@ WHERE "c"."City" IS NOT NULL
 SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM "Orders" AS "o"
 INNER JOIN (
-    SELECT DISTINCT "t"."CustomerID"
+    SELECT DISTINCT "c1"."CustomerID"
     FROM (
-        SELECT TOP(@__p_0) "c"."CustomerID"
+        SELECT FIRST @__p_0 "c"."CustomerID"
         FROM "Customers" AS "c"
         ORDER BY "c"."CustomerID"
-    ) AS "t"
+    ) AS "c1"
     CROSS JOIN "Customers" AS "c0"
-) AS "t0" ON "o"."CustomerID" = "t0"."CustomerID"
-ORDER BY "t0"."CustomerID"
+) AS "s" ON "o"."CustomerID" = "s"."CustomerID"
+ORDER BY "s"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Lifting_when_subquery_nested_order_by_simple(bool async)
     {
         await base.Lifting_when_subquery_nested_order_by_simple(async);
@@ -104,31 +238,30 @@ ORDER BY "t0"."CustomerID"
 SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM "Orders" AS "o"
 INNER JOIN (
-    SELECT DISTINCT "t"."CustomerID"
+    SELECT DISTINCT "c1"."CustomerID"
     FROM (
-        SELECT TOP(@__p_0) "c"."CustomerID"
+        SELECT FIRST @__p_0 "c"."CustomerID"
         FROM "Customers" AS "c"
         ORDER BY "c"."CustomerID"
-    ) AS "t"
+    ) AS "c1"
     CROSS JOIN "Customers" AS "c0"
-) AS "t0" ON "o"."CustomerID" = "t0"."CustomerID"
-ORDER BY "t0"."CustomerID"
+) AS "s" ON "o"."CustomerID" = "s"."CustomerID"
+ORDER BY "s"."CustomerID"
 """);
     }
 
     private static T Scoper<T>(Func<T> getter)
         => getter();
 
-    [ActianTodo]
     public override async Task Local_dictionary(bool async)
     {
         await base.Local_dictionary(async);
 
         AssertSql(
             """
-@__p_0='ALFKI' (Size = 5) (DbType = StringFixedLength)
+@__p_0='ALFKI'
 
-SELECT TOP(2) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+SELECT FIRST 2 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 WHERE "c"."CustomerID" = @__p_0
 """);
@@ -145,14 +278,13 @@ FROM "Customers" AS "c"
 """);
     }
 
-    [ActianTodo]
     public override async Task Entity_equality_local(bool async)
     {
         await base.Entity_equality_local(async);
 
         AssertSql(
             """
-@__entity_equality_local_0_CustomerID='ANATR' (Size = 5) (DbType = StringFixedLength)
+@__entity_equality_local_0_CustomerID='ANATR'
 
 SELECT "c"."CustomerID"
 FROM "Customers" AS "c"
@@ -160,7 +292,6 @@ WHERE "c"."CustomerID" = @__entity_equality_local_0_CustomerID
 """);
     }
 
-    [ActianTodo]
     public override async Task Entity_equality_local_composite_key(bool async)
     {
         await base.Entity_equality_local_composite_key(async);
@@ -176,14 +307,13 @@ WHERE "o"."OrderID" = @__entity_equality_local_0_OrderID AND "o"."ProductID" = @
 """);
     }
 
-    [ActianTodo]
     public override async Task Entity_equality_local_double_check(bool async)
     {
         await base.Entity_equality_local_double_check(async);
 
         AssertSql(
             """
-@__entity_equality_local_0_CustomerID='ANATR' (Size = 5) (DbType = StringFixedLength)
+@__entity_equality_local_0_CustomerID='ANATR'
 
 SELECT "c"."CustomerID"
 FROM "Customers" AS "c"
@@ -191,22 +321,21 @@ WHERE "c"."CustomerID" = @__entity_equality_local_0_CustomerID AND @__entity_equ
 """);
     }
 
-    [ActianTodo]
     public override async Task Join_with_entity_equality_local_on_both_sources(bool async)
     {
         await base.Join_with_entity_equality_local_on_both_sources(async);
 
         AssertSql(
             """
-@__entity_equality_local_0_CustomerID='ANATR' (Size = 5) (DbType = StringFixedLength)
+@__entity_equality_local_0_CustomerID='ANATR'
 
 SELECT "c"."CustomerID"
 FROM "Customers" AS "c"
 INNER JOIN (
-    SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
+    SELECT "c0"."CustomerID"
     FROM "Customers" AS "c0"
     WHERE "c0"."CustomerID" = @__entity_equality_local_0_CustomerID
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
+) AS "c1" ON "c"."CustomerID" = "c1"."CustomerID"
 WHERE "c"."CustomerID" = @__entity_equality_local_0_CustomerID
 """);
     }
@@ -235,7 +364,6 @@ WHERE "o"."OrderID" = 10248 AND "o"."ProductID" = 11
 """);
     }
 
-    [ActianTodo]
     public override async Task Entity_equality_null(bool async)
     {
         await base.Entity_equality_null(async);
@@ -248,7 +376,6 @@ WHERE 0 = 1
 """);
     }
 
-    [ActianTodo]
     public override async Task Entity_equality_null_composite_key(bool async)
     {
         await base.Entity_equality_null_composite_key(async);
@@ -324,7 +451,6 @@ WHERE EXISTS (
 """);
     }
 
-    [ActianTodo]
     public override async Task Entity_equality_through_include(bool async)
     {
         await base.Entity_equality_through_include(async);
@@ -371,7 +497,7 @@ ORDER BY "o"."OrderID" DESC, "o"."ProductID" DESC
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 ORDER BY (
-    SELECT TOP(1) "o"."OrderID"
+    SELECT FIRST 1 "o"."OrderID"
     FROM "Orders" AS "o"
     WHERE "c"."CustomerID" = "o"."CustomerID")
 """);
@@ -396,56 +522,53 @@ ORDER BY (
 """);
     }
 
-    [ActianTodo]
     public override async Task Default_if_empty_top_level(bool async)
     {
         await base.Default_if_empty_top_level(async);
 
         AssertSql(
             """
-SELECT "t"."EmployeeID", "t"."City", "t"."Country", "t"."FirstName", "t"."ReportsTo", "t"."Title"
+SELECT "e1"."EmployeeID", "e1"."City", "e1"."Country", "e1"."FirstName", "e1"."ReportsTo", "e1"."Title"
 FROM (
-    SELECT NULL AS "empty"
+    SELECT 1
 ) AS "e0"
 LEFT JOIN (
     SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
     FROM "Employees" AS "e"
-    WHERE "e"."EmployeeID" = -1
-) AS "t" ON 1 = 1
+    WHERE "e"."EmployeeID" = 4294967295
+) AS "e1" ON 1 = 1
 """);
     }
 
-    [ActianTodo]
     public override async Task Join_with_default_if_empty_on_both_sources(bool async)
     {
         await base.Join_with_default_if_empty_on_both_sources(async);
 
         AssertSql(
             """
-SELECT "t"."EmployeeID", "t"."City", "t"."Country", "t"."FirstName", "t"."ReportsTo", "t"."Title"
+SELECT "e1"."EmployeeID", "e1"."City", "e1"."Country", "e1"."FirstName", "e1"."ReportsTo", "e1"."Title"
 FROM (
-    SELECT NULL AS "empty"
+    SELECT 1
 ) AS "e0"
 LEFT JOIN (
     SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
     FROM "Employees" AS "e"
-    WHERE "e"."EmployeeID" = -1
-) AS "t" ON 1 = 1
+    WHERE "e"."EmployeeID" = 4294967295
+) AS "e1" ON 1 = 1
 INNER JOIN (
-    SELECT "t1"."EmployeeID", "t1"."City", "t1"."Country", "t1"."FirstName", "t1"."ReportsTo", "t1"."Title"
+    SELECT "e4"."EmployeeID"
     FROM (
-        SELECT NULL AS "empty"
-    ) AS "e1"
+        SELECT 1
+    ) AS "e3"
     LEFT JOIN (
-        SELECT "e2"."EmployeeID", "e2"."City", "e2"."Country", "e2"."FirstName", "e2"."ReportsTo", "e2"."Title"
+        SELECT "e2"."EmployeeID"
         FROM "Employees" AS "e2"
-        WHERE "e2"."EmployeeID" = -1
-    ) AS "t1" ON 1 = 1
-) AS "t0" ON "t"."EmployeeID" = "t0"."EmployeeID"
+        WHERE "e2"."EmployeeID" = 4294967295
+    ) AS "e4" ON 1 = 1
+) AS "s" ON "e1"."EmployeeID" = "s"."EmployeeID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Default_if_empty_top_level_followed_by_projecting_constant(bool async)
     {
         await base.Default_if_empty_top_level_followed_by_projecting_constant(async);
@@ -454,51 +577,49 @@ INNER JOIN (
             """
 SELECT N'Foo'
 FROM (
-    SELECT NULL AS "empty"
+    SELECT 1
 ) AS "e0"
 LEFT JOIN (
-    SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
+    SELECT 1
     FROM "Employees" AS "e"
-    WHERE "e"."EmployeeID" = -1
-) AS "t" ON 1 = 1
+    WHERE "e"."EmployeeID" = 4294967295
+) AS "e1" ON 1 = 1
 """);
     }
 
-    [ActianTodo]
     public override async Task Default_if_empty_top_level_positive(bool async)
     {
         await base.Default_if_empty_top_level_positive(async);
 
         AssertSql(
             """
-SELECT "t"."EmployeeID", "t"."City", "t"."Country", "t"."FirstName", "t"."ReportsTo", "t"."Title"
+SELECT "e1"."EmployeeID", "e1"."City", "e1"."Country", "e1"."FirstName", "e1"."ReportsTo", "e1"."Title"
 FROM (
-    SELECT NULL AS "empty"
+    SELECT 1
 ) AS "e0"
 LEFT JOIN (
     SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
     FROM "Employees" AS "e"
     WHERE "e"."EmployeeID" > 0
-) AS "t" ON 1 = 1
+) AS "e1" ON 1 = 1
 """);
     }
 
-    [ActianTodo]
     public override async Task Default_if_empty_top_level_projection(bool async)
     {
         await base.Default_if_empty_top_level_projection(async);
 
         AssertSql(
             """
-SELECT COALESCE("t"."EmployeeID", 0)
+SELECT COALESCE("e1"."EmployeeID", 0)
 FROM (
-    SELECT NULL AS "empty"
+    SELECT 1
 ) AS "e0"
 LEFT JOIN (
     SELECT "e"."EmployeeID"
     FROM "Employees" AS "e"
-    WHERE "e"."EmployeeID" = -1
-) AS "t" ON 1 = 1
+    WHERE "e"."EmployeeID" = 4294967295
+) AS "e1" ON 1 = 1
 """);
     }
 
@@ -512,13 +633,12 @@ LEFT JOIN (
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
 WHERE "e"."FirstName" = (
-    SELECT TOP(1) "e0"."FirstName"
+    SELECT FIRST 1 "e0"."FirstName"
     FROM "Employees" AS "e0"
     ORDER BY "e0"."EmployeeID")
 """);
     }
 
-    [ActianTodo]
     public override async Task Where_query_composition_is_null(bool async)
     {
         await base.Where_query_composition_is_null(async);
@@ -527,21 +647,20 @@ WHERE "e"."FirstName" = (
             """
 @__p_0='3'
 
-SELECT "t"."EmployeeID", "t"."City", "t"."Country", "t"."FirstName", "t"."ReportsTo", "t"."Title"
+SELECT "e1"."EmployeeID", "e1"."City", "e1"."Country", "e1"."FirstName", "e1"."ReportsTo", "e1"."Title"
 FROM (
-    SELECT TOP(@__p_0) "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
+    SELECT FIRST @__p_0 "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
     FROM "Employees" AS "e"
     ORDER BY "e"."EmployeeID"
-) AS "t"
+) AS "e1"
 WHERE NOT EXISTS (
     SELECT 1
     FROM "Employees" AS "e0"
-    WHERE "e0"."EmployeeID" = "t"."ReportsTo")
-ORDER BY "t"."EmployeeID"
+    WHERE "e0"."EmployeeID" = "e1"."ReportsTo")
+ORDER BY "e1"."EmployeeID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Where_query_composition_is_not_null(bool async)
     {
         await base.Where_query_composition_is_not_null(async);
@@ -551,18 +670,18 @@ ORDER BY "t"."EmployeeID"
 @__p_0='4'
 @__p_1='3'
 
-SELECT "t"."EmployeeID", "t"."City", "t"."Country", "t"."FirstName", "t"."ReportsTo", "t"."Title"
+SELECT "e1"."EmployeeID", "e1"."City", "e1"."Country", "e1"."FirstName", "e1"."ReportsTo", "e1"."Title"
 FROM (
     SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
     FROM "Employees" AS "e"
     ORDER BY "e"."EmployeeID"
-    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
-) AS "t"
+    OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
+) AS "e1"
 WHERE EXISTS (
     SELECT 1
     FROM "Employees" AS "e0"
-    WHERE "e0"."EmployeeID" = "t"."ReportsTo")
-ORDER BY "t"."EmployeeID"
+    WHERE "e0"."EmployeeID" = "e1"."ReportsTo")
+ORDER BY "e1"."EmployeeID"
 """);
     }
 
@@ -576,7 +695,7 @@ ORDER BY "t"."EmployeeID"
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
 WHERE (
-    SELECT TOP(1) "e0"."EmployeeID"
+    SELECT FIRST 1 "e0"."EmployeeID"
     FROM "Employees" AS "e0"
     WHERE "e0"."EmployeeID" = "e"."ReportsTo") = 0
 """);
@@ -592,7 +711,7 @@ WHERE (
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
 WHERE (
-    SELECT TOP(1) "e0"."EmployeeID"
+    SELECT FIRST 1 "e0"."EmployeeID"
     FROM "Employees" AS "e0"
     WHERE "e0"."EmployeeID" = "e"."ReportsTo") = 0
 """);
@@ -608,7 +727,7 @@ WHERE (
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
 WHERE (
-    SELECT TOP(1) "e0"."EmployeeID"
+    SELECT FIRST 1 "e0"."EmployeeID"
     FROM "Employees" AS "e0"
     WHERE "e0"."EmployeeID" = "e"."ReportsTo") = 0
 """);
@@ -624,7 +743,7 @@ WHERE (
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
 WHERE (
-    SELECT TOP(1) "e0"."EmployeeID"
+    SELECT FIRST 1 "e0"."EmployeeID"
     FROM "Employees" AS "e0"
     WHERE "e0"."EmployeeID" = "e"."ReportsTo") = 0
 """);
@@ -640,7 +759,7 @@ WHERE (
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
 WHERE (
-    SELECT TOP(1) "e0"."EmployeeID"
+    SELECT FIRST 1 "e0"."EmployeeID"
     FROM "Employees" AS "e0"
     WHERE "e0"."EmployeeID" = 42) = 0
 """);
@@ -656,7 +775,7 @@ WHERE (
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
 WHERE (
-    SELECT TOP(1) "e0"."EmployeeID"
+    SELECT FIRST 1 "e0"."EmployeeID"
     FROM "Employees" AS "e0"
     WHERE "e0"."EmployeeID" = 42) = 0
 """);
@@ -672,7 +791,7 @@ WHERE (
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
 WHERE (
-    SELECT TOP(1) "e0"."EmployeeID"
+    SELECT FIRST 1 "e0"."EmployeeID"
     FROM "Employees" AS "e0"
     WHERE "e0"."EmployeeID" = 42) = 0
 """);
@@ -688,7 +807,7 @@ WHERE (
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
 WHERE (
-    SELECT TOP(1) "e0"."EmployeeID"
+    SELECT FIRST 1 "e0"."EmployeeID"
     FROM "Employees" AS "e0"
     WHERE "e0"."EmployeeID" = 42) = 0
 """);
@@ -704,7 +823,7 @@ WHERE (
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
 WHERE (
-    SELECT TOP(1) "e0"."EmployeeID"
+    SELECT FIRST 1 "e0"."EmployeeID"
     FROM "Employees" AS "e0"
     WHERE "e0"."EmployeeID" <> "e"."ReportsTo" OR "e"."ReportsTo" IS NULL
     ORDER BY "e0"."EmployeeID") = 1
@@ -721,7 +840,7 @@ WHERE (
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
 WHERE (
-    SELECT TOP(1) "e0"."EmployeeID"
+    SELECT FIRST 1 "e0"."EmployeeID"
     FROM "Employees" AS "e0"
     WHERE "e0"."EmployeeID" <> "e"."ReportsTo" OR "e"."ReportsTo" IS NULL) = 0
 """);
@@ -737,7 +856,7 @@ WHERE (
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
 WHERE (
-    SELECT TOP(1) "e0"."EmployeeID"
+    SELECT FIRST 1 "e0"."EmployeeID"
     FROM "Employees" AS "e0"
     WHERE "e0"."EmployeeID" <> "e"."ReportsTo" OR "e"."ReportsTo" IS NULL) = 0
 """);
@@ -753,7 +872,7 @@ WHERE (
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
 WHERE (
-    SELECT TOP(1) "e0"."EmployeeID"
+    SELECT FIRST 1 "e0"."EmployeeID"
     FROM "Employees" AS "e0"
     WHERE "e0"."EmployeeID" <> "e"."ReportsTo" OR "e"."ReportsTo" IS NULL) = 0
 """);
@@ -822,7 +941,6 @@ WHERE "t"."FirstName" = (
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_Subquery_Single(bool async)
     {
         await base.Select_Subquery_Single(async);
@@ -831,21 +949,21 @@ WHERE "t"."FirstName" = (
             """
 @__p_0='2'
 
-SELECT "t0"."OrderID", "t0"."CustomerID", "t0"."EmployeeID", "t0"."OrderDate"
+SELECT "o3"."OrderID", "o3"."CustomerID", "o3"."EmployeeID", "o3"."OrderDate"
 FROM (
-    SELECT TOP(@__p_0) "o"."OrderID", "o"."ProductID"
+    SELECT FIRST @__p_0 "o"."OrderID", "o"."ProductID"
     FROM "Order Details" AS "o"
     ORDER BY "o"."ProductID", "o"."OrderID"
-) AS "t"
+) AS "o1"
 LEFT JOIN (
-    SELECT "t1"."OrderID", "t1"."CustomerID", "t1"."EmployeeID", "t1"."OrderDate"
+    SELECT "o2"."OrderID", "o2"."CustomerID", "o2"."EmployeeID", "o2"."OrderDate"
     FROM (
         SELECT "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate", ROW_NUMBER() OVER(PARTITION BY "o0"."OrderID" ORDER BY "o0"."OrderID") AS "row"
         FROM "Orders" AS "o0"
-    ) AS "t1"
-    WHERE "t1"."row" <= 1
-) AS "t0" ON "t"."OrderID" = "t0"."OrderID"
-ORDER BY "t"."ProductID", "t"."OrderID"
+    ) AS "o2"
+    WHERE "o2"."row" <= 1
+) AS "o3" ON "o1"."OrderID" = "o3"."OrderID"
+ORDER BY "o1"."ProductID", "o1"."OrderID"
 """);
     }
 
@@ -936,7 +1054,6 @@ ORDER BY "t"."OrderID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Where_subquery_anon(bool async)
     {
         await base.Where_subquery_anon(async);
@@ -945,23 +1062,23 @@ ORDER BY "t"."OrderID"
             """
 @__p_0='3'
 
-SELECT "t"."EmployeeID", "t"."City", "t"."Country", "t"."FirstName", "t"."ReportsTo", "t"."Title", "t0"."OrderID", "t0"."CustomerID", "t0"."EmployeeID", "t0"."OrderDate"
+SELECT "e0"."EmployeeID", "e0"."City", "e0"."Country", "e0"."FirstName", "e0"."ReportsTo", "e0"."Title", "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
 FROM (
-    SELECT TOP(@__p_0) "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
+    SELECT FIRST @__p_0 "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
     FROM "Employees" AS "e"
     ORDER BY "e"."EmployeeID"
-) AS "t"
+) AS "e0"
 CROSS JOIN (
-    SELECT TOP(5) "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+    SELECT FIRST 5 "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderID"
-) AS "t0"
-WHERE "t"."EmployeeID" = "t0"."EmployeeID"
-ORDER BY "t"."EmployeeID"
+) AS "o0"
+WHERE "e0"."EmployeeID" = "o0"."EmployeeID"
+ORDER BY "e0"."EmployeeID"
 """);
     }
 
-    [ActianTodo]
+    [ActianTodo] //Expected: 10 Actual: 20
     public override async Task Where_subquery_anon_nested(bool async)
     {
         await base.Where_subquery_anon_nested(async);
@@ -972,17 +1089,17 @@ ORDER BY "t"."EmployeeID"
 
 SELECT "t"."EmployeeID", "t"."City", "t"."Country", "t"."FirstName", "t"."ReportsTo", "t"."Title", "t0"."OrderID", "t0"."CustomerID", "t0"."EmployeeID", "t0"."OrderDate", "t1"."CustomerID", "t1"."Address", "t1"."City", "t1"."CompanyName", "t1"."ContactName", "t1"."ContactTitle", "t1"."Country", "t1"."Fax", "t1"."Phone", "t1"."PostalCode", "t1"."Region"
 FROM (
-    SELECT TOP(@__p_0) "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
+    SELECT FIRST @__p_0 "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
     FROM "Employees" AS "e"
     ORDER BY "e"."EmployeeID"
 ) AS "t"
 CROSS JOIN (
-    SELECT TOP(5) "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+    SELECT FIRST 5 "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderID"
 ) AS "t0"
 CROSS JOIN (
-    SELECT TOP(2) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+    SELECT FIRST 2 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
     ORDER BY "c"."CustomerID"
 ) AS "t1"
@@ -991,26 +1108,24 @@ ORDER BY "t"."EmployeeID"
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_SelectMany(bool async)
     {
         await base.OrderBy_SelectMany(async);
 
         AssertSql(
             """
-SELECT "c"."ContactName", "t"."OrderID"
+SELECT "c"."ContactName", "o0"."OrderID"
 FROM "Customers" AS "c"
 CROSS JOIN (
-    SELECT TOP(3) "o"."OrderID", "o"."CustomerID"
+    SELECT FIRST 3 "o"."OrderID", "o"."CustomerID"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderID"
-) AS "t"
-WHERE "c"."CustomerID" = "t"."CustomerID"
+) AS "o0"
+WHERE "c"."CustomerID" = "o0"."CustomerID"
 ORDER BY "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Let_any_subquery_anonymous(bool async)
     {
         await base.Let_any_subquery_anonymous(async);
@@ -1021,8 +1136,8 @@ SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."Cont
     WHEN EXISTS (
         SELECT 1
         FROM "Orders" AS "o"
-        WHERE "o"."CustomerID" = "c"."CustomerID") THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "o"."CustomerID" = "c"."CustomerID") THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END AS "hasOrders"
 FROM "Customers" AS "c"
 WHERE "c"."CustomerID" LIKE N'A%'
@@ -1042,7 +1157,6 @@ ORDER BY "e"."EmployeeID" - "e"."EmployeeID"
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_condition_comparison(bool async)
     {
         await base.OrderBy_condition_comparison(async);
@@ -1052,8 +1166,8 @@ ORDER BY "e"."EmployeeID" - "e"."EmployeeID"
 SELECT "p"."ProductID", "p"."Discontinued", "p"."ProductName", "p"."SupplierID", "p"."UnitPrice", "p"."UnitsInStock"
 FROM "Products" AS "p"
 ORDER BY CASE
-    WHEN "p"."UnitsInStock" > CAST(0 AS smallint) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "p"."UnitsInStock" > 0 THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END, "p"."ProductID"
 """);
     }
@@ -1068,9 +1182,10 @@ END, "p"."ProductID"
     //FROM "Products" AS "p"
     //ORDER BY CASE
     //    WHEN (("p"."UnitsInStock" > CAST(10 AS smallint)) AND ("p"."ProductID" > 40)) OR (("p"."UnitsInStock" <= CAST(10 AS smallint)) AND ("p"."ProductID" <= 40))
-    //    THEN CAST(1 AS bit) ELSE CAST(0 AS bit)
+    //    THEN CAST(1 AS boolean) ELSE CAST(0 AS boolean)
     //END, "p"."ProductID"");
-    [ActianTodo]
+
+    [ActianTodo] //Expected: 91 Actual: 54
     public override async Task OrderBy_any(bool async)
     {
         await base.OrderBy_any(async);
@@ -1083,13 +1198,12 @@ ORDER BY CASE
     WHEN EXISTS (
         SELECT 1
         FROM "Orders" AS "o"
-        WHERE "c"."CustomerID" = "o"."CustomerID" AND "o"."OrderID" > 11000) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "c"."CustomerID" = "o"."CustomerID" AND "o"."OrderID" > 11000) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END, "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Skip(bool async)
     {
         await base.Skip(async);
@@ -1101,11 +1215,10 @@ END, "c"."CustomerID"
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 ORDER BY "c"."CustomerID"
-OFFSET @__p_0 ROWS
+OFFSET @__p_0
 """);
     }
 
-    [ActianTodo]
     public override async Task Skip_no_orderby(bool async)
     {
         await base.Skip_no_orderby(async);
@@ -1116,12 +1229,10 @@ OFFSET @__p_0 ROWS
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-ORDER BY (SELECT 1)
-OFFSET @__p_0 ROWS
+OFFSET @__p_0
 """);
     }
 
-    [ActianTodo]
     public override async Task Skip_orderby_const(bool async)
     {
         await base.Skip_orderby_const(async);
@@ -1133,11 +1244,10 @@ OFFSET @__p_0 ROWS
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 ORDER BY (SELECT 1)
-OFFSET @__p_0 ROWS
+OFFSET @__p_0
 """);
     }
 
-    [ActianTodo]
     public override async Task Skip_Take(bool async)
     {
         await base.Skip_Take(async);
@@ -1150,11 +1260,10 @@ OFFSET @__p_0 ROWS
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 ORDER BY "c"."ContactName"
-OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
 """);
     }
 
-    [ActianTodo]
     public override async Task Join_Customers_Orders_Skip_Take(bool async)
     {
         await base.Join_Customers_Orders_Skip_Take(async);
@@ -1168,11 +1277,10 @@ SELECT "c"."ContactName", "o"."OrderID"
 FROM "Customers" AS "c"
 INNER JOIN "Orders" AS "o" ON "c"."CustomerID" = "o"."CustomerID"
 ORDER BY "o"."OrderID"
-OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
 """);
     }
 
-    [ActianTodo]
     public override async Task Join_Customers_Orders_Skip_Take_followed_by_constant_projection(bool async)
     {
         await base.Join_Customers_Orders_Skip_Take_followed_by_constant_projection(async);
@@ -1186,11 +1294,10 @@ SELECT N'Foo'
 FROM "Customers" AS "c"
 INNER JOIN "Orders" AS "o" ON "c"."CustomerID" = "o"."CustomerID"
 ORDER BY "o"."OrderID"
-OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
 """);
     }
 
-    [ActianTodo]
     public override async Task Join_Customers_Orders_Projection_With_String_Concat_Skip_Take(bool async)
     {
         await base.Join_Customers_Orders_Projection_With_String_Concat_Skip_Take(async);
@@ -1200,15 +1307,14 @@ OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
 @__p_0='10'
 @__p_1='5'
 
-SELECT COALESCE("c"."ContactName", N'') + N' ' + COALESCE("c"."ContactTitle", N'') AS "Contact", "o"."OrderID"
+SELECT (COALESCE("c"."ContactName", N'') + N' ') + COALESCE("c"."ContactTitle", N'') AS "Contact", "o"."OrderID"
 FROM "Customers" AS "c"
 INNER JOIN "Orders" AS "o" ON "c"."CustomerID" = "o"."CustomerID"
 ORDER BY "o"."OrderID"
-OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
 """);
     }
 
-    [ActianTodo]
     public override async Task Join_Customers_Orders_Orders_Skip_Take_Same_Properties(bool async)
     {
         await base.Join_Customers_Orders_Orders_Skip_Take_Same_Properties(async);
@@ -1223,22 +1329,17 @@ FROM "Orders" AS "o"
 INNER JOIN "Customers" AS "c" ON "o"."CustomerID" = "c"."CustomerID"
 INNER JOIN "Customers" AS "c0" ON "o"."CustomerID" = "c0"."CustomerID"
 ORDER BY "o"."OrderID"
-OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
 """);
     }
 
-    [ActianTodo]
     public override async Task Ternary_should_not_evaluate_both_sides(bool async)
     {
         await base.Ternary_should_not_evaluate_both_sides(async);
 
         AssertSql(
             """
-@__p_0='none' (Size = 4000)
-@__p_1='none' (Size = 4000)
-@__p_2='none' (Size = 4000)
-
-SELECT "c"."CustomerID", @__p_0 AS "Data1", @__p_1 AS "Data2", @__p_2 AS "Data3"
+SELECT "c"."CustomerID", N'none' AS "Data1"
 FROM "Customers" AS "c"
 """);
     }
@@ -1249,12 +1350,11 @@ FROM "Customers" AS "c"
 
         AssertSql(
             """
-SELECT TRUE AS "Data1"
+SELECT CAST(1 AS boolean) AS "Data1"
 FROM "Orders" AS "o"
 """);
     }
 
-    [ActianTodo]
     public override async Task Take_Skip(bool async)
     {
         await base.Take_Skip(async);
@@ -1264,18 +1364,17 @@ FROM "Orders" AS "o"
 @__p_0='10'
 @__p_1='5'
 
-SELECT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+    SELECT FIRST @__p_0 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
     ORDER BY "c"."ContactName"
-) AS "t"
-ORDER BY "t"."ContactName"
-OFFSET @__p_1 ROWS
+) AS "c0"
+ORDER BY "c0"."ContactName"
+OFFSET @__p_1
 """);
     }
 
-    [ActianTodo]
     public override async Task Take_Skip_Distinct(bool async)
     {
         await base.Take_Skip_Distinct(async);
@@ -1285,21 +1384,20 @@ OFFSET @__p_1 ROWS
 @__p_0='10'
 @__p_1='5'
 
-SELECT DISTINCT "t0"."CustomerID", "t0"."Address", "t0"."City", "t0"."CompanyName", "t0"."ContactName", "t0"."ContactTitle", "t0"."Country", "t0"."Fax", "t0"."Phone", "t0"."PostalCode", "t0"."Region"
+SELECT DISTINCT "c1"."CustomerID", "c1"."Address", "c1"."City", "c1"."CompanyName", "c1"."ContactName", "c1"."ContactTitle", "c1"."Country", "c1"."Fax", "c1"."Phone", "c1"."PostalCode", "c1"."Region"
 FROM (
-    SELECT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+    SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM (
-        SELECT TOP(@__p_0) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+        SELECT FIRST @__p_0 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
         FROM "Customers" AS "c"
         ORDER BY "c"."ContactName"
-    ) AS "t"
-    ORDER BY "t"."ContactName"
-    OFFSET @__p_1 ROWS
-) AS "t0"
+    ) AS "c0"
+    ORDER BY "c0"."ContactName"
+    OFFSET @__p_1
+) AS "c1"
 """);
     }
 
-    [ActianTodo]
     public override async Task Take_Skip_Distinct_Caching(bool async)
     {
         await base.Take_Skip_Distinct_Caching(async);
@@ -1309,38 +1407,37 @@ FROM (
 @__p_0='10'
 @__p_1='5'
 
-SELECT DISTINCT "t0"."CustomerID", "t0"."Address", "t0"."City", "t0"."CompanyName", "t0"."ContactName", "t0"."ContactTitle", "t0"."Country", "t0"."Fax", "t0"."Phone", "t0"."PostalCode", "t0"."Region"
+SELECT DISTINCT "c1"."CustomerID", "c1"."Address", "c1"."City", "c1"."CompanyName", "c1"."ContactName", "c1"."ContactTitle", "c1"."Country", "c1"."Fax", "c1"."Phone", "c1"."PostalCode", "c1"."Region"
 FROM (
-    SELECT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+    SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM (
-        SELECT TOP(@__p_0) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+        SELECT FIRST @__p_0 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
         FROM "Customers" AS "c"
         ORDER BY "c"."ContactName"
-    ) AS "t"
-    ORDER BY "t"."ContactName"
-    OFFSET @__p_1 ROWS
-) AS "t0"
+    ) AS "c0"
+    ORDER BY "c0"."ContactName"
+    OFFSET @__p_1
+) AS "c1"
 """,
-            //
-            """
+                //
+                """
 @__p_0='15'
 @__p_1='10'
 
-SELECT DISTINCT "t0"."CustomerID", "t0"."Address", "t0"."City", "t0"."CompanyName", "t0"."ContactName", "t0"."ContactTitle", "t0"."Country", "t0"."Fax", "t0"."Phone", "t0"."PostalCode", "t0"."Region"
+SELECT DISTINCT "c1"."CustomerID", "c1"."Address", "c1"."City", "c1"."CompanyName", "c1"."ContactName", "c1"."ContactTitle", "c1"."Country", "c1"."Fax", "c1"."Phone", "c1"."PostalCode", "c1"."Region"
 FROM (
-    SELECT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+    SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM (
-        SELECT TOP(@__p_0) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+        SELECT FIRST @__p_0 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
         FROM "Customers" AS "c"
         ORDER BY "c"."ContactName"
-    ) AS "t"
-    ORDER BY "t"."ContactName"
-    OFFSET @__p_1 ROWS
-) AS "t0"
+    ) AS "c0"
+    ORDER BY "c0"."ContactName"
+    OFFSET @__p_1
+) AS "c1"
 """);
     }
 
-    [ActianTodo]
     public override async Task Take_Distinct_Count(bool async)
     {
         await base.Take_Distinct_Count(async);
@@ -1351,16 +1448,15 @@ FROM (
 
 SELECT COUNT(*)
 FROM (
-    SELECT DISTINCT "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate"
+    SELECT DISTINCT "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
     FROM (
-        SELECT TOP(@__p_0) "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+        SELECT FIRST @__p_0 "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
         FROM "Orders" AS "o"
-    ) AS "t"
-) AS "t0"
+    ) AS "o0"
+) AS "o1"
 """);
     }
 
-    [ActianTodo]
     public override async Task Take_Where_Distinct_Count(bool async)
     {
         await base.Take_Where_Distinct_Count(async);
@@ -1371,13 +1467,13 @@ FROM (
 
 SELECT COUNT(*)
 FROM (
-    SELECT DISTINCT "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate"
+    SELECT DISTINCT "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
     FROM (
-        SELECT TOP(@__p_0) "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+        SELECT FIRST @__p_0 "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
         FROM "Orders" AS "o"
         WHERE "o"."CustomerID" = N'FRANK'
-    ) AS "t"
-) AS "t0"
+    ) AS "o0"
+) AS "o1"
 """);
     }
 
@@ -1414,7 +1510,6 @@ FROM "Customers" AS "c"
 """);
     }
 
-    [ActianTodo]
     public override async Task Queryable_simple_anonymous_projection_subquery(bool async)
     {
         await base.Queryable_simple_anonymous_projection_subquery(async);
@@ -1423,12 +1518,11 @@ FROM "Customers" AS "c"
             """
 @__p_0='91'
 
-SELECT TOP(@__p_0) "c"."City"
+SELECT FIRST @__p_0 "c"."City"
 FROM "Customers" AS "c"
 """);
     }
 
-    [ActianTodo]
     public override async Task Queryable_simple_anonymous_subquery(bool async)
     {
         await base.Queryable_simple_anonymous_subquery(async);
@@ -1437,12 +1531,12 @@ FROM "Customers" AS "c"
             """
 @__p_0='91'
 
-SELECT TOP(@__p_0) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+SELECT FIRST @__p_0 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 """);
     }
 
-    [ActianTodo]
+    //[ActianTodo]
     public override async Task Take_simple(bool async)
     {
         await base.Take_simple(async);
@@ -1451,13 +1545,13 @@ FROM "Customers" AS "c"
             """
 @__p_0='10'
 
-SELECT TOP(@__p_0) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+SELECT FIRST @__p_0 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 ORDER BY "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
+    //[ActianTodo]
     public override async Task Take_simple_parameterized(bool async)
     {
         await base.Take_simple_parameterized(async);
@@ -1466,13 +1560,13 @@ ORDER BY "c"."CustomerID"
             """
 @__p_0='10'
 
-SELECT TOP(@__p_0) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+SELECT FIRST @__p_0 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 ORDER BY "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
+    //[ActianTodo]
     public override async Task Take_simple_projection(bool async)
     {
         await base.Take_simple_projection(async);
@@ -1481,13 +1575,12 @@ ORDER BY "c"."CustomerID"
             """
 @__p_0='10'
 
-SELECT TOP(@__p_0) "c"."City"
+SELECT FIRST @__p_0 "c"."City"
 FROM "Customers" AS "c"
 ORDER BY "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Take_subquery_projection(bool async)
     {
         await base.Take_subquery_projection(async);
@@ -1496,13 +1589,12 @@ ORDER BY "c"."CustomerID"
             """
 @__p_0='2'
 
-SELECT TOP(@__p_0) "c"."City"
+SELECT FIRST @__p_0 "c"."City"
 FROM "Customers" AS "c"
 ORDER BY "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_Take_Count(bool async)
     {
         await base.OrderBy_Take_Count(async);
@@ -1513,14 +1605,13 @@ ORDER BY "c"."CustomerID"
 
 SELECT COUNT(*)
 FROM (
-    SELECT TOP(@__p_0) "o"."OrderID"
+    SELECT FIRST @__p_0 1
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderID"
-) AS "t"
+) AS "o0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Take_OrderBy_Count(bool async)
     {
         await base.Take_OrderBy_Count(async);
@@ -1531,13 +1622,12 @@ FROM (
 
 SELECT COUNT(*)
 FROM (
-    SELECT TOP(@__p_0) "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+    SELECT FIRST @__p_0 1
     FROM "Orders" AS "o"
-) AS "t"
+) AS "o0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Any_simple(bool async)
     {
         await base.Any_simple(async);
@@ -1547,13 +1637,12 @@ FROM (
 SELECT CASE
     WHEN EXISTS (
         SELECT 1
-        FROM "Customers" AS "c") THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        FROM "Customers" AS "c") THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
 
-    [ActianTodo]
     public override async Task Any_predicate(bool async)
     {
         await base.Any_predicate(async);
@@ -1564,8 +1653,8 @@ SELECT CASE
     WHEN EXISTS (
         SELECT 1
         FROM "Customers" AS "c"
-        WHERE "c"."ContactName" LIKE N'A%') THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "c"."ContactName" LIKE N'A%') THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
@@ -1675,7 +1764,14 @@ WHERE "c"."City" = N'London' AND EXISTS (
 """);
     }
 
-    [ActianTodo]
+    [ActianTodo] //Collection was not empty
+    public override async Task All_on_distinct(bool async)
+    {
+        await base.All_on_distinct(async);
+
+        AssertSql();
+    }
+
     public override async Task All_top_level(bool async)
     {
         await base.All_top_level(async);
@@ -1686,13 +1782,12 @@ SELECT CASE
     WHEN NOT EXISTS (
         SELECT 1
         FROM "Customers" AS "c"
-        WHERE "c"."ContactName" NOT LIKE N'A%' OR "c"."ContactName" IS NULL) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "c"."ContactName" NOT LIKE N'A%' OR "c"."ContactName" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
 
-    [ActianTodo]
     public override async Task All_top_level_column(bool async)
     {
         await base.All_top_level_column(async);
@@ -1703,13 +1798,12 @@ SELECT CASE
     WHEN NOT EXISTS (
         SELECT 1
         FROM "Customers" AS "c"
-        WHERE "c"."ContactName" IS NULL OR LEFT("c"."ContactName", LEN("c"."ContactName")) <> "c"."ContactName") THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "c"."ContactName" IS NULL OR LEFT("c"."ContactName", LENGTH("c"."ContactName")) <> "c"."ContactName") THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
 
-    [ActianTodo]
     public override async Task All_top_level_subquery(bool async)
     {
         await base.All_top_level_subquery(async);
@@ -1726,13 +1820,12 @@ SELECT CASE
             WHERE EXISTS (
                 SELECT 1
                 FROM "Customers" AS "c1"
-                WHERE "c"."CustomerID" = "c1"."CustomerID"))) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+                WHERE "c"."CustomerID" = "c1"."CustomerID"))) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
 
-    [ActianTodo]
     public override async Task All_top_level_subquery_ef_property(bool async)
     {
         await base.All_top_level_subquery_ef_property(async);
@@ -1749,8 +1842,8 @@ SELECT CASE
             WHERE EXISTS (
                 SELECT 1
                 FROM "Customers" AS "c1"
-                WHERE "c"."CustomerID" = "c1"."CustomerID"))) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+                WHERE "c"."CustomerID" = "c1"."CustomerID"))) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
@@ -1807,15 +1900,14 @@ WHERE "c"."City" IN (N'London', N'Berlin', N'Seattle', N'Lisboa')
 """);
     }
 
-    [ActianTodo]
     public override async Task Where_select_many_or_with_parameter(bool async)
     {
         await base.Where_select_many_or_with_parameter(async);
 
         AssertSql(
             """
-@__london_0='London' (Size = 15)
-@__lisboa_1='Lisboa' (Size = 15)
+@__london_0='London'
+@__lisboa_1='Lisboa'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Customers" AS "c"
@@ -1930,7 +2022,6 @@ CROSS JOIN "Orders" AS "o"
 """);
     }
 
-    [ActianTodo]
     public override async Task SelectMany_OrderBy_ThenBy_Any(bool async)
     {
         await base.SelectMany_OrderBy_ThenBy_Any(async);
@@ -1941,8 +2032,8 @@ SELECT CASE
     WHEN EXISTS (
         SELECT 1
         FROM "Customers" AS "c"
-        CROSS JOIN "Orders" AS "o") THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        CROSS JOIN "Orders" AS "o") THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
@@ -2015,7 +2106,6 @@ INNER JOIN "Orders" AS "o" ON "c"."CustomerID" = "o"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Multiple_joins_Where_Order_Any(bool async)
     {
         await base.Multiple_joins_Where_Order_Any(async);
@@ -2028,8 +2118,8 @@ SELECT CASE
         FROM "Customers" AS "c"
         INNER JOIN "Orders" AS "o" ON "c"."CustomerID" = "o"."CustomerID"
         INNER JOIN "Order Details" AS "o0" ON "o"."OrderID" = "o0"."OrderID"
-        WHERE "c"."City" = N'London') THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "c"."City" = N'London') THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
@@ -2147,7 +2237,7 @@ LEFT JOIN "Orders" AS "o" ON "c"."CustomerID" = "o"."CustomerID"
 
         AssertSql(
             """
-SELECT "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate"
+SELECT "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
 FROM "Customers" AS "c"
 LEFT JOIN (
     SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
@@ -2156,7 +2246,7 @@ LEFT JOIN (
         SELECT 1
         FROM "Order Details" AS "o0"
         WHERE "o"."OrderID" = "o0"."OrderID")
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
+) AS "o1" ON "c"."CustomerID" = "o1"."CustomerID"
 """);
     }
 
@@ -2166,20 +2256,19 @@ LEFT JOIN (
 
         AssertSql(
             """
-SELECT "c"."ContactName", "t0"."OrderID", "t0"."CustomerID", "t0"."EmployeeID", "t0"."OrderDate"
+SELECT "c"."ContactName", "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
 FROM "Customers" AS "c"
 INNER JOIN (
-    SELECT "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate"
+    SELECT "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
     FROM (
         SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate", ROW_NUMBER() OVER(PARTITION BY "o"."CustomerID" ORDER BY "o"."OrderID") AS "row"
         FROM "Orders" AS "o"
-    ) AS "t"
-    WHERE "t"."row" <= 4
-) AS "t0" ON "c"."CustomerID" = "t0"."CustomerID"
+    ) AS "o0"
+    WHERE "o0"."row" <= 4
+) AS "o1" ON "c"."CustomerID" = "o1"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Take_with_single(bool async)
     {
         await base.Take_with_single(async);
@@ -2188,17 +2277,16 @@ INNER JOIN (
             """
 @__p_0='1'
 
-SELECT TOP(2) "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT FIRST 2 "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+    SELECT FIRST @__p_0 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
     ORDER BY "c"."CustomerID"
-) AS "t"
-ORDER BY "t"."CustomerID"
+) AS "c0"
+ORDER BY "c0"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Take_with_single_select_many(bool async)
     {
         await base.Take_with_single_select_many(async);
@@ -2207,18 +2295,17 @@ ORDER BY "t"."CustomerID"
             """
 @__p_0='1'
 
-SELECT TOP(2) "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region", "t"."OrderID", "t"."CustomerID0", "t"."EmployeeID", "t"."OrderDate"
+SELECT FIRST 2 "s"."CustomerID", "s"."Address", "s"."City", "s"."CompanyName", "s"."ContactName", "s"."ContactTitle", "s"."Country", "s"."Fax", "s"."Phone", "s"."PostalCode", "s"."Region", "s"."OrderID", "s"."CustomerID0", "s"."EmployeeID", "s"."OrderDate"
 FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o"."OrderID", "o"."CustomerID" AS "CustomerID0", "o"."EmployeeID", "o"."OrderDate"
+    SELECT FIRST @__p_0 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o"."OrderID", "o"."CustomerID" AS "CustomerID0", "o"."EmployeeID", "o"."OrderDate"
     FROM "Customers" AS "c"
     CROSS JOIN "Orders" AS "o"
     ORDER BY "c"."CustomerID", "o"."OrderID"
-) AS "t"
-ORDER BY "t"."CustomerID", "t"."OrderID"
+) AS "s"
+ORDER BY "s"."CustomerID", "s"."OrderID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Distinct_Skip(bool async)
     {
         await base.Distinct_Skip(async);
@@ -2227,17 +2314,16 @@ ORDER BY "t"."CustomerID", "t"."OrderID"
             """
 @__p_0='5'
 
-SELECT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
     SELECT DISTINCT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
-) AS "t"
-ORDER BY "t"."CustomerID"
-OFFSET @__p_0 ROWS
+) AS "c0"
+ORDER BY "c0"."CustomerID"
+OFFSET @__p_0
 """);
     }
 
-    [ActianTodo]
     public override async Task Distinct_Skip_Take(bool async)
     {
         await base.Distinct_Skip_Take(async);
@@ -2247,17 +2333,16 @@ OFFSET @__p_0 ROWS
 @__p_0='5'
 @__p_1='10'
 
-SELECT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
     SELECT DISTINCT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
-) AS "t"
-ORDER BY "t"."ContactName"
-OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
-""");
+) AS "c0"
+ORDER BY "c0"."ContactName"
+OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
+"""); 
     }
 
-    [ActianTodo]
     public override async Task Skip_Distinct(bool async)
     {
         await base.Skip_Distinct(async);
@@ -2266,17 +2351,16 @@ OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
             """
 @__p_0='5'
 
-SELECT DISTINCT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT DISTINCT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
     ORDER BY "c"."ContactName"
-    OFFSET @__p_0 ROWS
-) AS "t"
+    OFFSET @__p_0
+) AS "c0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Skip_Take_Distinct(bool async)
     {
         await base.Skip_Take_Distinct(async);
@@ -2286,17 +2370,17 @@ FROM (
 @__p_0='5'
 @__p_1='10'
 
-SELECT DISTINCT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT DISTINCT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
     ORDER BY "c"."ContactName"
-    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
-) AS "t"
+    OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
+) AS "c0"
 """);
     }
 
-    [ActianTodo]
+    [ActianTodo] //KILLS THE SERVER!!!
     public override async Task Skip_Take_Any(bool async)
     {
         await base.Skip_Take_Any(async);
@@ -2311,13 +2395,13 @@ SELECT CASE
         SELECT 1
         FROM "Customers" AS "c"
         ORDER BY "c"."ContactName"
-        OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
 
-    [ActianTodo]
+    [ActianTodo] //Expected: True Actual: False
     public override async Task Skip_Take_All(bool async)
     {
         await base.Skip_Take_All(async);
@@ -2334,15 +2418,15 @@ SELECT CASE
             SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
             FROM "Customers" AS "c"
             ORDER BY "c"."CustomerID"
-            OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+            OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
         ) AS "t"
-        WHERE "t"."CustomerID" NOT LIKE N'B%') THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "t"."CustomerID" NOT LIKE N'B%') THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
 
-    [ActianTodo]
+    [ActianTodo] //Expected: True Actual: False
     public override async Task Take_All(bool async)
     {
         await base.Take_All(async);
@@ -2359,13 +2443,13 @@ SELECT CASE
             FROM "Customers" AS "c"
             ORDER BY "c"."CustomerID"
         ) AS "t"
-        WHERE "t"."CustomerID" NOT LIKE N'A%') THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "t"."CustomerID" NOT LIKE N'A%') THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
 
-    [ActianTodo]
+    [ActianTodo] //Expected: True Actual: False
     public override async Task Skip_Take_Any_with_predicate(bool async)
     {
         await base.Skip_Take_Any_with_predicate(async);
@@ -2382,15 +2466,14 @@ SELECT CASE
             SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
             FROM "Customers" AS "c"
             ORDER BY "c"."CustomerID"
-            OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+            OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
         ) AS "t"
-        WHERE "t"."CustomerID" LIKE N'C%') THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "t"."CustomerID" LIKE N'C%') THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
 
-    [ActianTodo]
     public override async Task Take_Any_with_predicate(bool async)
     {
         await base.Take_Any_with_predicate(async);
@@ -2403,12 +2486,12 @@ SELECT CASE
     WHEN EXISTS (
         SELECT 1
         FROM (
-            SELECT TOP(@__p_0) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+            SELECT FIRST @__p_0 "c"."CustomerID"
             FROM "Customers" AS "c"
             ORDER BY "c"."CustomerID"
-        ) AS "t"
-        WHERE "t"."CustomerID" LIKE N'B%') THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        ) AS "c0"
+        WHERE "c0"."CustomerID" LIKE N'B%') THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
@@ -2482,7 +2565,6 @@ ORDER BY "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Distinct_Take(bool async)
     {
         await base.Distinct_Take(async);
@@ -2491,12 +2573,12 @@ ORDER BY "c"."CustomerID"
             """
 @__p_0='5'
 
-SELECT TOP(@__p_0) "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate"
+SELECT FIRST @__p_0 "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
 FROM (
     SELECT DISTINCT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
-) AS "t"
-ORDER BY "t"."OrderID"
+) AS "o0"
+ORDER BY "o0"."OrderID"
 """);
     }
 
@@ -2511,7 +2593,7 @@ ORDER BY "t"."OrderID"
 
 SELECT COUNT(*)
 FROM (
-    SELECT DISTINCT TOP(@__p_0) "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+    SELECT DISTINCT FIRST @__p_0 "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
 ) AS "t"
 """);
@@ -2542,7 +2624,6 @@ ORDER BY "c"."Country", "c"."City"
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_ThenBy_Any(bool async)
     {
         await base.OrderBy_ThenBy_Any(async);
@@ -2552,13 +2633,12 @@ ORDER BY "c"."Country", "c"."City"
 SELECT CASE
     WHEN EXISTS (
         SELECT 1
-        FROM "Customers" AS "c") THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        FROM "Customers" AS "c") THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_correlated_subquery1(bool async)
     {
         await base.OrderBy_correlated_subquery1(async);
@@ -2572,8 +2652,8 @@ ORDER BY CASE
     WHEN EXISTS (
         SELECT 1
         FROM "Customers" AS "c0"
-        WHERE "c0"."CustomerID" = "c"."CustomerID") THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "c0"."CustomerID" = "c"."CustomerID") THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END, "c"."CustomerID"
 """);
     }
@@ -2594,8 +2674,8 @@ WHERE "o"."OrderID" <= 10250 AND ((
         WHEN EXISTS (
             SELECT 1
             FROM "Customers" AS "c0"
-            WHERE "c0"."CustomerID" = N'ALFKI') THEN CAST(1 AS bit)
-        ELSE CAST(0 AS bit)
+            WHERE "c0"."CustomerID" = N'ALFKI') THEN CAST(1 AS boolean)
+        ELSE CAST(0 AS boolean)
     END) <> N'Nowhere' OR (
     SELECT TOP(1) "c"."City"
     FROM "Customers" AS "c"
@@ -2603,8 +2683,8 @@ WHERE "o"."OrderID" <= 10250 AND ((
         WHEN EXISTS (
             SELECT 1
             FROM "Customers" AS "c0"
-            WHERE "c0"."CustomerID" = N'ALFKI') THEN CAST(1 AS bit)
-        ELSE CAST(0 AS bit)
+            WHERE "c0"."CustomerID" = N'ALFKI') THEN CAST(1 AS boolean)
+        ELSE CAST(0 AS boolean)
     END) IS NULL)
 """);
     }
@@ -2670,14 +2750,14 @@ WHERE "o"."OrderID" < 10300
 
         AssertSql(
             """
-SELECT "t"."CustomerID", "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
+SELECT "o0"."CustomerID", "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
 FROM (
     SELECT DISTINCT "o"."CustomerID"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" < 10300
-) AS "t"
-LEFT JOIN "Orders" AS "o0" ON "t"."CustomerID" = "o0"."CustomerID"
-ORDER BY "t"."CustomerID"
+) AS "o0"
+LEFT JOIN "Orders" AS "o1" ON "o0"."CustomerID" = "o1"."CustomerID"
+ORDER BY "o0"."CustomerID"
 """);
     }
 
@@ -2691,14 +2771,14 @@ ORDER BY "t"."CustomerID"
 
         AssertSql(
             """
-SELECT "t"."CustomerID", "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
+SELECT "o0"."CustomerID", "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
 FROM (
     SELECT DISTINCT "o"."CustomerID"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" < 10300
-) AS "t"
-LEFT JOIN "Orders" AS "o0" ON "t"."CustomerID" = "o0"."CustomerID"
-ORDER BY "t"."CustomerID"
+) AS "o0"
+LEFT JOIN "Orders" AS "o1" ON "o0"."CustomerID" = "o1"."CustomerID"
+ORDER BY "o0"."CustomerID"
 """);
     }
 
@@ -2740,8 +2820,8 @@ FROM (
     SELECT DISTINCT "o"."CustomerID" AS "Id", "o"."OrderID" AS "Count"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" < 10300
-) AS "t"
-INNER JOIN "Customers" AS "c" ON "t"."Id" = "c"."CustomerID"
+) AS "o0"
+INNER JOIN "Customers" AS "c" ON "o0"."Id" = "c"."CustomerID"
 """);
     }
 
@@ -2756,8 +2836,8 @@ FROM (
     SELECT DISTINCT "o"."CustomerID" AS "Id", "o"."OrderID" AS "Count"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" < 10300
-) AS "t"
-INNER JOIN "Customers" AS "c" ON "t"."Id" = "c"."CustomerID"
+) AS "o0"
+INNER JOIN "Customers" AS "c" ON "o0"."Id" = "c"."CustomerID"
 """);
     }
 
@@ -2767,13 +2847,13 @@ INNER JOIN "Customers" AS "c" ON "t"."Id" = "c"."CustomerID"
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "t"."Id", "t"."Count"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o0"."Id", "o0"."Count"
 FROM "Customers" AS "c"
 CROSS JOIN (
     SELECT DISTINCT "o"."CustomerID" AS "Id", "o"."OrderID" AS "Count"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" < 10300
-) AS "t"
+) AS "o0"
 WHERE "c"."CustomerID" LIKE N'A%'
 """);
     }
@@ -2895,20 +2975,17 @@ END, "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Null_Coalesce_Short_Circuit(bool async)
     {
         await base.Null_Coalesce_Short_Circuit(async);
 
         AssertSql(
             """
-@__p_0='False'
-
-SELECT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region", @__p_0 AS "Test"
+SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region", CAST(0 AS boolean) AS "Test"
 FROM (
     SELECT DISTINCT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
-) AS "t"
+) AS "c0"
 """);
     }
 
@@ -2918,7 +2995,7 @@ FROM (
 
         AssertSql(
             """
-SELECT FALSE AS "Result"
+SELECT CAST(0 AS boolean) AS "Result"
 FROM "Customers" AS "c"
 """);
     }
@@ -2935,7 +3012,6 @@ ORDER BY "c"."City"
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_comparison_operator(bool async)
     {
         await base.OrderBy_comparison_operator(async);
@@ -2945,8 +3021,8 @@ ORDER BY "c"."City"
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 ORDER BY CASE
-    WHEN "c"."Region" = N'ASK' AND "c"."Region" IS NOT NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "c"."Region" = N'ASK' AND "c"."Region" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
@@ -2970,11 +3046,10 @@ FROM "Customers" AS "c"
             """
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE COALESCE("c"."CompanyName", "c"."ContactName") = N'The Big Cheese'
+WHERE COALESCE("c"."ContactName", "c"."CompanyName") = N'Liz Nixon'
 """);
     }
 
-    [ActianTodo]
     public override async Task Take_skip_null_coalesce_operator(bool async)
     {
         await base.Take_skip_null_coalesce_operator(async);
@@ -2984,21 +3059,20 @@ WHERE COALESCE("c"."CompanyName", "c"."ContactName") = N'The Big Cheese'
 @__p_0='10'
 @__p_1='5'
 
-SELECT DISTINCT "t0"."CustomerID", "t0"."Address", "t0"."City", "t0"."CompanyName", "t0"."ContactName", "t0"."ContactTitle", "t0"."Country", "t0"."Fax", "t0"."Phone", "t0"."PostalCode", "t0"."Region"
+SELECT DISTINCT "c1"."CustomerID", "c1"."Address", "c1"."City", "c1"."CompanyName", "c1"."ContactName", "c1"."ContactTitle", "c1"."Country", "c1"."Fax", "c1"."Phone", "c1"."PostalCode", "c1"."Region"
 FROM (
-    SELECT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+    SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM (
-        SELECT TOP(@__p_0) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", COALESCE("c"."Region", N'ZZ') AS "c"
+        SELECT FIRST @__p_0 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", COALESCE("c"."Region", N'ZZ') AS "c"
         FROM "Customers" AS "c"
         ORDER BY COALESCE("c"."Region", N'ZZ')
-    ) AS "t"
-    ORDER BY "t"."c"
-    OFFSET @__p_1 ROWS
-) AS "t0"
+    ) AS "c0"
+    ORDER BY "c0"."c"
+    OFFSET @__p_1
+) AS "c1"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_take_null_coalesce_operator(bool async)
         => await base.Select_take_null_coalesce_operator(async);
 
@@ -3008,7 +3082,7 @@ FROM (
     //SELECT TOP(@__p_0) "c"."CustomerID", "c"."CompanyName", COALESCE("c"."Region", N'ZZ') AS "Region"
     //FROM "Customers" AS "c"
     //ORDER BY "Region"");
-    [ActianTodo]
+
     public override async Task Select_take_skip_null_coalesce_operator(bool async)
     {
         await base.Select_take_skip_null_coalesce_operator(async);
@@ -3018,18 +3092,17 @@ FROM (
 @__p_0='10'
 @__p_1='5'
 
-SELECT "t"."CustomerID", "t"."CompanyName", COALESCE("t"."Region", N'ZZ') AS "Region"
+SELECT "c0"."CustomerID", "c0"."CompanyName", COALESCE("c0"."Region", N'ZZ') AS "Region"
 FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID", "c"."CompanyName", "c"."Region", COALESCE("c"."Region", N'ZZ') AS "c"
+    SELECT FIRST @__p_0 "c"."CustomerID", "c"."CompanyName", "c"."Region", COALESCE("c"."Region", N'ZZ') AS "c"
     FROM "Customers" AS "c"
     ORDER BY COALESCE("c"."Region", N'ZZ')
-) AS "t"
-ORDER BY "t"."c"
-OFFSET @__p_1 ROWS
+) AS "c0"
+ORDER BY "c0"."c"
+OFFSET @__p_1
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_take_skip_null_coalesce_operator2(bool async)
     {
         await base.Select_take_skip_null_coalesce_operator2(async);
@@ -3039,18 +3112,17 @@ OFFSET @__p_1 ROWS
 @__p_0='10'
 @__p_1='5'
 
-SELECT "t"."CustomerID", "t"."CompanyName", "t"."Region"
+SELECT "c0"."CustomerID", "c0"."CompanyName", "c0"."Region"
 FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID", "c"."CompanyName", "c"."Region", COALESCE("c"."Region", N'ZZ') AS "c"
+    SELECT FIRST @__p_0 "c"."CustomerID", "c"."CompanyName", "c"."Region", COALESCE("c"."Region", N'ZZ') AS "c"
     FROM "Customers" AS "c"
     ORDER BY COALESCE("c"."Region", N'ZZ')
-) AS "t"
-ORDER BY "t"."c"
-OFFSET @__p_1 ROWS
+) AS "c0"
+ORDER BY "c0"."c"
+OFFSET @__p_1
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_take_skip_null_coalesce_operator3(bool async)
     {
         await base.Select_take_skip_null_coalesce_operator3(async);
@@ -3060,14 +3132,14 @@ OFFSET @__p_1 ROWS
 @__p_0='10'
 @__p_1='5'
 
-SELECT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", COALESCE("c"."Region", N'ZZ') AS "c"
+    SELECT FIRST @__p_0 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", COALESCE("c"."Region", N'ZZ') AS "c"
     FROM "Customers" AS "c"
     ORDER BY COALESCE("c"."Region", N'ZZ')
-) AS "t"
-ORDER BY "t"."c"
-OFFSET @__p_1 ROWS
+) AS "c0"
+ORDER BY "c0"."c"
+OFFSET @__p_1
 """);
     }
 
@@ -3095,7 +3167,6 @@ WHERE "o"."OrderDate" > TIMESTAMP '1998-01-01 12:00:00'
 """);
     }
 
-    [ActianTodo]
     public override async Task DateTime_parse_is_parameterized_when_from_closure(bool async)
     {
         await base.DateTime_parse_is_parameterized_when_from_closure(async);
@@ -3122,7 +3193,6 @@ WHERE "o"."OrderDate" > TIMESTAMP '1998-01-01 12:00:00'
 """);
     }
 
-    [ActianTodo]
     public override async Task New_DateTime_is_parameterized_when_from_closure(bool async)
     {
         await base.New_DateTime_is_parameterized_when_from_closure(async);
@@ -3145,7 +3215,6 @@ WHERE "o"."OrderDate" > @__p_0
 """);
     }
 
-    [ActianTodo]
     public override async Task Environment_newline_is_funcletized(bool async)
     {
         await base.Environment_newline_is_funcletized(async);
@@ -3153,11 +3222,11 @@ WHERE "o"."OrderDate" > @__p_0
         AssertSql(
             """
 @__NewLine_0_contains='%
-%' (Size = 5)
+%'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" LIKE @__NewLine_0_contains ESCAPE N'\'
+WHERE "c"."CustomerID" LIKE @__NewLine_0_contains ESCAPE N'\\'
 """);
     }
 
@@ -3185,7 +3254,7 @@ FROM "Orders" AS "o"
 """);
     }
 
-    [ActianTodo]
+    [ActianTodo] //Expected: -10248 Actual: -10248  
     public override async Task Concat_parameter_string_int(bool async)
     {
         await base.Concat_parameter_string_int(async);
@@ -3199,7 +3268,7 @@ FROM "Orders" AS "o"
 """);
     }
 
-    [ActianTodo]
+    [ActianTodo] //Expected: -10248 Actual: -10248  
     public override async Task Concat_constant_string_int(bool async)
     {
         await base.Concat_constant_string_int(async);
@@ -3236,7 +3305,6 @@ LEFT JOIN "Customers" AS "c" ON "o"."CustomerID" = "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_bitwise_or(bool async)
     {
         await base.Select_bitwise_or(async);
@@ -3244,18 +3312,14 @@ LEFT JOIN "Customers" AS "c" ON "o"."CustomerID" = "c"."CustomerID"
         AssertSql(
             """
 SELECT "c"."CustomerID", CASE
-    WHEN "c"."CustomerID" = N'ALFKI' THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END | CASE
-    WHEN "c"."CustomerID" = N'ANATR' THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "c"."CustomerID" IN (N'ALFKI', N'ANATR') THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END AS "Value"
 FROM "Customers" AS "c"
 ORDER BY "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_bitwise_or_multiple(bool async)
     {
         await base.Select_bitwise_or_multiple(async);
@@ -3263,62 +3327,41 @@ ORDER BY "c"."CustomerID"
         AssertSql(
             """
 SELECT "c"."CustomerID", CASE
-    WHEN "c"."CustomerID" = N'ALFKI' THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END | CASE
-    WHEN "c"."CustomerID" = N'ANATR' THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END | CASE
-    WHEN "c"."CustomerID" = N'ANTON' THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "c"."CustomerID" IN (N'ALFKI', N'ANATR', N'ANTON') THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END AS "Value"
 FROM "Customers" AS "c"
 ORDER BY "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_bitwise_and(bool async)
     {
         await base.Select_bitwise_and(async);
 
         AssertSql(
             """
-SELECT "c"."CustomerID", CASE
-    WHEN "c"."CustomerID" = N'ALFKI' THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END & CASE
-    WHEN "c"."CustomerID" = N'ANATR' THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END AS "Value"
+SELECT "c"."CustomerID", CAST(0 AS boolean) AS "Value"
 FROM "Customers" AS "c"
 ORDER BY "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_bitwise_and_or(bool async)
     {
         await base.Select_bitwise_and_or(async);
 
         AssertSql(
             """
-SELECT "c"."CustomerID", (CASE
-    WHEN "c"."CustomerID" = N'ALFKI' THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END & CASE
-    WHEN "c"."CustomerID" = N'ANATR' THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END) | CASE
-    WHEN "c"."CustomerID" = N'ANTON' THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+SELECT "c"."CustomerID", CASE
+    WHEN "c"."CustomerID" = N'ANTON' THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END AS "Value"
 FROM "Customers" AS "c"
 ORDER BY "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Where_bitwise_or_with_logical_or(bool async)
     {
         await base.Where_bitwise_or_with_logical_or(async);
@@ -3327,13 +3370,7 @@ ORDER BY "c"."CustomerID"
             """
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE CASE
-    WHEN "c"."CustomerID" = N'ALFKI' THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END | CASE
-    WHEN "c"."CustomerID" = N'ANATR' THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END = CAST(1 AS bit) OR "c"."CustomerID" = N'ANTON'
+WHERE "c"."CustomerID" IN (N'ALFKI', N'ANATR', N'ANTON')
 """);
     }
 
@@ -3347,16 +3384,15 @@ END = CAST(1 AS bit) OR "c"."CustomerID" = N'ANTON'
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 WHERE CASE
-    WHEN "c"."CustomerID" = N'ALFKI' THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "c"."CustomerID" = N'ALFKI' THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END & CASE
-    WHEN "c"."CustomerID" = N'ANATR' THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END = CAST(1 AS bit) AND "c"."CustomerID" = N'ANTON'
+    WHEN "c"."CustomerID" = N'ANATR' THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END = CAST(1 AS boolean) AND "c"."CustomerID" = N'ANTON'
 """);
     }
 
-    [ActianTodo]
     public override async Task Where_bitwise_or_with_logical_and(bool async)
     {
         await base.Where_bitwise_or_with_logical_and(async);
@@ -3365,13 +3401,7 @@ END = CAST(1 AS bit) AND "c"."CustomerID" = N'ANTON'
             """
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE CASE
-    WHEN "c"."CustomerID" = N'ALFKI' THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END | CASE
-    WHEN "c"."CustomerID" = N'ANATR' THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END = CAST(1 AS bit) AND "c"."Country" = N'Germany'
+WHERE "c"."CustomerID" IN (N'ALFKI', N'ANATR') AND "c"."Country" = N'Germany'
 """);
     }
 
@@ -3385,12 +3415,12 @@ END = CAST(1 AS bit) AND "c"."Country" = N'Germany'
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 WHERE CASE
-    WHEN "c"."CustomerID" = N'ALFKI' THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "c"."CustomerID" = N'ALFKI' THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END & CASE
-    WHEN "c"."CustomerID" = N'ANATR' THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END = CAST(1 AS bit) OR "c"."CustomerID" = N'ANTON'
+    WHEN "c"."CustomerID" = N'ANATR' THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END = CAST(1 AS boolean) OR "c"."CustomerID" = N'ANTON'
 """);
     }
 
@@ -3433,7 +3463,6 @@ WHERE (INT4("o"."OrderID") | INT4(10248)) = 10248
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_bitwise_or_with_logical_or(bool async)
     {
         await base.Select_bitwise_or_with_logical_or(async);
@@ -3441,50 +3470,33 @@ WHERE (INT4("o"."OrderID") | INT4(10248)) = 10248
         AssertSql(
             """
 SELECT "c"."CustomerID", CASE
-    WHEN CASE
-        WHEN "c"."CustomerID" = N'ALFKI' THEN CAST(1 AS bit)
-        ELSE CAST(0 AS bit)
-    END | CASE
-        WHEN "c"."CustomerID" = N'ANATR' THEN CAST(1 AS bit)
-        ELSE CAST(0 AS bit)
-    END = CAST(1 AS bit) OR "c"."CustomerID" = N'ANTON' THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "c"."CustomerID" IN (N'ALFKI', N'ANATR', N'ANTON') THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END AS "Value"
 FROM "Customers" AS "c"
 ORDER BY "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_bitwise_and_with_logical_and(bool async)
     {
         await base.Select_bitwise_and_with_logical_and(async);
 
         AssertSql(
             """
-SELECT "c"."CustomerID", CASE
-    WHEN CASE
-        WHEN "c"."CustomerID" = N'ALFKI' THEN CAST(1 AS bit)
-        ELSE CAST(0 AS bit)
-    END & CASE
-        WHEN "c"."CustomerID" = N'ANATR' THEN CAST(1 AS bit)
-        ELSE CAST(0 AS bit)
-    END = CAST(1 AS bit) AND "c"."CustomerID" = N'ANTON' THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END AS "Value"
+SELECT "c"."CustomerID", CAST(0 AS boolean) AS "Value"
 FROM "Customers" AS "c"
 ORDER BY "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Handle_materialization_properly_when_more_than_two_query_sources_are_involved(bool async)
     {
         await base.Handle_materialization_properly_when_more_than_two_query_sources_are_involved(async);
 
         AssertSql(
             """
-SELECT TOP(1) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+SELECT FIRST 1 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 CROSS JOIN "Orders" AS "o"
 CROSS JOIN "Employees" AS "e"
@@ -3492,7 +3504,6 @@ ORDER BY "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Parameter_extraction_short_circuits_1(bool async)
     {
         await base.Parameter_extraction_short_circuits_1(async);
@@ -3504,7 +3515,7 @@ ORDER BY "c"."CustomerID"
 
 SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM "Orders" AS "o"
-WHERE "o"."OrderID" < 10400 AND "o"."OrderDate" IS NOT NULL AND DATEPART(month, "o"."OrderDate") = @__dateFilter_Value_Month_0 AND DATEPART(year, "o"."OrderDate") = @__dateFilter_Value_Year_1
+WHERE "o"."OrderID" < 10400 AND "o"."OrderDate" IS NOT NULL AND DATE_PART('MONTH', "o"."OrderDate") = @__dateFilter_Value_Month_0 AND DATE_PART('YEAR', "o"."OrderDate") = @__dateFilter_Value_Year_1
 """,
             //
             """
@@ -3514,7 +3525,6 @@ WHERE "o"."OrderID" < 10400
 """);
     }
 
-    [ActianTodo]
     public override async Task Parameter_extraction_short_circuits_2(bool async)
     {
         await base.Parameter_extraction_short_circuits_2(async);
@@ -3526,7 +3536,7 @@ WHERE "o"."OrderID" < 10400
 
 SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM "Orders" AS "o"
-WHERE "o"."OrderID" < 10400 AND "o"."OrderDate" IS NOT NULL AND DATEPART(month, "o"."OrderDate") = @__dateFilter_Value_Month_0 AND DATEPART(year, "o"."OrderDate") = @__dateFilter_Value_Year_1
+WHERE "o"."OrderID" < 10400 AND "o"."OrderDate" IS NOT NULL AND DATE_PART('MONTH', "o"."OrderDate") = @__dateFilter_Value_Month_0 AND DATE_PART('YEAR', "o"."OrderDate") = @__dateFilter_Value_Year_1
 """,
             //
             """
@@ -3536,7 +3546,6 @@ WHERE 0 = 1
 """);
     }
 
-    [ActianTodo]
     public override async Task Parameter_extraction_short_circuits_3(bool async)
     {
         await base.Parameter_extraction_short_circuits_3(async);
@@ -3548,7 +3557,7 @@ WHERE 0 = 1
 
 SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM "Orders" AS "o"
-WHERE "o"."OrderID" < 10400 OR ("o"."OrderDate" IS NOT NULL AND DATEPART(month, "o"."OrderDate") = @__dateFilter_Value_Month_0 AND DATEPART(year, "o"."OrderDate") = @__dateFilter_Value_Year_1)
+WHERE "o"."OrderID" < 10400 OR ("o"."OrderDate" IS NOT NULL AND DATE_PART('MONTH', "o"."OrderDate") = @__dateFilter_Value_Month_0 AND DATE_PART('YEAR', "o"."OrderDate") = @__dateFilter_Value_Year_1)
 """,
             //
             """
@@ -3786,7 +3795,6 @@ ORDER BY "o"."OrderID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_expression_references_are_updated_correctly_with_subquery(bool async)
     {
         await base.Select_expression_references_are_updated_correctly_with_subquery(async);
@@ -3795,29 +3803,28 @@ ORDER BY "o"."OrderID"
             """
 @__nextYear_0='2017'
 
-SELECT DISTINCT DATEPART(year, "o"."OrderDate")
+SELECT DISTINCT DATE_PART('YEAR', "o"."OrderDate")
 FROM "Orders" AS "o"
-WHERE "o"."OrderDate" IS NOT NULL AND DATEPART(year, "o"."OrderDate") < @__nextYear_0
+WHERE "o"."OrderDate" IS NOT NULL AND DATE_PART('YEAR', "o"."OrderDate") < @__nextYear_0
 """);
     }
 
-    [ActianTodo]
     public override async Task DefaultIfEmpty_without_group_join(bool async)
     {
         await base.DefaultIfEmpty_without_group_join(async);
 
         AssertSql(
             """
-SELECT "t"."CustomerID"
+SELECT "c0"."CustomerID"
 FROM (
-    SELECT NULL AS "empty"
+    SELECT 1
 ) AS "e"
 LEFT JOIN (
     SELECT "c"."CustomerID"
     FROM "Customers" AS "c"
     WHERE "c"."City" = N'London'
-) AS "t" ON 1 = 1
-WHERE "t"."CustomerID" IS NOT NULL
+) AS "c0" ON 1 = 1
+WHERE "c0"."CustomerID" IS NOT NULL
 """);
     }
 
@@ -3834,52 +3841,50 @@ WHERE "o"."OrderID" IS NOT NULL
 """);
     }
 
-    [ActianTodo]
     public override async Task DefaultIfEmpty_in_subquery_not_correlated(bool async)
     {
         await base.DefaultIfEmpty_in_subquery_not_correlated(async);
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "t0"."OrderID"
+SELECT "c"."CustomerID", "s"."OrderID"
 FROM "Customers" AS "c"
 CROSS JOIN (
-    SELECT "t"."OrderID"
+    SELECT "o0"."OrderID"
     FROM (
-        SELECT NULL AS "empty"
+        SELECT 1
     ) AS "e"
     LEFT JOIN (
         SELECT "o"."OrderID"
         FROM "Orders" AS "o"
         WHERE "o"."OrderID" > 15000
-    ) AS "t" ON 1 = 1
-) AS "t0"
+    ) AS "o0" ON 1 = 1
+) AS "s"
 """);
     }
 
-    [ActianTodo]
     public override async Task DefaultIfEmpty_in_subquery_nested(bool async)
     {
         await base.DefaultIfEmpty_in_subquery_nested(async);
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "t0"."OrderID", "o0"."OrderDate"
+SELECT "c"."CustomerID", "s"."OrderID", "o1"."OrderDate"
 FROM "Customers" AS "c"
 CROSS JOIN (
-    SELECT "t"."OrderID"
+    SELECT "o0"."OrderID"
     FROM (
-        SELECT NULL AS "empty"
+        SELECT 1
     ) AS "e"
     LEFT JOIN (
         SELECT "o"."OrderID"
         FROM "Orders" AS "o"
         WHERE "o"."OrderID" > 11050
-    ) AS "t" ON 1 = 1
-) AS "t0"
-LEFT JOIN "Orders" AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
-WHERE "c"."City" = N'Seattle' AND "t0"."OrderID" IS NOT NULL AND "o0"."OrderID" IS NOT NULL
-ORDER BY "t0"."OrderID", "o0"."OrderDate"
+    ) AS "o0" ON 1 = 1
+) AS "s"
+LEFT JOIN "Orders" AS "o1" ON "c"."CustomerID" = "o1"."CustomerID"
+WHERE "c"."City" = N'Seattle' AND "s"."OrderID" IS NOT NULL AND "o1"."OrderID" IS NOT NULL
+ORDER BY "s"."OrderID", "o1"."OrderDate"
 """);
     }
 
@@ -3913,7 +3918,6 @@ ORDER BY "t0"."OrderID", "t1"."OrderDate"
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_skip_take(bool async)
     {
         await base.OrderBy_skip_take(async);
@@ -3926,11 +3930,10 @@ ORDER BY "t0"."OrderID", "t1"."OrderDate"
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 ORDER BY "c"."ContactTitle", "c"."ContactName"
-OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_skip_skip_take(bool async)
     {
         await base.OrderBy_skip_skip_take(async);
@@ -3941,19 +3944,18 @@ OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
 @__p_1='8'
 @__p_2='3'
 
-SELECT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
     ORDER BY "c"."ContactTitle", "c"."ContactName"
-    OFFSET @__p_0 ROWS
-) AS "t"
-ORDER BY "t"."ContactTitle", "t"."ContactName"
-OFFSET @__p_1 ROWS FETCH NEXT @__p_2 ROWS ONLY
+    OFFSET @__p_0
+) AS "c0"
+ORDER BY "c0"."ContactTitle", "c0"."ContactName"
+OFFSET @__p_1 FETCH NEXT @__p_2 ROWS ONLY
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_skip_take_take(bool async)
     {
         await base.OrderBy_skip_take_take(async);
@@ -3964,18 +3966,17 @@ OFFSET @__p_1 ROWS FETCH NEXT @__p_2 ROWS ONLY
 @__p_0='5'
 @__p_1='8'
 
-SELECT TOP(@__p_2) "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT FIRST @__p_2 "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
     ORDER BY "c"."ContactTitle", "c"."ContactName"
-    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
-) AS "t"
-ORDER BY "t"."ContactTitle", "t"."ContactName"
+    OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
+) AS "c0"
+ORDER BY "c0"."ContactTitle", "c0"."ContactName"
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_skip_take_take_take_take(bool async)
     {
         await base.OrderBy_skip_take_take_take_take(async);
@@ -3987,26 +3988,25 @@ ORDER BY "t"."ContactTitle", "t"."ContactName"
 @__p_2='10'
 @__p_1='15'
 
-SELECT TOP(@__p_0) "t1"."CustomerID", "t1"."Address", "t1"."City", "t1"."CompanyName", "t1"."ContactName", "t1"."ContactTitle", "t1"."Country", "t1"."Fax", "t1"."Phone", "t1"."PostalCode", "t1"."Region"
+SELECT FIRST @__p_0 "c2"."CustomerID", "c2"."Address", "c2"."City", "c2"."CompanyName", "c2"."ContactName", "c2"."ContactTitle", "c2"."Country", "c2"."Fax", "c2"."Phone", "c2"."PostalCode", "c2"."Region"
 FROM (
-    SELECT TOP(@__p_3) "t0"."CustomerID", "t0"."Address", "t0"."City", "t0"."CompanyName", "t0"."ContactName", "t0"."ContactTitle", "t0"."Country", "t0"."Fax", "t0"."Phone", "t0"."PostalCode", "t0"."Region"
+    SELECT FIRST @__p_3 "c1"."CustomerID", "c1"."Address", "c1"."City", "c1"."CompanyName", "c1"."ContactName", "c1"."ContactTitle", "c1"."Country", "c1"."Fax", "c1"."Phone", "c1"."PostalCode", "c1"."Region"
     FROM (
-        SELECT TOP(@__p_2) "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+        SELECT FIRST @__p_2 "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
         FROM (
             SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
             FROM "Customers" AS "c"
             ORDER BY "c"."ContactTitle", "c"."ContactName"
-            OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
-        ) AS "t"
-        ORDER BY "t"."ContactTitle", "t"."ContactName"
-    ) AS "t0"
-    ORDER BY "t0"."ContactTitle", "t0"."ContactName"
-) AS "t1"
-ORDER BY "t1"."ContactTitle", "t1"."ContactName"
+            OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
+        ) AS "c0"
+        ORDER BY "c0"."ContactTitle", "c0"."ContactName"
+    ) AS "c1"
+    ORDER BY "c1"."ContactTitle", "c1"."ContactName"
+) AS "c2"
+ORDER BY "c2"."ContactTitle", "c2"."ContactName"
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_skip_take_skip_take_skip(bool async)
     {
         await base.OrderBy_skip_take_skip_take_skip(async);
@@ -4018,24 +4018,23 @@ ORDER BY "t1"."ContactTitle", "t1"."ContactName"
 @__p_2='2'
 @__p_3='8'
 
-SELECT "t0"."CustomerID", "t0"."Address", "t0"."City", "t0"."CompanyName", "t0"."ContactName", "t0"."ContactTitle", "t0"."Country", "t0"."Fax", "t0"."Phone", "t0"."PostalCode", "t0"."Region"
+SELECT "c1"."CustomerID", "c1"."Address", "c1"."City", "c1"."CompanyName", "c1"."ContactName", "c1"."ContactTitle", "c1"."Country", "c1"."Fax", "c1"."Phone", "c1"."PostalCode", "c1"."Region"
 FROM (
-    SELECT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+    SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM (
         SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
         FROM "Customers" AS "c"
         ORDER BY "c"."ContactTitle", "c"."ContactName"
-        OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
-    ) AS "t"
-    ORDER BY "t"."ContactTitle", "t"."ContactName"
-    OFFSET @__p_2 ROWS FETCH NEXT @__p_3 ROWS ONLY
-) AS "t0"
-ORDER BY "t0"."ContactTitle", "t0"."ContactName"
-OFFSET @__p_0 ROWS
+        OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
+    ) AS "c0"
+    ORDER BY "c0"."ContactTitle", "c0"."ContactName"
+    OFFSET @__p_2 FETCH NEXT @__p_3 ROWS ONLY
+) AS "c1"
+ORDER BY "c1"."ContactTitle", "c1"."ContactName"
+OFFSET @__p_0
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_skip_take_distinct(bool async)
     {
         await base.OrderBy_skip_take_distinct(async);
@@ -4045,17 +4044,17 @@ OFFSET @__p_0 ROWS
 @__p_0='5'
 @__p_1='15'
 
-SELECT DISTINCT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT DISTINCT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
     ORDER BY "c"."ContactTitle", "c"."ContactName"
-    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
-) AS "t"
+    OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
+) AS "c0"
 """);
     }
 
-    [ActianTodo]
+    [ActianTodo] //Expected: 3 Actual: 5
     public override async Task OrderBy_coalesce_take_distinct(bool async)
     {
         await base.OrderBy_coalesce_take_distinct(async);
@@ -4066,14 +4065,14 @@ FROM (
 
 SELECT DISTINCT "t"."ProductID", "t"."Discontinued", "t"."ProductName", "t"."SupplierID", "t"."UnitPrice", "t"."UnitsInStock"
 FROM (
-    SELECT TOP(@__p_0) "p"."ProductID", "p"."Discontinued", "p"."ProductName", "p"."SupplierID", "p"."UnitPrice", "p"."UnitsInStock"
+    SELECT FIRST @__p_0 "p"."ProductID", "p"."Discontinued", "p"."ProductName", "p"."SupplierID", "p"."UnitPrice", "p"."UnitsInStock"
     FROM "Products" AS "p"
     ORDER BY COALESCE("p"."UnitPrice", 0.0)
 ) AS "t"
 """);
     }
 
-    [ActianTodo]
+    [ActianTodo] //Expected: 19 Actual: 7
     public override async Task OrderBy_coalesce_skip_take_distinct(bool async)
     {
         await base.OrderBy_coalesce_skip_take_distinct(async);
@@ -4088,12 +4087,12 @@ FROM (
     SELECT "p"."ProductID", "p"."Discontinued", "p"."ProductName", "p"."SupplierID", "p"."UnitPrice", "p"."UnitsInStock"
     FROM "Products" AS "p"
     ORDER BY COALESCE("p"."UnitPrice", 0.0)
-    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+    OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
 ) AS "t"
 """);
     }
 
-    [ActianTodo]
+    [ActianTodo] // .Distinct() must preceed .Skip()
     public override async Task OrderBy_coalesce_skip_take_distinct_take(bool async)
     {
         await base.OrderBy_coalesce_skip_take_distinct_take(async);
@@ -4113,7 +4112,6 @@ FROM (
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_skip_take_distinct_orderby_take(bool async)
     {
         await base.OrderBy_skip_take_distinct_orderby_take(async);
@@ -4124,17 +4122,17 @@ FROM (
 @__p_0='5'
 @__p_1='15'
 
-SELECT TOP(@__p_2) "t0"."CustomerID", "t0"."Address", "t0"."City", "t0"."CompanyName", "t0"."ContactName", "t0"."ContactTitle", "t0"."Country", "t0"."Fax", "t0"."Phone", "t0"."PostalCode", "t0"."Region"
+SELECT FIRST @__p_2 "c1"."CustomerID", "c1"."Address", "c1"."City", "c1"."CompanyName", "c1"."ContactName", "c1"."ContactTitle", "c1"."Country", "c1"."Fax", "c1"."Phone", "c1"."PostalCode", "c1"."Region"
 FROM (
-    SELECT DISTINCT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+    SELECT DISTINCT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM (
         SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
         FROM "Customers" AS "c"
         ORDER BY "c"."ContactTitle", "c"."ContactName"
-        OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
-    ) AS "t"
-) AS "t0"
-ORDER BY "t0"."ContactTitle"
+        OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
+    ) AS "c0"
+) AS "c1"
+ORDER BY "c1"."ContactTitle"
 """);
     }
 
@@ -4243,7 +4241,6 @@ WHERE "c"."CustomerID" = N'ALFKI' AND EXISTS (
 """);
     }
 
-    [ActianTodo]
     public override async Task Complex_query_with_repeated_nested_query_model_compiles_correctly(bool async)
     {
         await base.Complex_query_with_repeated_nested_query_model_compiles_correctly(async);
@@ -4259,12 +4256,12 @@ WHERE "c"."CustomerID" = N'ALFKI' AND EXISTS (
         SELECT 1
         FROM "Customers" AS "c1"
         WHERE EXISTS (
-            SELECT DISTINCT 1
+            SELECT 1
             FROM (
-                SELECT TOP(10) "c2"."CustomerID", "c2"."Address", "c2"."City", "c2"."CompanyName", "c2"."ContactName", "c2"."ContactTitle", "c2"."Country", "c2"."Fax", "c2"."Phone", "c2"."PostalCode", "c2"."Region"
+                SELECT FIRST 10 1
                 FROM "Customers" AS "c2"
                 ORDER BY "c2"."CustomerID"
-            ) AS "t")))
+            ) AS "c3")))
 """);
     }
 
@@ -4286,12 +4283,12 @@ WHERE "c"."CustomerID" = N'ALFKI'
 
         AssertSql(
             """
-SELECT "t"."CustomerID"
+SELECT "c0"."CustomerID"
 FROM (
     SELECT DISTINCT "c"."CustomerID"
     FROM "Customers" AS "c"
-) AS "t"
-ORDER BY "t"."CustomerID"
+) AS "c0"
+ORDER BY "c0"."CustomerID"
 """);
     }
 
@@ -4306,11 +4303,10 @@ FROM (
     SELECT DISTINCT "c"."CustomerID"
     FROM "Customers" AS "c"
     WHERE "c"."CustomerID" LIKE N'A%'
-) AS "t"
+) AS "c0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Anonymous_complex_distinct_where(bool async)
     {
         await base.Anonymous_complex_distinct_where(async);
@@ -4319,23 +4315,22 @@ FROM (
             """
 SELECT DISTINCT "c"."CustomerID" + COALESCE("c"."City", N'') AS "A"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" + COALESCE("c"."City", N'') = N'ALFKIBerlin'
+WHERE ("c"."CustomerID" + COALESCE("c"."City", N'')) = N'ALFKIBerlin'
 """);
     }
 
-    [ActianTodo]
     public override async Task Anonymous_complex_distinct_orderby(bool async)
     {
         await base.Anonymous_complex_distinct_orderby(async);
 
         AssertSql(
             """
-SELECT "t"."A"
+SELECT "c0"."A"
 FROM (
     SELECT DISTINCT "c"."CustomerID" + COALESCE("c"."City", N'') AS "A"
     FROM "Customers" AS "c"
-) AS "t"
-ORDER BY "t"."A"
+) AS "c0"
+ORDER BY "c0"."A"
 """);
     }
 
@@ -4350,11 +4345,10 @@ FROM (
     SELECT DISTINCT "c"."CustomerID" + COALESCE("c"."City", N'') AS "A"
     FROM "Customers" AS "c"
     WHERE "c"."CustomerID" + COALESCE("c"."City", N'') LIKE N'A%'
-) AS "t"
+) AS "c0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Anonymous_complex_orderby(bool async)
     {
         await base.Anonymous_complex_orderby(async);
@@ -4410,12 +4404,12 @@ WHERE "c"."CustomerID" = N'ALFKI'
 
         AssertSql(
             """
-SELECT "t"."Property"
+SELECT "c0"."Property"
 FROM (
     SELECT DISTINCT "c"."CustomerID" AS "Property"
     FROM "Customers" AS "c"
-) AS "t"
-ORDER BY "t"."Property"
+) AS "c0"
+ORDER BY "c0"."Property"
 """);
     }
 
@@ -4430,11 +4424,10 @@ FROM (
     SELECT DISTINCT "c"."CustomerID" AS "Property"
     FROM "Customers" AS "c"
     WHERE "c"."CustomerID" LIKE N'A%'
-) AS "t"
+) AS "c0"
 """);
     }
 
-    [ActianTodo]
     public override async Task DTO_complex_distinct_where(bool async)
     {
         await base.DTO_complex_distinct_where(async);
@@ -4443,23 +4436,22 @@ FROM (
             """
 SELECT DISTINCT "c"."CustomerID" + COALESCE("c"."City", N'') AS "Property"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" + COALESCE("c"."City", N'') = N'ALFKIBerlin'
+WHERE ("c"."CustomerID" + COALESCE("c"."City", N'')) = N'ALFKIBerlin'
 """);
     }
 
-    [ActianTodo]
     public override async Task DTO_complex_distinct_orderby(bool async)
     {
         await base.DTO_complex_distinct_orderby(async);
 
         AssertSql(
             """
-SELECT "t"."Property"
+SELECT "c0"."Property"
 FROM (
     SELECT DISTINCT "c"."CustomerID" + COALESCE("c"."City", N'') AS "Property"
     FROM "Customers" AS "c"
-) AS "t"
-ORDER BY "t"."Property"
+) AS "c0"
+ORDER BY "c0"."Property"
 """);
     }
 
@@ -4474,11 +4466,10 @@ FROM (
     SELECT DISTINCT "c"."CustomerID" + COALESCE("c"."City", N'') AS "Property"
     FROM "Customers" AS "c"
     WHERE "c"."CustomerID" + COALESCE("c"."City", N'') LIKE N'A%'
-) AS "t"
+) AS "c0"
 """);
     }
 
-    [ActianTodo]
     public override async Task DTO_complex_orderby(bool async)
         => await base.DTO_complex_orderby(async);
 
@@ -4512,7 +4503,6 @@ ORDER BY (
 """);
     }
 
-    [ActianTodo]
     public override async Task Include_with_orderby_skip_preserves_ordering(bool async)
     {
         await base.Include_with_orderby_skip_preserves_ordering(async);
@@ -4522,16 +4512,16 @@ ORDER BY (
 @__p_0='40'
 @__p_1='5'
 
-SELECT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
     WHERE "c"."CustomerID" NOT IN (N'VAFFE', N'DRACD')
     ORDER BY "c"."City", "c"."CustomerID"
-    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
-) AS "t"
-LEFT JOIN "Orders" AS "o" ON "t"."CustomerID" = "o"."CustomerID"
-ORDER BY "t"."City", "t"."CustomerID"
+    OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
+) AS "c0"
+LEFT JOIN "Orders" AS "o" ON "c0"."CustomerID" = "o"."CustomerID"
+ORDER BY "c0"."City", "c0"."CustomerID"
 """);
     }
 
@@ -4581,7 +4571,6 @@ WHERE (
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_take_average(bool async)
     {
         await base.Select_take_average(async);
@@ -4590,16 +4579,15 @@ WHERE (
             """
 @__p_0='10'
 
-SELECT AVG(CAST("t"."OrderID" AS float))
+SELECT AVG(CAST("o0"."OrderID" AS float))
 FROM (
-    SELECT TOP(@__p_0) "o"."OrderID"
+    SELECT FIRST @__p_0 "o"."OrderID"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderID"
-) AS "t"
+) AS "o0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_take_count(bool async)
     {
         await base.Select_take_count(async);
@@ -4610,13 +4598,12 @@ FROM (
 
 SELECT COUNT(*)
 FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID"
+    SELECT FIRST @__p_0 1
     FROM "Customers" AS "c"
-) AS "t"
+) AS "c0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_orderBy_take_count(bool async)
     {
         await base.Select_orderBy_take_count(async);
@@ -4627,14 +4614,13 @@ FROM (
 
 SELECT COUNT(*)
 FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID"
+    SELECT FIRST @__p_0 1
     FROM "Customers" AS "c"
     ORDER BY "c"."Country"
-) AS "t"
+) AS "c0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_take_long_count(bool async)
     {
         await base.Select_take_long_count(async);
@@ -4643,15 +4629,14 @@ FROM (
             """
 @__p_0='7'
 
-SELECT COUNT_BIG(*)
+SELECT COUNT(*)
 FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID"
+    SELECT FIRST @__p_0 1
     FROM "Customers" AS "c"
-) AS "t"
+) AS "c0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_orderBy_take_long_count(bool async)
     {
         await base.Select_orderBy_take_long_count(async);
@@ -4660,16 +4645,15 @@ FROM (
             """
 @__p_0='7'
 
-SELECT COUNT_BIG(*)
+SELECT COUNT(*)
 FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID"
+    SELECT FIRST @__p_0 1
     FROM "Customers" AS "c"
     ORDER BY "c"."Country"
-) AS "t"
+) AS "c0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_take_max(bool async)
     {
         await base.Select_take_max(async);
@@ -4678,16 +4662,15 @@ FROM (
             """
 @__p_0='10'
 
-SELECT MAX("t"."OrderID")
+SELECT MAX("o0"."OrderID")
 FROM (
-    SELECT TOP(@__p_0) "o"."OrderID"
+    SELECT FIRST @__p_0 "o"."OrderID"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderID"
-) AS "t"
+) AS "o0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_take_min(bool async)
     {
         await base.Select_take_min(async);
@@ -4696,16 +4679,15 @@ FROM (
             """
 @__p_0='10'
 
-SELECT MIN("t"."OrderID")
+SELECT MIN("o0"."OrderID")
 FROM (
-    SELECT TOP(@__p_0) "o"."OrderID"
+    SELECT FIRST @__p_0 "o"."OrderID"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderID"
-) AS "t"
+) AS "o0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_take_sum(bool async)
     {
         await base.Select_take_sum(async);
@@ -4714,16 +4696,15 @@ FROM (
             """
 @__p_0='10'
 
-SELECT COALESCE(SUM("t"."OrderID"), 0)
+SELECT COALESCE(SUM("o0"."OrderID"), 0)
 FROM (
-    SELECT TOP(@__p_0) "o"."OrderID"
+    SELECT FIRST @__p_0 "o"."OrderID"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderID"
-) AS "t"
+) AS "o0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_skip_average(bool async)
     {
         await base.Select_skip_average(async);
@@ -4732,17 +4713,16 @@ FROM (
             """
 @__p_0='10'
 
-SELECT AVG(CAST("t"."OrderID" AS float))
+SELECT AVG(CAST("o0"."OrderID" AS float))
 FROM (
     SELECT "o"."OrderID"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderID"
-    OFFSET @__p_0 ROWS
-) AS "t"
+    OFFSET @__p_0
+) AS "o0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_skip_count(bool async)
     {
         await base.Select_skip_count(async);
@@ -4753,15 +4733,13 @@ FROM (
 
 SELECT COUNT(*)
 FROM (
-    SELECT "c"."CustomerID"
+    SELECT 1
     FROM "Customers" AS "c"
-    ORDER BY (SELECT 1)
-    OFFSET @__p_0 ROWS
-) AS "t"
+    OFFSET @__p_0
+) AS "c0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_orderBy_skip_count(bool async)
     {
         await base.Select_orderBy_skip_count(async);
@@ -4772,15 +4750,14 @@ FROM (
 
 SELECT COUNT(*)
 FROM (
-    SELECT "c"."CustomerID"
+    SELECT 1
     FROM "Customers" AS "c"
     ORDER BY "c"."Country"
-    OFFSET @__p_0 ROWS
-) AS "t"
+    OFFSET @__p_0
+) AS "c0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_skip_long_count(bool async)
     {
         await base.Select_skip_long_count(async);
@@ -4789,17 +4766,15 @@ FROM (
             """
 @__p_0='7'
 
-SELECT COUNT_BIG(*)
+SELECT COUNT(*)
 FROM (
-    SELECT "c"."CustomerID"
+    SELECT 1
     FROM "Customers" AS "c"
-    ORDER BY (SELECT 1)
-    OFFSET @__p_0 ROWS
-) AS "t"
+    OFFSET @__p_0
+) AS "c0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_orderBy_skip_long_count(bool async)
     {
         await base.Select_orderBy_skip_long_count(async);
@@ -4808,17 +4783,16 @@ FROM (
             """
 @__p_0='7'
 
-SELECT COUNT_BIG(*)
+SELECT COUNT(*)
 FROM (
-    SELECT "c"."CustomerID"
+    SELECT 1
     FROM "Customers" AS "c"
     ORDER BY "c"."Country"
-    OFFSET @__p_0 ROWS
-) AS "t"
+    OFFSET @__p_0
+) AS "c0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_skip_max(bool async)
     {
         await base.Select_skip_max(async);
@@ -4827,17 +4801,16 @@ FROM (
             """
 @__p_0='10'
 
-SELECT MAX("t"."OrderID")
+SELECT MAX("o0"."OrderID")
 FROM (
     SELECT "o"."OrderID"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderID"
-    OFFSET @__p_0 ROWS
-) AS "t"
+    OFFSET @__p_0
+) AS "o0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_skip_min(bool async)
     {
         await base.Select_skip_min(async);
@@ -4846,17 +4819,16 @@ FROM (
             """
 @__p_0='10'
 
-SELECT MIN("t"."OrderID")
+SELECT MIN("o0"."OrderID")
 FROM (
     SELECT "o"."OrderID"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderID"
-    OFFSET @__p_0 ROWS
-) AS "t"
+    OFFSET @__p_0
+) AS "o0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_skip_sum(bool async)
     {
         await base.Select_skip_sum(async);
@@ -4865,13 +4837,13 @@ FROM (
             """
 @__p_0='10'
 
-SELECT COALESCE(SUM("t"."OrderID"), 0)
+SELECT COALESCE(SUM("o0"."OrderID"), 0)
 FROM (
     SELECT "o"."OrderID"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderID"
-    OFFSET @__p_0 ROWS
-) AS "t"
+    OFFSET @__p_0
+) AS "o0"
 """);
     }
 
@@ -4881,11 +4853,11 @@ FROM (
 
         AssertSql(
             """
-SELECT AVG(CAST("t"."OrderID" AS float))
+SELECT AVG(CAST("o0"."OrderID" AS float))
 FROM (
     SELECT DISTINCT "o"."OrderID"
     FROM "Orders" AS "o"
-) AS "t"
+) AS "o0"
 """);
     }
 
@@ -4899,7 +4871,7 @@ SELECT COUNT(*)
 FROM (
     SELECT DISTINCT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
-) AS "t"
+) AS "c0"
 """);
     }
 
@@ -4913,7 +4885,7 @@ SELECT COUNT(*)
 FROM (
     SELECT DISTINCT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
-) AS "t"
+) AS "c0"
 """);
     }
 
@@ -4923,11 +4895,11 @@ FROM (
 
         AssertSql(
             """
-SELECT MAX("t"."OrderID")
+SELECT MAX("o0"."OrderID")
 FROM (
     SELECT DISTINCT "o"."OrderID"
     FROM "Orders" AS "o"
-) AS "t"
+) AS "o0"
 """);
     }
 
@@ -4937,11 +4909,11 @@ FROM (
 
         AssertSql(
             """
-SELECT MIN("t"."OrderID")
+SELECT MIN("o0"."OrderID")
 FROM (
     SELECT DISTINCT "o"."OrderID"
     FROM "Orders" AS "o"
-) AS "t"
+) AS "o0"
 """);
     }
 
@@ -4951,26 +4923,25 @@ FROM (
 
         AssertSql(
             """
-SELECT COALESCE(SUM("t"."OrderID"), 0)
+SELECT COALESCE(SUM("o0"."OrderID"), 0)
 FROM (
     SELECT DISTINCT "o"."OrderID"
     FROM "Orders" AS "o"
-) AS "t"
+) AS "o0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Comparing_to_fixed_string_parameter(bool async)
     {
         await base.Comparing_to_fixed_string_parameter(async);
 
         AssertSql(
             """
-@__prefix_0_startswith='A%' (Size = 5)
+@__prefix_0_startswith='A%'
 
 SELECT "c"."CustomerID"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" LIKE @__prefix_0_startswith ESCAPE N'\'
+WHERE "c"."CustomerID" LIKE @__prefix_0_startswith ESCAPE N'\\'
 """);
     }
 
@@ -4988,7 +4959,6 @@ ORDER BY "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Comparing_different_entity_types_using_Equals(bool async)
     {
         await base.Comparing_different_entity_types_using_Equals(async);
@@ -5047,7 +5017,6 @@ ORDER BY "o"."OrderID", "o0"."OrderID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Comparing_non_matching_entities_using_Equals(bool async)
     {
         await base.Comparing_non_matching_entities_using_Equals(async);
@@ -5061,7 +5030,6 @@ WHERE 0 = 1
 """);
     }
 
-    [ActianTodo]
     public override async Task Comparing_non_matching_collection_navigations_using_Equals(bool async)
     {
         await base.Comparing_non_matching_collection_navigations_using_Equals(async);
@@ -5075,7 +5043,6 @@ WHERE 0 = 1
 """);
     }
 
-    [ActianTodo]
     public override async Task Comparing_collection_navigation_to_null(bool async)
     {
         await base.Comparing_collection_navigation_to_null(async);
@@ -5222,7 +5189,6 @@ WHERE "c"."CustomerID" = N'ALFKI'
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_Dto_projection_skip_take(bool async)
     {
         await base.OrderBy_Dto_projection_skip_take(async);
@@ -5235,11 +5201,10 @@ WHERE "c"."CustomerID" = N'ALFKI'
 SELECT "c"."CustomerID" AS "Id"
 FROM "Customers" AS "c"
 ORDER BY "c"."CustomerID"
-OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
 """);
     }
 
-    [ActianTodo]
     public override async Task Join_take_count_works(bool async)
     {
         await base.Join_take_count_works(async);
@@ -5250,57 +5215,37 @@ OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
 
 SELECT COUNT(*)
 FROM (
-    SELECT TOP(@__p_0) "o"."OrderID", "t"."CustomerID"
+    SELECT FIRST @__p_0 1
     FROM "Orders" AS "o"
     INNER JOIN (
         SELECT "c"."CustomerID"
         FROM "Customers" AS "c"
         WHERE "c"."CustomerID" = N'ALFKI'
-    ) AS "t" ON "o"."CustomerID" = "t"."CustomerID"
+    ) AS "c0" ON "o"."CustomerID" = "c0"."CustomerID"
     WHERE "o"."OrderID" > 690 AND "o"."OrderID" < 710
-) AS "t0"
+) AS "s"
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_empty_list_contains(bool async)
     {
         await base.OrderBy_empty_list_contains(async);
 
         AssertSql(
             """
-@__list_0='""' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-ORDER BY CASE
-    WHEN "c"."CustomerID" IN (
-        SELECT "l"."value"
-        FROM OPENJSON(@__list_0) WITH ("value" nchar(5) '$') AS "l"
-    ) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_empty_list_does_not_contains(bool async)
     {
         await base.OrderBy_empty_list_does_not_contains(async);
 
         AssertSql(
             """
-@__list_0='""' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-ORDER BY CASE
-    WHEN "c"."CustomerID" NOT IN (
-        SELECT "l"."value"
-        FROM OPENJSON(@__list_0) WITH ("value" nchar(5) '$') AS "l"
-    ) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END
 """);
     }
 
@@ -5343,7 +5288,7 @@ WHERE EXISTS (
         AssertSql(
             """
 SELECT "c"."CustomerID", (
-    SELECT TOP(1) "o0"."OrderDate"
+    SELECT FIRST 1 "o0"."OrderDate"
     FROM "Orders" AS "o0"
     WHERE "c"."CustomerID" = "o0"."CustomerID"
     ORDER BY "o0"."OrderDate") AS "OrderDate"
@@ -5363,17 +5308,17 @@ WHERE "c"."CustomerID" LIKE N'A%' AND EXISTS (
         AssertSql(
             """
 SELECT "c"."CustomerID", (
-    SELECT TOP(1) "o0"."OrderDate"
+    SELECT FIRST 1 "o0"."OrderDate"
     FROM "Orders" AS "o0"
     WHERE "c"."CustomerID" = "o0"."CustomerID"
     ORDER BY "o0"."OrderDate") AS "A"
 FROM "Customers" AS "c"
 WHERE "c"."CustomerID" LIKE N'A%' AND ((
-    SELECT TOP(1) "o"."OrderID"
+    SELECT FIRST 1 "o"."OrderID"
     FROM "Orders" AS "o"
     WHERE "c"."CustomerID" = "o"."CustomerID"
     ORDER BY "o"."OrderDate") <> 0 OR (
-    SELECT TOP(1) "o"."OrderID"
+    SELECT FIRST 1 "o"."OrderID"
     FROM "Orders" AS "o"
     WHERE "c"."CustomerID" = "o"."CustomerID"
     ORDER BY "o"."OrderDate") IS NULL)
@@ -5431,7 +5376,7 @@ FROM "Customers" AS "c"
 WHERE (
     SELECT COUNT(*)
     FROM "Orders" AS "o"
-    WHERE "c"."CustomerID" = "o"."CustomerID" AND "c"."CustomerID" = "o"."CustomerID") > 0
+    WHERE "c"."CustomerID" = "o"."CustomerID") > 0
 """);
     }
 
@@ -5458,7 +5403,6 @@ LEFT JOIN "Customers" AS "c" ON "o"."CustomerID" = "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_object_type_server_evals(bool async)
     {
         await base.OrderBy_object_type_server_evals(async);
@@ -5472,33 +5416,31 @@ SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM "Orders" AS "o"
 LEFT JOIN "Customers" AS "c" ON "o"."CustomerID" = "c"."CustomerID"
 ORDER BY "o"."OrderID", "o"."OrderDate", "c"."CustomerID", "c"."City"
-OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
 """);
     }
 
-    [ActianTodo]
     public override async Task AsQueryable_in_query_server_evals(bool async)
     {
         await base.AsQueryable_in_query_server_evals(async);
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "t0"."OrderDate", "t0"."OrderID"
+SELECT "c"."CustomerID", "o1"."OrderDate", "o1"."OrderID"
 FROM "Customers" AS "c"
 LEFT JOIN (
-    SELECT "t"."OrderDate", "t"."OrderID", "t"."CustomerID"
+    SELECT "o0"."OrderDate", "o0"."OrderID", "o0"."CustomerID"
     FROM (
         SELECT "o"."OrderDate", "o"."OrderID", "o"."CustomerID", ROW_NUMBER() OVER(PARTITION BY "o"."CustomerID" ORDER BY "o"."OrderID") AS "row"
         FROM "Orders" AS "o"
-        WHERE DATEPART(year, "o"."OrderDate") = 1998
-    ) AS "t"
-    WHERE "t"."row" <= 1
-) AS "t0" ON "c"."CustomerID" = "t0"."CustomerID"
-ORDER BY "c"."CustomerID", "t0"."CustomerID", "t0"."OrderID"
+        WHERE DATE_PART('YEAR', "o"."OrderDate") = 1998
+    ) AS "o0"
+    WHERE "o0"."row" <= 1
+) AS "o1" ON "c"."CustomerID" = "o1"."CustomerID"
+ORDER BY "c"."CustomerID", "o1"."CustomerID", "o1"."OrderID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Subquery_DefaultIfEmpty_Any(bool async)
     {
         await base.Subquery_DefaultIfEmpty_Any(async);
@@ -5509,19 +5451,19 @@ SELECT CASE
     WHEN EXISTS (
         SELECT 1
         FROM (
-            SELECT NULL AS "empty"
+            SELECT 1
         ) AS "e0"
         LEFT JOIN (
-            SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
+            SELECT 1
             FROM "Employees" AS "e"
-            WHERE "e"."EmployeeID" = -1
-        ) AS "t" ON 1 = 1) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+            WHERE "e"."EmployeeID" = 4294967295
+        ) AS "e1" ON 1 = 1) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
 
-    [ActianTodo]
+    [ActianTodo] //Expected: 31 Actual: 49
     public override async Task Projection_skip_collection_projection(bool async)
     {
         await base.Projection_skip_collection_projection(async);
@@ -5536,14 +5478,14 @@ FROM (
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" < 10300
     ORDER BY "o"."OrderID"
-    OFFSET @__p_0 ROWS
+    OFFSET @__p_0
 ) AS "t"
 LEFT JOIN "Order Details" AS "o0" ON "t"."OrderID" = "o0"."OrderID"
 ORDER BY "t"."OrderID", "o0"."OrderID"
 """);
     }
 
-    [ActianTodo]
+    [ActianTodo] //Expected: 11 Actual: 72
     public override async Task Projection_take_collection_projection(bool async)
     {
         await base.Projection_take_collection_projection(async);
@@ -5554,7 +5496,7 @@ ORDER BY "t"."OrderID", "o0"."OrderID"
 
 SELECT "t"."OrderID", "o0"."ProductID", "o0"."OrderID"
 FROM (
-    SELECT TOP(@__p_0) "o"."OrderID"
+    SELECT FIRST @__p_0 "o"."OrderID"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" < 10300
     ORDER BY "o"."OrderID"
@@ -5564,7 +5506,7 @@ ORDER BY "t"."OrderID", "o0"."OrderID"
 """);
     }
 
-    [ActianTodo]
+    [ActianTodo] //Expected: 31 Actual: 49
     public override async Task Projection_skip_take_collection_projection(bool async)
     {
         await base.Projection_skip_take_collection_projection(async);
@@ -5580,14 +5522,13 @@ FROM (
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" < 10300
     ORDER BY "o"."OrderID"
-    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
+    OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
 ) AS "t"
 LEFT JOIN "Order Details" AS "o0" ON "t"."OrderID" = "o0"."OrderID"
 ORDER BY "t"."OrderID", "o0"."OrderID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Projection_skip_projection(bool async)
     {
         await base.Projection_skip_projection(async);
@@ -5602,14 +5543,13 @@ FROM (
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" < 10300
     ORDER BY "o"."OrderID"
-    OFFSET @__p_0 ROWS
-) AS "t"
-LEFT JOIN "Customers" AS "c" ON "t"."CustomerID" = "c"."CustomerID"
-ORDER BY "t"."OrderID"
+    OFFSET @__p_0
+) AS "o0"
+LEFT JOIN "Customers" AS "c" ON "o0"."CustomerID" = "c"."CustomerID"
+ORDER BY "o0"."OrderID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Projection_take_projection(bool async)
     {
         await base.Projection_take_projection(async);
@@ -5620,17 +5560,16 @@ ORDER BY "t"."OrderID"
 
 SELECT "c"."City"
 FROM (
-    SELECT TOP(@__p_0) "o"."OrderID", "o"."CustomerID"
+    SELECT FIRST @__p_0 "o"."OrderID", "o"."CustomerID"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" < 10300
     ORDER BY "o"."OrderID"
-) AS "t"
-LEFT JOIN "Customers" AS "c" ON "t"."CustomerID" = "c"."CustomerID"
-ORDER BY "t"."OrderID"
+) AS "o0"
+LEFT JOIN "Customers" AS "c" ON "o0"."CustomerID" = "c"."CustomerID"
+ORDER BY "o0"."OrderID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Projection_skip_take_projection(bool async)
     {
         await base.Projection_skip_take_projection(async);
@@ -5646,14 +5585,13 @@ FROM (
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" < 10300
     ORDER BY "o"."OrderID"
-    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
-) AS "t"
-LEFT JOIN "Customers" AS "c" ON "t"."CustomerID" = "c"."CustomerID"
-ORDER BY "t"."OrderID"
+    OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
+) AS "o0"
+LEFT JOIN "Customers" AS "c" ON "o0"."CustomerID" = "c"."CustomerID"
+ORDER BY "o0"."OrderID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Collection_projection_skip(bool async)
     {
         await base.Collection_projection_skip(async);
@@ -5662,20 +5600,19 @@ ORDER BY "t"."OrderID"
             """
 @__p_0='5'
 
-SELECT "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate", "o0"."OrderID", "o0"."ProductID", "o0"."Discount", "o0"."Quantity", "o0"."UnitPrice"
+SELECT "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate", "o0"."OrderID", "o0"."ProductID", "o0"."Discount", "o0"."Quantity", "o0"."UnitPrice"
 FROM (
     SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" < 10300
     ORDER BY "o"."OrderID"
-    OFFSET @__p_0 ROWS
-) AS "t"
-LEFT JOIN "Order Details" AS "o0" ON "t"."OrderID" = "o0"."OrderID"
-ORDER BY "t"."OrderID", "o0"."OrderID"
+    OFFSET @__p_0
+) AS "o1"
+LEFT JOIN "Order Details" AS "o0" ON "o1"."OrderID" = "o0"."OrderID"
+ORDER BY "o1"."OrderID", "o0"."OrderID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Collection_projection_take(bool async)
     {
         await base.Collection_projection_take(async);
@@ -5684,19 +5621,18 @@ ORDER BY "t"."OrderID", "o0"."OrderID"
             """
 @__p_0='10'
 
-SELECT "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate", "o0"."OrderID", "o0"."ProductID", "o0"."Discount", "o0"."Quantity", "o0"."UnitPrice"
+SELECT "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate", "o0"."OrderID", "o0"."ProductID", "o0"."Discount", "o0"."Quantity", "o0"."UnitPrice"
 FROM (
-    SELECT TOP(@__p_0) "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+    SELECT FIRST @__p_0 "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" < 10300
     ORDER BY "o"."OrderID"
-) AS "t"
-LEFT JOIN "Order Details" AS "o0" ON "t"."OrderID" = "o0"."OrderID"
-ORDER BY "t"."OrderID", "o0"."OrderID"
+) AS "o1"
+LEFT JOIN "Order Details" AS "o0" ON "o1"."OrderID" = "o0"."OrderID"
+ORDER BY "o1"."OrderID", "o0"."OrderID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Collection_projection_skip_take(bool async)
     {
         await base.Collection_projection_skip_take(async);
@@ -5706,20 +5642,19 @@ ORDER BY "t"."OrderID", "o0"."OrderID"
 @__p_0='5'
 @__p_1='10'
 
-SELECT "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate", "o0"."OrderID", "o0"."ProductID", "o0"."Discount", "o0"."Quantity", "o0"."UnitPrice"
+SELECT "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate", "o0"."OrderID", "o0"."ProductID", "o0"."Discount", "o0"."Quantity", "o0"."UnitPrice"
 FROM (
     SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" < 10300
     ORDER BY "o"."OrderID"
-    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
-) AS "t"
-LEFT JOIN "Order Details" AS "o0" ON "t"."OrderID" = "o0"."OrderID"
-ORDER BY "t"."OrderID", "o0"."OrderID"
+    OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
+) AS "o1"
+LEFT JOIN "Order Details" AS "o0" ON "o1"."OrderID" = "o0"."OrderID"
+ORDER BY "o1"."OrderID", "o0"."OrderID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Anonymous_projection_skip_empty_collection_FirstOrDefault(bool async)
     {
         await base.Anonymous_projection_skip_empty_collection_FirstOrDefault(async);
@@ -5728,26 +5663,24 @@ ORDER BY "t"."OrderID", "o0"."OrderID"
             """
 @__p_0='0'
 
-SELECT "t0"."OrderID", "t0"."CustomerID", "t0"."EmployeeID", "t0"."OrderDate"
+SELECT "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
 FROM (
     SELECT "c"."CustomerID"
     FROM "Customers" AS "c"
     WHERE "c"."CustomerID" = N'FISSA'
-    ORDER BY (SELECT 1)
-    OFFSET @__p_0 ROWS
-) AS "t"
+    OFFSET @__p_0
+) AS "c0"
 LEFT JOIN (
-    SELECT "t1"."OrderID", "t1"."CustomerID", "t1"."EmployeeID", "t1"."OrderDate"
+    SELECT "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
     FROM (
         SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate", ROW_NUMBER() OVER(PARTITION BY "o"."CustomerID" ORDER BY "o"."OrderID") AS "row"
         FROM "Orders" AS "o"
-    ) AS "t1"
-    WHERE "t1"."row" <= 1
-) AS "t0" ON "t"."CustomerID" = "t0"."CustomerID"
+    ) AS "o0"
+    WHERE "o0"."row" <= 1
+) AS "o1" ON "c0"."CustomerID" = "o1"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Anonymous_projection_take_empty_collection_FirstOrDefault(bool async)
     {
         await base.Anonymous_projection_take_empty_collection_FirstOrDefault(async);
@@ -5756,24 +5689,23 @@ LEFT JOIN (
             """
 @__p_0='1'
 
-SELECT "t0"."OrderID", "t0"."CustomerID", "t0"."EmployeeID", "t0"."OrderDate"
+SELECT "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
 FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID"
+    SELECT FIRST @__p_0 "c"."CustomerID"
     FROM "Customers" AS "c"
     WHERE "c"."CustomerID" = N'FISSA'
-) AS "t"
+) AS "c0"
 LEFT JOIN (
-    SELECT "t1"."OrderID", "t1"."CustomerID", "t1"."EmployeeID", "t1"."OrderDate"
+    SELECT "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
     FROM (
         SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate", ROW_NUMBER() OVER(PARTITION BY "o"."CustomerID" ORDER BY "o"."OrderID") AS "row"
         FROM "Orders" AS "o"
-    ) AS "t1"
-    WHERE "t1"."row" <= 1
-) AS "t0" ON "t"."CustomerID" = "t0"."CustomerID"
+    ) AS "o0"
+    WHERE "o0"."row" <= 1
+) AS "o1" ON "c0"."CustomerID" = "o1"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Anonymous_projection_skip_take_empty_collection_FirstOrDefault(bool async)
     {
         await base.Anonymous_projection_skip_take_empty_collection_FirstOrDefault(async);
@@ -5783,22 +5715,21 @@ LEFT JOIN (
 @__p_0='0'
 @__p_1='1'
 
-SELECT "t0"."OrderID", "t0"."CustomerID", "t0"."EmployeeID", "t0"."OrderDate"
+SELECT "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
 FROM (
     SELECT "c"."CustomerID"
     FROM "Customers" AS "c"
     WHERE "c"."CustomerID" = N'FISSA'
-    ORDER BY (SELECT 1)
-    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
-) AS "t"
+    OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
+) AS "c0"
 LEFT JOIN (
-    SELECT "t1"."OrderID", "t1"."CustomerID", "t1"."EmployeeID", "t1"."OrderDate"
+    SELECT "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
     FROM (
         SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate", ROW_NUMBER() OVER(PARTITION BY "o"."CustomerID" ORDER BY "o"."OrderID") AS "row"
         FROM "Orders" AS "o"
-    ) AS "t1"
-    WHERE "t1"."row" <= 1
-) AS "t0" ON "t"."CustomerID" = "t0"."CustomerID"
+    ) AS "o0"
+    WHERE "o0"."row" <= 1
+) AS "o1" ON "c0"."CustomerID" = "o1"."CustomerID"
 """);
     }
 
@@ -5826,18 +5757,17 @@ FROM "Order Details" AS "o"
 """);
     }
 
-    [ActianTodo]
     public override async Task Entity_equality_with_null_coalesce_client_side(bool async)
     {
         await base.Entity_equality_with_null_coalesce_client_side(async);
 
         AssertSql(
             """
-@__entity_equality_p_0_CustomerID='ALFKI' (Size = 5) (DbType = StringFixedLength)
+@__entity_equality_a_0_CustomerID='ALFKI'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__entity_equality_p_0_CustomerID
+WHERE "c"."CustomerID" = @__entity_equality_a_0_CustomerID
 """);
     }
 
@@ -5922,32 +5852,31 @@ ORDER BY "c"."CustomerID", "o"."OrderID"
 
         AssertSql(
             """
-SELECT "t0"."OrderID", "t0"."CustomerID", "t0"."EmployeeID", "t0"."OrderDate"
+SELECT "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
 FROM "Customers" AS "c"
 LEFT JOIN (
-    SELECT "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate"
+    SELECT "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
     FROM (
         SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate", ROW_NUMBER() OVER(PARTITION BY "o"."CustomerID" ORDER BY "o"."OrderDate", "o"."OrderID") AS "row"
         FROM "Orders" AS "o"
-    ) AS "t"
-    WHERE 2 < "t"."row" AND "t"."row" <= 3
-) AS "t0" ON "c"."CustomerID" = "t0"."CustomerID"
+    ) AS "o0"
+    WHERE 2 < "o0"."row" AND "o0"."row" <= 3
+) AS "o1" ON "c"."CustomerID" = "o1"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_distinct_Select_with_client_bindings(bool async)
     {
         await base.Select_distinct_Select_with_client_bindings(async);
 
         AssertSql(
             """
-SELECT "t"."c"
+SELECT "o0"."c"
 FROM (
-    SELECT DISTINCT DATEPART(year, "o"."OrderDate") AS "c"
+    SELECT DISTINCT DATE_PART('YEAR', "o"."OrderDate") AS "c"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" < 20000
-) AS "t"
+) AS "o0"
 """);
     }
 
@@ -6014,8 +5943,8 @@ SELECT CASE
             FROM "Orders" AS "o1"
             LEFT JOIN "Customers" AS "c1" ON "o1"."CustomerID" = "c1"."CustomerID"
             WHERE "c"."CustomerID" = "o1"."CustomerID"
-            ORDER BY "o1"."OrderDate") IS NULL AND "o"."CustomerID" IS NULL)) AND "o"."OrderID" < 11000) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+            ORDER BY "o1"."OrderDate") IS NULL AND "o"."CustomerID" IS NULL)) AND "o"."OrderID" < 11000) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END AS "Complex"
 FROM "Customers" AS "c"
 WHERE "c"."CustomerID" LIKE N'F%'
@@ -6081,10 +6010,10 @@ SELECT "c"."CustomerID", CASE
         WHERE "c"."CustomerID" = "o"."CustomerID") OR NOT EXISTS (
         SELECT 1
         FROM "Orders" AS "o0"
-        WHERE "c"."CustomerID" = "o0"."CustomerID") THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "c"."CustomerID" = "o0"."CustomerID") THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END, (
-    SELECT TOP(1) "o1"."OrderDate"
+    SELECT FIRST 1 "o1"."OrderDate"
     FROM "Orders" AS "o1"
     WHERE "c"."CustomerID" = "o1"."CustomerID"
     ORDER BY "o1"."OrderID")
@@ -6092,22 +6021,21 @@ FROM "Customers" AS "c"
 """);
     }
 
-    [ActianTodo]
     public override async Task DefaultIfEmpty_over_empty_collection_followed_by_projecting_constant(bool async)
     {
         await base.DefaultIfEmpty_over_empty_collection_followed_by_projecting_constant(async);
 
         AssertSql(
             """
-SELECT TOP(1) N'520'
+SELECT FIRST 1 N'520'
 FROM (
-    SELECT NULL AS "empty"
+    SELECT 1
 ) AS "e"
 LEFT JOIN (
-    SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+    SELECT 1
     FROM "Customers" AS "c"
     WHERE 0 = 1
-) AS "t" ON 1 = 1
+) AS "c0" ON 1 = 1
 """);
     }
 
@@ -6119,7 +6047,7 @@ LEFT JOIN (
         AssertSql(
             """
 SELECT "c"."CustomerID", (
-    SELECT TOP(1) "o"."OrderDate"
+    SELECT FIRST "o"."OrderDate"
     FROM "Orders" AS "o"
     WHERE "c"."CustomerID" = "o"."CustomerID") AS "OrderDate"
 FROM "Customers" AS "c"
@@ -6181,7 +6109,6 @@ CROSS APPLY (
 """);
     }
 
-    [ActianTodo]
     public override async Task Skip_0_Take_0_works_when_parameter(bool async)
     {
         await base.Skip_0_Take_0_works_when_parameter(async);
@@ -6192,31 +6119,24 @@ SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."Cont
 FROM "Customers" AS "c"
 WHERE 0 = 1
 """,
-            //
-            """
+                //
+                """
 @__p_0='1'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 ORDER BY "c"."CustomerID"
-OFFSET @__p_0 ROWS FETCH NEXT @__p_0 ROWS ONLY
+OFFSET @__p_0 FETCH NEXT @__p_0 ROWS ONLY
 """);
     }
 
-    [ActianTodo]
     public override async Task Skip_0_Take_0_works_when_constant(bool async)
     {
         await base.Skip_0_Take_0_works_when_constant(async);
 
         AssertSql(
             """
-SELECT CASE
-    WHEN EXISTS (
-        SELECT 1
-        FROM "Orders" AS "o"
-        WHERE 0 = 1) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END
+SELECT CAST(0 AS boolean)
 FROM "Customers" AS "c"
 WHERE "c"."CustomerID" LIKE N'F%'
 ORDER BY "c"."CustomerID"
@@ -6343,7 +6263,6 @@ ORDER BY "c"."CustomerID", "t"."First", "t"."Second"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_nested_collection_with_distinct(bool async)
     {
         await base.Select_nested_collection_with_distinct(async);
@@ -6354,20 +6273,19 @@ SELECT CASE
     WHEN EXISTS (
         SELECT 1
         FROM "Orders" AS "o"
-        WHERE "c"."CustomerID" = "o"."CustomerID") THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END, "c"."CustomerID", "t"."CustomerID"
+        WHERE "c"."CustomerID" = "o"."CustomerID") THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END, "c"."CustomerID", "o1"."CustomerID"
 FROM "Customers" AS "c"
 LEFT JOIN (
     SELECT DISTINCT "o0"."CustomerID"
     FROM "Orders" AS "o0"
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
+) AS "o1" ON "c"."CustomerID" = "o1"."CustomerID"
 WHERE "c"."CustomerID" LIKE N'A%'
 ORDER BY "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task SelectMany_primitive_select_subquery(bool async)
     {
         await base.SelectMany_primitive_select_subquery(async);
@@ -6377,67 +6295,40 @@ ORDER BY "c"."CustomerID"
 SELECT CASE
     WHEN EXISTS (
         SELECT 1
-        FROM "Employees" AS "e") THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        FROM "Employees" AS "e") THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """,
-            //
-            """
+                //
+                """
 @__Any_0='True'
 
 SELECT @__Any_0
 FROM "Employees" AS "e"
 CROSS JOIN "Employees" AS "e0"
-""",
-            //
-            """
-SELECT CASE
-    WHEN EXISTS (
-        SELECT 1
-        FROM "Employees" AS "e") THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END
-""",
-            //
-            """
-SELECT CASE
-    WHEN EXISTS (
-        SELECT 1
-        FROM "Employees" AS "e") THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END
 """);
     }
 
-    [ActianTodo]
     public override async Task Throws_on_concurrent_query_first(bool async)
     {
         await base.Throws_on_concurrent_query_first(async);
 
         AssertSql(
             """
-SELECT 1
+select 1
+                                          from $ingres.iidatabase_info
+                                          where database_name = 'iidbdb'
 """,
-            //
-            """
+                //
+                """
 
-IF EXISTS
-    (SELECT *
-     FROM "sys"."objects" o
-     WHERE "o"."type" = 'U'
-     AND "o"."is_ms_shipped" = 0
-     AND NOT EXISTS (SELECT *
-         FROM "sys"."extended_properties" AS "ep"
-         WHERE "ep"."major_id" = "o"."object_id"
-             AND "ep"."minor_id" = 0
-             AND "ep"."class" = 1
-             AND "ep"."name" = N'microsoft_database_tools_support'
-    )
-)
-SELECT 1 ELSE SELECT 0
+                        select distinct 1
+                          from $ingres.iitables
+                         where table_type = 'T'
+                           and system_use = 'U';
 """,
-            //
-            """
+                //
+                """
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 """);
@@ -6449,7 +6340,7 @@ FROM "Customers" AS "c"
 
         AssertSql(
             """
-SELECT "c"."Region"
+SELECT CAST(LENGTH("c"."Region") AS integer) AS "Length"
 FROM "Customers" AS "c"
 """);
     }
@@ -6466,7 +6357,6 @@ ORDER BY "c"."CustomerID" DESC
 """);
     }
 
-    [ActianTodo]
     public override async Task Take_Distinct(bool async)
     {
         await base.Take_Distinct(async);
@@ -6475,16 +6365,15 @@ ORDER BY "c"."CustomerID" DESC
             """
 @__p_0='5'
 
-SELECT DISTINCT "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate"
+SELECT DISTINCT "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
 FROM (
-    SELECT TOP(@__p_0) "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+    SELECT FIRST @__p_0 "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderID"
-) AS "t"
+) AS "o0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Perform_identity_resolution_reuses_same_instances(bool async, bool useAsTracking)
     {
         await base.Perform_identity_resolution_reuses_same_instances(async, useAsTracking);
@@ -6498,15 +6387,10 @@ WHERE "c"."CustomerID" = N'ALFKI'
 """,
             //
             """
-@__orderIds_0='"10643,10692,10702,10835,10952,11011"' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Orders" AS "o"
 LEFT JOIN "Customers" AS "c" ON "o"."CustomerID" = "c"."CustomerID"
-WHERE "o"."OrderID" IN (
-    SELECT "o0"."value"
-    FROM OPENJSON(@__orderIds_0) WITH ("value" int '$') AS "o0"
-)
+WHERE "o"."OrderID" IN (10643, 10692, 10702, 10835, 10952, 11011)
 """);
     }
 
@@ -6526,22 +6410,21 @@ FROM "Customers" AS "c"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_nested_collection_in_anonymous_type(bool async)
     {
         await base.Select_nested_collection_in_anonymous_type(async);
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "t"."OrderID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+SELECT "c"."CustomerID", "o0"."OrderID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 LEFT JOIN (
     SELECT "o"."OrderID", "o"."CustomerID"
     FROM "Orders" AS "o"
-    WHERE DATEPART(year, "o"."OrderDate") = 1997
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
+    WHERE DATE_PART('YEAR', "o"."OrderDate") = 1997
+) AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
 WHERE "c"."CustomerID" = N'ALFKI'
-ORDER BY "c"."CustomerID", "t"."OrderID"
+ORDER BY "c"."CustomerID", "o0"."OrderID"
 """);
     }
 
@@ -6630,22 +6513,21 @@ ORDER BY "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Where_Property_shadow_closure(bool async)
     {
         await base.Where_Property_shadow_closure(async);
 
         AssertSql(
             """
-@__value_0='Sales Representative' (Size = 30)
+@__value_0='Sales Representative'
 
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
 WHERE "e"."Title" = @__value_0
 """,
-            //
-            """
-@__value_0='Steven' (Size = 10)
+                //
+                """
+@__value_0='Steven'
 
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
@@ -6666,35 +6548,26 @@ WHERE "c"."CustomerID" = "o"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Throws_on_concurrent_query_list(bool async)
     {
         await base.Throws_on_concurrent_query_list(async);
 
         AssertSql(
             """
-SELECT 1
+select 1
+                                          from $ingres.iidatabase_info
+                                          where database_name = 'iidbdb'
 """,
-            //
-            """
+                //
+                """
 
-IF EXISTS
-    (SELECT *
-     FROM "sys"."objects" o
-     WHERE "o"."type" = 'U'
-     AND "o"."is_ms_shipped" = 0
-     AND NOT EXISTS (SELECT *
-         FROM "sys"."extended_properties" AS "ep"
-         WHERE "ep"."major_id" = "o"."object_id"
-             AND "ep"."minor_id" = 0
-             AND "ep"."class" = 1
-             AND "ep"."name" = N'microsoft_database_tools_support'
-    )
-)
-SELECT 1 ELSE SELECT 0
+                        select distinct 1
+                          from $ingres.iitables
+                         where table_type = 'T'
+                           and system_use = 'U';
 """,
-            //
-            """
+                //
+                """
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 """);
@@ -6770,14 +6643,13 @@ WHERE "e"."Title" = N'Sales Representative'
 """);
     }
 
-    [ActianTodo]
     public override async Task Where_Property_when_shadow_unconstrained_generic_method(bool async)
     {
         await base.Where_Property_when_shadow_unconstrained_generic_method(async);
 
         AssertSql(
             """
-@__value_0='Sales Representative' (Size = 30)
+@__value_0='Sales Representative'
 
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
@@ -6791,14 +6663,14 @@ WHERE "e"."Title" = @__value_0
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate", "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate", "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM "Customers" AS "c"
 INNER JOIN (
     SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" < 10500
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
-LEFT JOIN "Customers" AS "c0" ON "t"."CustomerID" = "c0"."CustomerID"
+) AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
+LEFT JOIN "Customers" AS "c0" ON "o0"."CustomerID" = "c0"."CustomerID"
 WHERE "c"."CustomerID" LIKE N'A%'
 """);
     }
@@ -6863,7 +6735,6 @@ ORDER BY "c0"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Null_parameter_name_works(bool async)
     {
         await base.Null_parameter_name_works(async);
@@ -6876,59 +6747,34 @@ WHERE 0 = 1
 """);
     }
 
-    [ActianTodo]
     public override async Task Where_subquery_expression(bool async)
     {
         await base.Where_subquery_expression(async);
 
         AssertSql(
             """
-SELECT TOP(1) "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+SELECT FIRST 1 "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM "Orders" AS "o"
 """,
-            //
-            """
+                //
+                """
 @__firstOrder_OrderID_0='10248'
 
 SELECT CASE
     WHEN EXISTS (
         SELECT 1
         FROM "Orders" AS "o"
-        WHERE "o"."OrderID" = @__firstOrder_OrderID_0) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "o"."OrderID" = @__firstOrder_OrderID_0) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """,
-            //
-            """
+                //
+                """
 @__Any_0='True'
 
 SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM "Orders" AS "o"
-WHERE @__Any_0 = CAST(1 AS bit)
-""",
-            //
-            """
-@__firstOrder_OrderID_0='10248'
-
-SELECT CASE
-    WHEN EXISTS (
-        SELECT 1
-        FROM "Orders" AS "o"
-        WHERE "o"."OrderID" = @__firstOrder_OrderID_0) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END
-""",
-            //
-            """
-@__firstOrder_OrderID_0='10248'
-
-SELECT CASE
-    WHEN EXISTS (
-        SELECT 1
-        FROM "Orders" AS "o"
-        WHERE "o"."OrderID" = @__firstOrder_OrderID_0) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END
+WHERE @__Any_0 = CAST(1 AS boolean)
 """);
     }
 
@@ -6960,14 +6806,14 @@ WHERE "o"."OrderDate" IS NOT NULL
 """);
     }
 
-    [ActianTodo]
+    //[ActianTodo]
     public override async Task Where_subquery_expression_same_parametername(bool async)
     {
         await base.Where_subquery_expression_same_parametername(async);
 
         AssertSql(
             """
-SELECT TOP(1) "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+SELECT FIRST 1 "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM "Orders" AS "o"
 ORDER BY "o"."OrderID"
 """,
@@ -7055,24 +6901,23 @@ ORDER BY "c"."CustomerID", "c"."Country"
 """);
     }
 
-    [ActianTodo]
     public override async Task Collection_projection_after_DefaultIfEmpty(bool async)
     {
         await base.Collection_projection_after_DefaultIfEmpty(async);
 
         AssertSql(
             """
-SELECT "t"."CustomerID", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+SELECT "c0"."CustomerID", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM (
-    SELECT NULL AS "empty"
+    SELECT 1
 ) AS "e"
 LEFT JOIN (
     SELECT "c"."CustomerID"
     FROM "Customers" AS "c"
     WHERE "c"."City" = N'Seattle'
-) AS "t" ON 1 = 1
-LEFT JOIN "Orders" AS "o" ON "t"."CustomerID" = "o"."CustomerID"
-ORDER BY "t"."CustomerID"
+) AS "c0" ON 1 = 1
+LEFT JOIN "Orders" AS "o" ON "c0"."CustomerID" = "o"."CustomerID"
+ORDER BY "c0"."CustomerID"
 """);
     }
 
@@ -7462,7 +7307,7 @@ WHERE NOT EXISTS (
 """);
     }
 
-    [ActianTodo]
+    [ActianTodo] //Expected: 3 Actual: 2
     public override async Task Collection_navigation_equal_to_null_for_subquery_using_ElementAtOrDefault_constant_one(bool async)
     {
         await base.Collection_navigation_equal_to_null_for_subquery_using_ElementAtOrDefault_constant_one(async);
@@ -7476,11 +7321,11 @@ WHERE NOT EXISTS (
     FROM "Orders" AS "o"
     WHERE "c"."CustomerID" = "o"."CustomerID"
     ORDER BY "o"."OrderID"
-    OFFSET 1 ROWS)
+    OFFSET 1)
 """);
     }
 
-    [ActianTodo]
+    [ActianTodo] //Expected: 5 Actual: 2
     public override async Task Collection_navigation_equal_to_null_for_subquery_using_ElementAtOrDefault_parameter(bool async)
     {
         await base.Collection_navigation_equal_to_null_for_subquery_using_ElementAtOrDefault_parameter(async);
@@ -7496,85 +7341,61 @@ WHERE NOT EXISTS (
     FROM "Orders" AS "o"
     WHERE "c"."CustomerID" = "o"."CustomerID"
     ORDER BY "o"."OrderID"
-    OFFSET @__prm_0 ROWS)
+    OFFSET @__prm_0)
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_over_concatenated_columns_with_different_sizes(bool async)
     {
         await base.Contains_over_concatenated_columns_with_different_sizes(async);
 
         AssertSql(
             """
-@__data_0='""ALFKIAlfreds Futterkiste","ANATRAna Trujillo Emparedados y helados""' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" + "c"."CompanyName" IN (
-    SELECT "d"."value"
-    FROM OPENJSON(@__data_0) WITH ("value" nvarchar(45) '$') AS "d"
-)
+WHERE "c"."CustomerID" + "c"."CompanyName" IN (N'ALFKIAlfreds Futterkiste', N'ANATRAna Trujillo Emparedados y helados')
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_over_concatenated_column_and_constant(bool async)
     {
         await base.Contains_over_concatenated_column_and_constant(async);
 
         AssertSql(
             """
-@__data_0='""ALFKISomeConstant","ANATRSomeConstant","ALFKIX""' (Size = 4000)
-
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" + N'SomeConstant' IN (
-    SELECT "d"."value"
-    FROM OPENJSON(@__data_0) WITH ("value" nvarchar(max) '$') AS "d"
-)
+WHERE "c"."CustomerID" + N'SomeConstant' IN (N'ALFKISomeConstant', N'ANATRSomeConstant', N'ALFKIX')
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_over_concatenated_columns_both_fixed_length(bool async)
     {
         await base.Contains_over_concatenated_columns_both_fixed_length(async);
 
         AssertSql(
             """
-@__data_0='""ALFKIALFKI","ALFKI","ANATRAna Trujillo Emparedados y helados","ANATRANATR""' (Size = 4000)
-
 SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM "Orders" AS "o"
 LEFT JOIN "Customers" AS "c" ON "o"."CustomerID" = "c"."CustomerID"
-WHERE COALESCE("o"."CustomerID", N'') + COALESCE("c"."CustomerID", N'') IN (
-    SELECT "d"."value"
-    FROM OPENJSON(@__data_0) WITH ("value" nchar(10) '$') AS "d"
-)
+WHERE COALESCE("o"."CustomerID", N'') + COALESCE("c"."CustomerID", N'') IN (N'ALFKIALFKI', N'ALFKI', N'ANATRAna Trujillo Emparedados y helados', N'ANATRANATR')
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_over_concatenated_column_and_parameter(bool async)
     {
         await base.Contains_over_concatenated_column_and_parameter(async);
 
         AssertSql(
             """
-@__someVariable_1='SomeVariable' (Size = 4000)
-@__data_0='""ALFKISomeVariable","ANATRSomeVariable","ALFKIX""' (Size = 4000)
+@__someVariable_0='SomeVariable'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" + @__someVariable_1 IN (
-    SELECT "d"."value"
-    FROM OPENJSON(@__data_0) WITH ("value" nvarchar(max) '$') AS "d"
-)
+WHERE "c"."CustomerID" + @__someVariable_0 IN (N'ALFKISomeVariable', N'ANATRSomeVariable', N'ALFKIX')
 """);
     }
 
-    [ActianTodo]
     public override async Task Contains_over_concatenated_parameter_and_constant(bool async)
     {
         await base.Contains_over_concatenated_parameter_and_constant(async);
@@ -7585,7 +7406,7 @@ WHERE "c"."CustomerID" + @__someVariable_1 IN (
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE @__Contains_0 = CAST(1 AS bit)
+WHERE @__Contains_0 = CAST(1 AS boolean)
 """);
     }
 
@@ -7648,6 +7469,7 @@ ORDER BY (
 """);
 #endif
     }
+
 
     private void AssertSql(params string[] expected)
         => Fixture.TestSqlLoggerFactory.AssertBaseline(expected);

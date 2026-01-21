@@ -37,7 +37,7 @@ Alternatively contact support.
 
 ### Before installing
 
-Actian.EFCore 8.0 relies on Actian.Client (Actian .NET Data Provider) version 8.0.0 and above to work. Actian.Client has not been published to [NuGet.org], so it will have to be added to a local or private NuGet feed, which the project has access to.
+Actian.EFCore 9.0 relies on Actian.Client (Actian .NET Data Provider) version 8.0.6 and above to work. Actian.Client has not been published to [NuGet.org], so it will have to be added to a local or private NuGet feed, which the project has access to.
 
 Actian.Client (Actian .NET Data Provider) can be downloaded from [Customer Downloads Provider].
 

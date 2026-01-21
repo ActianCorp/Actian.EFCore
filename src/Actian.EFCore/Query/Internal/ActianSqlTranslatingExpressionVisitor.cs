@@ -1,3 +1,7 @@
+﻿// Copyright (c) 2024 Actian Corporation. All Rights Reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -66,7 +70,7 @@ namespace Actian.EFCore.Query.Internal
             typeof(ActianSqlTranslatingExpressionVisitor).GetTypeInfo().GetDeclaredMethod(nameof(ConstructLikePatternParameter))!;
 
         private const char LikeEscapeChar = '\\';
-        private const string LikeEscapeString = "\\";
+        private const string LikeEscapeString = @"\\";
 
         public ActianSqlTranslatingExpressionVisitor(
             RelationalSqlTranslatingExpressionVisitorDependencies dependencies,
@@ -206,7 +210,7 @@ namespace Actian.EFCore.Query.Internal
                         // simple LIKE
                         translation = patternConstant.Value switch
                         {
-                            null => _sqlExpressionFactory.Like(translatedInstance, _sqlExpressionFactory.Constant(null, stringTypeMapping)),
+                            null => _sqlExpressionFactory.Like(translatedInstance, _sqlExpressionFactory.Constant(null!, stringTypeMapping)),
 
                             // In .NET, all strings start with/end with/contain the empty string, but SQL LIKE return false for empty patterns.
                             // Return % which always matches instead.
@@ -293,7 +297,7 @@ namespace Actian.EFCore.Query.Internal
                                                 {
                                                 translatedInstance,
                                                 _sqlExpressionFactory.Function(
-                                                    "LEN",
+                                                    "LENGTH",
                                                     new[] { translatedPattern },
                                                     nullable: true,
                                                     argumentsPropagateNullability: new[] { true },
@@ -315,7 +319,7 @@ namespace Actian.EFCore.Query.Internal
                                         _sqlExpressionFactory.OrElse(
                                             _sqlExpressionFactory.GreaterThan(
                                                 _sqlExpressionFactory.Function(
-                                                    "CHARINDEX",
+                                                    "POSITION",
                                                     new[] { translatedPattern, translatedInstance },
                                                     nullable: true,
                                                     argumentsPropagateNullability: new[] { true, true },

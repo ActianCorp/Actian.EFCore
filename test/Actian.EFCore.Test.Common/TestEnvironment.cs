@@ -1,3 +1,7 @@
+﻿// Copyright (c) 2024 Actian Corporation. All Rights Reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 ﻿using System;
 using System.IO;
 using System.Linq;
@@ -12,7 +16,7 @@ namespace Actian.EFCore.TestUtilities
 {
     public static class TestEnvironment
     {
-        public static string DefaultConnection = "Data Source=(localdb)";//\\MSSQLLocalDB;Database=master;Integrated Security=True;Connect Timeout=60;ConnectRetryCount=0";
+        public static string DefaultConnection = "";//"Data Source=(localdb)";//\\MSSQLLocalDB;Database=master;Integrated Security=True;Connect Timeout=60;ConnectRetryCount=0";
 
         public static void Log(object testObject, ITestOutputHelper testOutputHelper)
         {

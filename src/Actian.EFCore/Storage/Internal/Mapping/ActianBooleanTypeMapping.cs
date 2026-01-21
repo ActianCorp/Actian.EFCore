@@ -1,3 +1,7 @@
+﻿// Copyright (c) 2024 Actian Corporation. All Rights Reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 ﻿using System.Data;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -24,6 +28,6 @@ namespace Actian.EFCore.Storage.Internal
 
         /// <inheritdoc />
         protected override string GenerateNonNullSqlLiteral(object value)
-            => (bool)value ? "TRUE" : "FALSE";
+            => $"CAST({base.GenerateNonNullSqlLiteral(value)} AS {StoreType})";
     }
 }

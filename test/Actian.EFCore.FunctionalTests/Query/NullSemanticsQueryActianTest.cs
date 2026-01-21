@@ -1,4 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿// Copyright (c) 2024 Actian Corporation. All Rights Reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Actian.EFCore.Infrastructure;
 using Actian.EFCore.TestUtilities;
 using Microsoft.EntityFrameworkCore;
@@ -61,19 +66,19 @@ WHERE "e"."BoolA" <> "e"."BoolB"
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."BoolA" <> "e"."NullableBoolB" AND "e"."NullableBoolB" IS NOT NULL
+WHERE "e"."BoolA" <> "e"."NullableBoolB"
 """,
                 //
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."NullableBoolA" <> "e"."BoolB" AND "e"."NullableBoolA" IS NOT NULL
+WHERE "e"."NullableBoolA" <> "e"."BoolB"
 """,
                 //
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE ("e"."NullableBoolA" <> "e"."NullableBoolB" AND "e"."NullableBoolA" IS NOT NULL AND "e"."NullableBoolB" IS NOT NULL) OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL)
+WHERE "e"."NullableBoolA" <> "e"."NullableBoolB" OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL)
 """);
         }
 
@@ -91,19 +96,19 @@ WHERE "e"."BoolA" <> "e"."BoolB"
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."BoolA" <> "e"."NullableBoolB" AND "e"."NullableBoolB" IS NOT NULL
+WHERE "e"."BoolA" <> "e"."NullableBoolB"
 """,
                 //
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."NullableBoolA" <> "e"."BoolB" AND "e"."NullableBoolA" IS NOT NULL
+WHERE "e"."NullableBoolA" <> "e"."BoolB"
 """,
                 //
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE ("e"."NullableBoolA" <> "e"."NullableBoolB" AND "e"."NullableBoolA" IS NOT NULL AND "e"."NullableBoolB" IS NOT NULL) OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL)
+WHERE "e"."NullableBoolA" <> "e"."NullableBoolB" OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL)
 """);
         }
 
@@ -121,19 +126,19 @@ WHERE "e"."BoolA" = "e"."BoolB"
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."BoolA" = "e"."NullableBoolB" AND "e"."NullableBoolB" IS NOT NULL
+WHERE "e"."BoolA" = "e"."NullableBoolB"
 """,
                 //
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."NullableBoolA" = "e"."BoolB" AND "e"."NullableBoolA" IS NOT NULL
+WHERE "e"."NullableBoolA" = "e"."BoolB"
 """,
                 //
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE ("e"."NullableBoolA" = "e"."NullableBoolB" AND "e"."NullableBoolA" IS NOT NULL AND "e"."NullableBoolB" IS NOT NULL) OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL)
+WHERE "e"."NullableBoolA" = "e"."NullableBoolB" OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL)
 """);
         }
 
@@ -391,19 +396,19 @@ WHERE "e"."BoolA" = "e"."BoolB"
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."BoolA" = "e"."NullableBoolB" AND "e"."NullableBoolB" IS NOT NULL
+WHERE "e"."BoolA" = "e"."NullableBoolB"
 """,
                 //
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."NullableBoolA" = "e"."BoolB" AND "e"."NullableBoolA" IS NOT NULL
+WHERE "e"."NullableBoolA" = "e"."BoolB"
 """,
                 //
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE ("e"."NullableBoolA" = "e"."NullableBoolB" AND "e"."NullableBoolA" IS NOT NULL AND "e"."NullableBoolB" IS NOT NULL) OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL)
+WHERE "e"."NullableBoolA" = "e"."NullableBoolB" OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL)
 """);
         }
 
@@ -421,19 +426,19 @@ WHERE "e"."BoolA" <> "e"."BoolB"
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."BoolA" <> "e"."NullableBoolB" AND "e"."NullableBoolB" IS NOT NULL
+WHERE "e"."BoolA" <> "e"."NullableBoolB"
 """,
                 //
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."NullableBoolA" <> "e"."BoolB" AND "e"."NullableBoolA" IS NOT NULL
+WHERE "e"."NullableBoolA" <> "e"."BoolB"
 """,
                 //
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE ("e"."NullableBoolA" <> "e"."NullableBoolB" AND "e"."NullableBoolA" IS NOT NULL AND "e"."NullableBoolB" IS NOT NULL) OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL)
+WHERE "e"."NullableBoolA" <> "e"."NullableBoolB" OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL)
 """);
         }
 
@@ -451,19 +456,19 @@ WHERE "e"."BoolA" <> "e"."BoolB"
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."BoolA" <> "e"."NullableBoolB" AND "e"."NullableBoolB" IS NOT NULL
+WHERE "e"."BoolA" <> "e"."NullableBoolB"
 """,
                 //
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."NullableBoolA" <> "e"."BoolB" AND "e"."NullableBoolA" IS NOT NULL
+WHERE "e"."NullableBoolA" <> "e"."BoolB"
 """,
                 //
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE ("e"."NullableBoolA" <> "e"."NullableBoolB" AND "e"."NullableBoolA" IS NOT NULL AND "e"."NullableBoolB" IS NOT NULL) OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL)
+WHERE "e"."NullableBoolA" <> "e"."NullableBoolB" OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL)
 """);
         }
 
@@ -481,19 +486,19 @@ WHERE "e"."BoolA" = "e"."BoolB"
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."BoolA" = "e"."NullableBoolB" AND "e"."NullableBoolB" IS NOT NULL
+WHERE "e"."BoolA" = "e"."NullableBoolB"
 """,
                 //
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."NullableBoolA" = "e"."BoolB" AND "e"."NullableBoolA" IS NOT NULL
+WHERE "e"."NullableBoolA" = "e"."BoolB"
 """,
                 //
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE ("e"."NullableBoolA" = "e"."NullableBoolB" AND "e"."NullableBoolA" IS NOT NULL AND "e"."NullableBoolB" IS NOT NULL) OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL)
+WHERE "e"."NullableBoolA" = "e"."NullableBoolB" OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL)
 """);
         }
 
@@ -617,7 +622,7 @@ WHERE ("e"."NullableBoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL
 """);
         }
 
-        [ActianTodo]
+        [BooleanExpession]
         public override async Task Compare_complex_equal_equal_equal(bool async)
         {
             await base.Compare_complex_equal_equal_equal(async);
@@ -627,11 +632,11 @@ WHERE ("e"."NullableBoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
 WHERE CASE
-    WHEN "e"."BoolA" = "e"."BoolB" THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."BoolA" = "e"."BoolB" THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END = CASE
-    WHEN "e"."IntA" = "e"."IntB" THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."IntA" = "e"."IntB" THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """,
                 //
@@ -639,11 +644,11 @@ END
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
 WHERE CASE
-    WHEN "e"."NullableBoolA" = "e"."BoolB" AND "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."NullableBoolA" = "e"."BoolB" AND "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END = CASE
-    WHEN "e"."IntA" = "e"."NullableIntB" AND "e"."NullableIntB" IS NOT NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."IntA" = "e"."NullableIntB" AND "e"."NullableIntB" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """,
                 //
@@ -651,16 +656,16 @@ END
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
 WHERE CASE
-    WHEN ("e"."NullableBoolA" = "e"."NullableBoolB" AND "e"."NullableBoolA" IS NOT NULL AND "e"."NullableBoolB" IS NOT NULL) OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN ("e"."NullableBoolA" = "e"."NullableBoolB" AND "e"."NullableBoolA" IS NOT NULL AND "e"."NullableBoolB" IS NOT NULL) OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END = CASE
-    WHEN ("e"."NullableIntA" = "e"."NullableIntB" AND "e"."NullableIntA" IS NOT NULL AND "e"."NullableIntB" IS NOT NULL) OR ("e"."NullableIntA" IS NULL AND "e"."NullableIntB" IS NULL) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN ("e"."NullableIntA" = "e"."NullableIntB" AND "e"."NullableIntA" IS NOT NULL AND "e"."NullableIntB" IS NOT NULL) OR ("e"."NullableIntA" IS NULL AND "e"."NullableIntB" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
         }
 
-        [ActianTodo]
+        [BooleanExpession]
         public override async Task Compare_complex_equal_not_equal_equal(bool async)
         {
             await base.Compare_complex_equal_not_equal_equal(async);
@@ -670,11 +675,11 @@ END
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
 WHERE CASE
-    WHEN "e"."BoolA" = "e"."BoolB" THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."BoolA" = "e"."BoolB" THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END <> CASE
-    WHEN "e"."IntA" = "e"."IntB" THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."IntA" = "e"."IntB" THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """,
                 //
@@ -682,11 +687,11 @@ END
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
 WHERE CASE
-    WHEN "e"."NullableBoolA" = "e"."BoolB" AND "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."NullableBoolA" = "e"."BoolB" AND "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END <> CASE
-    WHEN "e"."IntA" = "e"."NullableIntB" AND "e"."NullableIntB" IS NOT NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."IntA" = "e"."NullableIntB" AND "e"."NullableIntB" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """,
                 //
@@ -694,16 +699,16 @@ END
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
 WHERE CASE
-    WHEN ("e"."NullableBoolA" = "e"."NullableBoolB" AND "e"."NullableBoolA" IS NOT NULL AND "e"."NullableBoolB" IS NOT NULL) OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN ("e"."NullableBoolA" = "e"."NullableBoolB" AND "e"."NullableBoolA" IS NOT NULL AND "e"."NullableBoolB" IS NOT NULL) OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END <> CASE
-    WHEN ("e"."NullableIntA" = "e"."NullableIntB" AND "e"."NullableIntA" IS NOT NULL AND "e"."NullableIntB" IS NOT NULL) OR ("e"."NullableIntA" IS NULL AND "e"."NullableIntB" IS NULL) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN ("e"."NullableIntA" = "e"."NullableIntB" AND "e"."NullableIntA" IS NOT NULL AND "e"."NullableIntB" IS NOT NULL) OR ("e"."NullableIntA" IS NULL AND "e"."NullableIntB" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
         }
 
-        [ActianTodo]
+        [BooleanExpession]
         public override async Task Compare_complex_not_equal_equal_equal(bool async)
         {
             await base.Compare_complex_not_equal_equal_equal(async);
@@ -713,11 +718,11 @@ END
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
 WHERE CASE
-    WHEN "e"."BoolA" <> "e"."BoolB" THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."BoolA" <> "e"."BoolB" THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END = CASE
-    WHEN "e"."IntA" = "e"."IntB" THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."IntA" = "e"."IntB" THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """,
                 //
@@ -725,11 +730,11 @@ END
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
 WHERE CASE
-    WHEN "e"."NullableBoolA" <> "e"."BoolB" OR "e"."NullableBoolA" IS NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."NullableBoolA" <> "e"."BoolB" OR "e"."NullableBoolA" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END = CASE
-    WHEN "e"."IntA" = "e"."NullableIntB" AND "e"."NullableIntB" IS NOT NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."IntA" = "e"."NullableIntB" AND "e"."NullableIntB" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """,
                 //
@@ -737,16 +742,16 @@ END
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
 WHERE CASE
-    WHEN ("e"."NullableBoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN ("e"."NullableBoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END = CASE
-    WHEN ("e"."NullableIntA" = "e"."NullableIntB" AND "e"."NullableIntA" IS NOT NULL AND "e"."NullableIntB" IS NOT NULL) OR ("e"."NullableIntA" IS NULL AND "e"."NullableIntB" IS NULL) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN ("e"."NullableIntA" = "e"."NullableIntB" AND "e"."NullableIntA" IS NOT NULL AND "e"."NullableIntB" IS NOT NULL) OR ("e"."NullableIntA" IS NULL AND "e"."NullableIntB" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
         }
 
-        [ActianTodo]
+        [BooleanExpession]
         public override async Task Compare_complex_not_equal_not_equal_equal(bool async)
         {
             await base.Compare_complex_not_equal_not_equal_equal(async);
@@ -756,11 +761,11 @@ END
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
 WHERE CASE
-    WHEN "e"."BoolA" <> "e"."BoolB" THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."BoolA" <> "e"."BoolB" THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END <> CASE
-    WHEN "e"."IntA" = "e"."IntB" THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."IntA" = "e"."IntB" THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """,
                 //
@@ -768,11 +773,11 @@ END
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
 WHERE CASE
-    WHEN "e"."NullableBoolA" <> "e"."BoolB" OR "e"."NullableBoolA" IS NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."NullableBoolA" <> "e"."BoolB" OR "e"."NullableBoolA" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END <> CASE
-    WHEN "e"."IntA" = "e"."NullableIntB" AND "e"."NullableIntB" IS NOT NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."IntA" = "e"."NullableIntB" AND "e"."NullableIntB" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """,
                 //
@@ -780,16 +785,16 @@ END
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
 WHERE CASE
-    WHEN ("e"."NullableBoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN ("e"."NullableBoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END <> CASE
-    WHEN ("e"."NullableIntA" = "e"."NullableIntB" AND "e"."NullableIntA" IS NOT NULL AND "e"."NullableIntB" IS NOT NULL) OR ("e"."NullableIntA" IS NULL AND "e"."NullableIntB" IS NULL) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN ("e"."NullableIntA" = "e"."NullableIntB" AND "e"."NullableIntA" IS NOT NULL AND "e"."NullableIntB" IS NOT NULL) OR ("e"."NullableIntA" IS NULL AND "e"."NullableIntB" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
         }
 
-        [ActianTodo]
+        [BooleanExpession]
         public override async Task Compare_complex_not_equal_equal_not_equal(bool async)
         {
             await base.Compare_complex_not_equal_equal_not_equal(async);
@@ -799,11 +804,11 @@ END
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
 WHERE CASE
-    WHEN "e"."BoolA" <> "e"."BoolB" THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."BoolA" <> "e"."BoolB" THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END = CASE
-    WHEN "e"."IntA" <> "e"."IntB" THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."IntA" <> "e"."IntB" THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """,
                 //
@@ -811,11 +816,11 @@ END
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
 WHERE CASE
-    WHEN "e"."NullableBoolA" <> "e"."BoolB" OR "e"."NullableBoolA" IS NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."NullableBoolA" <> "e"."BoolB" OR "e"."NullableBoolA" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END = CASE
-    WHEN "e"."IntA" <> "e"."NullableIntB" OR "e"."NullableIntB" IS NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."IntA" <> "e"."NullableIntB" OR "e"."NullableIntB" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """,
                 //
@@ -823,16 +828,16 @@ END
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
 WHERE CASE
-    WHEN ("e"."NullableBoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN ("e"."NullableBoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END = CASE
-    WHEN ("e"."NullableIntA" <> "e"."NullableIntB" OR "e"."NullableIntA" IS NULL OR "e"."NullableIntB" IS NULL) AND ("e"."NullableIntA" IS NOT NULL OR "e"."NullableIntB" IS NOT NULL) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN ("e"."NullableIntA" <> "e"."NullableIntB" OR "e"."NullableIntA" IS NULL OR "e"."NullableIntB" IS NULL) AND ("e"."NullableIntA" IS NOT NULL OR "e"."NullableIntB" IS NOT NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
         }
 
-        [ActianTodo]
+        [BooleanExpession]
         public override async Task Compare_complex_not_equal_not_equal_not_equal(bool async)
         {
             await base.Compare_complex_not_equal_not_equal_not_equal(async);
@@ -842,11 +847,11 @@ END
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
 WHERE CASE
-    WHEN "e"."BoolA" <> "e"."BoolB" THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."BoolA" <> "e"."BoolB" THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END <> CASE
-    WHEN "e"."IntA" <> "e"."IntB" THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."IntA" <> "e"."IntB" THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """,
                 //
@@ -854,11 +859,11 @@ END
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
 WHERE CASE
-    WHEN "e"."NullableBoolA" <> "e"."BoolB" OR "e"."NullableBoolA" IS NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."NullableBoolA" <> "e"."BoolB" OR "e"."NullableBoolA" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END <> CASE
-    WHEN "e"."IntA" <> "e"."NullableIntB" OR "e"."NullableIntB" IS NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."IntA" <> "e"."NullableIntB" OR "e"."NullableIntB" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """,
                 //
@@ -866,11 +871,11 @@ END
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
 WHERE CASE
-    WHEN ("e"."NullableBoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN ("e"."NullableBoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END <> CASE
-    WHEN ("e"."NullableIntA" <> "e"."NullableIntB" OR "e"."NullableIntA" IS NULL OR "e"."NullableIntB" IS NULL) AND ("e"."NullableIntA" IS NOT NULL OR "e"."NullableIntB" IS NOT NULL) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN ("e"."NullableIntA" <> "e"."NullableIntB" OR "e"."NullableIntA" IS NULL OR "e"."NullableIntB" IS NULL) AND ("e"."NullableIntA" IS NOT NULL OR "e"."NullableIntB" IS NOT NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
         }
@@ -1025,7 +1030,6 @@ WHERE "e"."NullableStringB" IS NOT NULL AND ("e"."NullableStringA" <> N'Foo' OR 
 """);
         }
 
-        [ActianTodo]
         public override async Task Where_coalesce(bool async)
         {
             await base.Where_coalesce(async);
@@ -1034,7 +1038,7 @@ WHERE "e"."NullableStringB" IS NOT NULL AND ("e"."NullableStringA" <> N'Foo' OR 
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE COALESCE("e"."NullableBoolA", CAST(1 AS bit)) = CAST(1 AS bit)
+WHERE COALESCE("e"."NullableBoolA", CAST(1 AS boolean)) = CAST(1 AS boolean)
 """);
         }
 
@@ -1094,7 +1098,7 @@ WHERE (COALESCE("e"."NullableStringA", "e"."NullableStringB") <> "e"."NullableSt
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE COALESCE("e"."NullableStringA", "e"."NullableStringB") = COALESCE("e"."StringA", "e"."StringB")
+WHERE COALESCE("e"."NullableStringA", "e"."NullableStringB") = COALESCE("e"."NullableStringC", "e"."StringA")
 """);
         }
 
@@ -1173,11 +1177,11 @@ END OR "e"."NullableStringC" IS NULL
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."NullableStringA" IS NOT NULL AND "e"."NullableStringB" IS NOT NULL AND (CHARINDEX("e"."NullableStringB", "e"."NullableStringA") > 0 OR "e"."NullableStringB" LIKE N'') AND "e"."BoolA" = CAST(1 AS bit)
+WHERE "e"."NullableStringA" IS NOT NULL AND "e"."NullableStringB" IS NOT NULL AND (CHARINDEX("e"."NullableStringB", "e"."NullableStringA") > 0 OR "e"."NullableStringB" LIKE N'') AND "e"."BoolA" = CAST(1 AS boolean)
 """);
         }
 
-        [ActianTodo]
+        //[ActianTodo]
         public override async Task Null_comparison_in_selector_with_relational_nulls(bool async)
         {
             await base.Null_comparison_in_selector_with_relational_nulls(async);
@@ -1185,14 +1189,14 @@ WHERE "e"."NullableStringA" IS NOT NULL AND "e"."NullableStringB" IS NOT NULL AN
             AssertSql(
                 """
 SELECT CASE
-    WHEN "e"."NullableStringA" <> N'Foo' OR "e"."NullableStringA" IS NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."NullableStringA" <> N'Foo' OR "e"."NullableStringA" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 FROM "Entities1" AS "e"
 """);
         }
 
-        [ActianTodo]
+        //[ActianTodo]
         public override async Task Null_comparison_in_order_by_with_relational_nulls(bool async)
         {
             await base.Null_comparison_in_order_by_with_relational_nulls(async);
@@ -1202,11 +1206,11 @@ FROM "Entities1" AS "e"
 SELECT "e"."Id", "e"."BoolA", "e"."BoolB", "e"."BoolC", "e"."IntA", "e"."IntB", "e"."IntC", "e"."NullableBoolA", "e"."NullableBoolB", "e"."NullableBoolC", "e"."NullableIntA", "e"."NullableIntB", "e"."NullableIntC", "e"."NullableStringA", "e"."NullableStringB", "e"."NullableStringC", "e"."StringA", "e"."StringB", "e"."StringC"
 FROM "Entities1" AS "e"
 ORDER BY CASE
-    WHEN "e"."NullableStringA" <> N'Foo' OR "e"."NullableStringA" IS NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."NullableStringA" <> N'Foo' OR "e"."NullableStringA" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END, CASE
-    WHEN "e"."NullableIntB" <> 10 OR "e"."NullableIntB" IS NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."NullableIntB" <> 10 OR "e"."NullableIntB" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
         }
@@ -1221,10 +1225,10 @@ SELECT "e1"."Id", "e1"."BoolA", "e1"."BoolB", "e1"."BoolC", "e1"."IntA", "e1"."I
 FROM "Entities1" AS "e1"
 INNER JOIN "Entities2" AS "e2" ON CASE
     WHEN "e1"."NullableStringA" <> N'Foo'
-    THEN CAST(1 AS bit) ELSE CAST(0 AS bit)
+    THEN CAST(1 AS boolean) ELSE CAST(0 AS boolean)
 END = CASE
-    WHEN "e2"."NullableBoolB" <> CAST(1 AS bit)
-    THEN CAST(1 AS bit) ELSE CAST(0 AS bit)
+    WHEN "e2"."NullableBoolB" <> CAST(1 AS boolean)
+    THEN CAST(1 AS boolean) ELSE CAST(0 AS boolean)
 END
 """);
         }
@@ -1318,7 +1322,6 @@ WHERE "e"."NullableStringA" IN (
 """);
         }
 
-        [ActianTodo]
         public override async Task Where_nullable_bool(bool async)
         {
             await base.Where_nullable_bool(async);
@@ -1327,7 +1330,7 @@ WHERE "e"."NullableStringA" IN (
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."NullableBoolA" = CAST(1 AS bit)
+WHERE "e"."NullableBoolA" = CAST(1 AS boolean)
 """);
         }
 
@@ -1339,11 +1342,10 @@ WHERE "e"."NullableBoolA" = CAST(1 AS bit)
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."NullableBoolA" = TRUE
+WHERE "e"."NullableBoolA" = CAST(1 AS boolean)
 """);
         }
 
-        [ActianTodo]
         public override async Task Where_nullable_bool_with_null_check(bool async)
         {
             await base.Where_nullable_bool_with_null_check(async);
@@ -1352,7 +1354,7 @@ WHERE "e"."NullableBoolA" = TRUE
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."NullableBoolA" IS NOT NULL AND "e"."NullableBoolA" = CAST(1 AS bit)
+WHERE "e"."NullableBoolA" IS NOT NULL AND "e"."NullableBoolA" = CAST(1 AS boolean)
 """);
         }
 
@@ -1416,7 +1418,6 @@ WHERE "e"."NullableBoolA" <> "e"."NullableBoolB"
 """);
         }
 
-        [ActianTodo]
         public override async Task Where_comparison_null_constant_and_null_parameter(bool async)
         {
             await base.Where_comparison_null_constant_and_null_parameter(async);
@@ -1427,7 +1428,7 @@ WHERE "e"."NullableBoolA" <> "e"."NullableBoolB"
 
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE @__p_0 = CAST(1 AS bit)
+WHERE @__p_0 = CAST(1 AS boolean)
 """,
                 //
                 """
@@ -1435,11 +1436,10 @@ WHERE @__p_0 = CAST(1 AS bit)
 
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE @__p_0 = CAST(1 AS bit)
+WHERE @__p_0 = CAST(1 AS boolean)
 """);
         }
 
-        [ActianTodo]
         public override async Task Where_comparison_null_constant_and_nonnull_parameter(bool async)
         {
             await base.Where_comparison_null_constant_and_nonnull_parameter(async);
@@ -1450,7 +1450,7 @@ WHERE @__p_0 = CAST(1 AS bit)
 
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE @__p_0 = CAST(1 AS bit)
+WHERE @__p_0 = CAST(1 AS boolean)
 """,
                 //
                 """
@@ -1458,11 +1458,10 @@ WHERE @__p_0 = CAST(1 AS bit)
 
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE @__p_0 = CAST(1 AS bit)
+WHERE @__p_0 = CAST(1 AS boolean)
 """);
         }
 
-        [ActianTodo]
         public override async Task Where_comparison_nonnull_constant_and_null_parameter(bool async)
         {
             await base.Where_comparison_nonnull_constant_and_null_parameter(async);
@@ -1473,7 +1472,7 @@ WHERE @__p_0 = CAST(1 AS bit)
 
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE @__p_0 = CAST(1 AS bit)
+WHERE @__p_0 = CAST(1 AS boolean)
 """,
                 //
                 """
@@ -1481,7 +1480,7 @@ WHERE @__p_0 = CAST(1 AS bit)
 
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE @__p_0 = CAST(1 AS bit)
+WHERE @__p_0 = CAST(1 AS boolean)
 """);
         }
 
@@ -1515,7 +1514,6 @@ WHERE "e"."NullableBoolA" = "e"."NullableBoolB"
 """);
         }
 
-        [ActianTodo]
         public override void Switching_parameter_value_to_null_produces_different_cache_entry()
         {
             base.Switching_parameter_value_to_null_produces_different_cache_entry();
@@ -1526,7 +1524,7 @@ WHERE "e"."NullableBoolA" = "e"."NullableBoolB"
 
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE @__p_0 = CAST(1 AS bit)
+WHERE @__p_0 = CAST(1 AS boolean)
 """,
                 //
                 """
@@ -1534,7 +1532,7 @@ WHERE @__p_0 = CAST(1 AS bit)
 
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE @__p_0 = CAST(1 AS bit)
+WHERE @__p_0 = CAST(1 AS boolean)
 """);
         }
 
@@ -1558,7 +1556,7 @@ WHERE "m"."StringA" = "m"."StringB"
 
             AssertSql(
                 """
-SELECT "e"."Id", COALESCE("e"."NullableBoolA", FALSE) AS "Coalesce"
+SELECT "e"."Id", COALESCE("e"."NullableBoolA", CAST(0 AS boolean)) AS "Coalesce"
 FROM "Entities1" AS "e"
 """);
         }
@@ -1569,12 +1567,12 @@ FROM "Entities1" AS "e"
 
             AssertSql(
                 """
-SELECT "e"."Id", COALESCE("e"."NullableBoolA", "e"."NullableBoolB", FALSE) AS "Coalesce"
+SELECT "e"."Id", COALESCE("e"."NullableBoolA", "e"."NullableBoolB", CAST(0 AS boolean)) AS "Coalesce"
 FROM "Entities1" AS "e"
 """,
                 //
                 """
-SELECT "e"."Id", COALESCE("e"."NullableBoolA", "e"."NullableBoolB", FALSE) AS "Coalesce"
+SELECT "e"."Id", COALESCE("e"."NullableBoolA", "e"."NullableBoolB", CAST(0 AS boolean)) AS "Coalesce"
 FROM "Entities1" AS "e"
 """);
         }
@@ -1609,7 +1607,15 @@ WHERE (CAST(CHARINDEX(N'oo', "e"."NullableStringA") AS int) - 1 <> "e"."Nullable
             await base.Where_IndexOf_empty(async);
 
             AssertSql(
-                @"");
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE CASE
+    WHEN "e"."NullableStringA" IS NOT NULL THEN 0
+END = "e"."NullableIntA" OR (CASE
+    WHEN "e"."NullableStringA" IS NOT NULL THEN 0
+END IS NULL AND "e"."NullableIntA" IS NULL)
+""");
         }
 
         [ActianTodo]
@@ -1704,7 +1710,7 @@ WHERE (COALESCE("e"."NullableBoolB", "e"."NullableBoolC") <> "e"."NullableBoolA"
 """);
         }
 
-        [ActianTodo]
+        [ActianTodo] // Expected: 17 Actual:   22
         public override async Task Null_semantics_conditional(bool async)
         {
             await base.Null_semantics_conditional(async);
@@ -1714,7 +1720,7 @@ WHERE (COALESCE("e"."NullableBoolB", "e"."NullableBoolC") <> "e"."NullableBoolA"
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
 WHERE "e"."BoolA" = CASE
-    WHEN "e"."BoolB" = CAST(1 AS bit) THEN "e"."NullableBoolB"
+    WHEN "e"."BoolB" = CAST(1 AS boolean) THEN "e"."NullableBoolB"
     ELSE "e"."NullableBoolC"
 END
 """,
@@ -1733,17 +1739,17 @@ SELECT "e"."Id"
 FROM "Entities1" AS "e"
 WHERE CASE
     WHEN CASE
-        WHEN "e"."BoolA" = CAST(1 AS bit) THEN CASE
-            WHEN ("e"."NullableBoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL) THEN CAST(1 AS bit)
-            ELSE CAST(0 AS bit)
+        WHEN "e"."BoolA" = CAST(1 AS boolean) THEN CASE
+            WHEN ("e"."NullableBoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL) THEN CAST(1 AS boolean)
+            ELSE CAST(0 AS boolean)
         END
         ELSE "e"."BoolC"
     END <> "e"."BoolB" THEN "e"."BoolA"
     ELSE CASE
-        WHEN ("e"."NullableBoolB" = "e"."NullableBoolC" AND "e"."NullableBoolB" IS NOT NULL AND "e"."NullableBoolC" IS NOT NULL) OR ("e"."NullableBoolB" IS NULL AND "e"."NullableBoolC" IS NULL) THEN CAST(1 AS bit)
-        ELSE CAST(0 AS bit)
+        WHEN ("e"."NullableBoolB" = "e"."NullableBoolC" AND "e"."NullableBoolB" IS NOT NULL AND "e"."NullableBoolC" IS NOT NULL) OR ("e"."NullableBoolB" IS NULL AND "e"."NullableBoolC" IS NULL) THEN CAST(1 AS boolean)
+        ELSE CAST(0 AS boolean)
     END
-END = CAST(1 AS bit)
+END = CAST(1 AS boolean)
 """);
         }
 
@@ -1759,7 +1765,6 @@ WHERE (SUBSTRING("e"."NullableStringA", 0 + 1, "e"."IntA") <> "e"."NullableStrin
 """);
         }
 
-        [ActianTodo]
         public override async Task Null_semantics_join_with_composite_key(bool async)
         {
             await base.Null_semantics_join_with_composite_key(async);
@@ -1769,8 +1774,8 @@ WHERE (SUBSTRING("e"."NullableStringA", 0 + 1, "e"."IntA") <> "e"."NullableStrin
 SELECT "e"."Id", "e"."BoolA", "e"."BoolB", "e"."BoolC", "e"."IntA", "e"."IntB", "e"."IntC", "e"."NullableBoolA", "e"."NullableBoolB", "e"."NullableBoolC", "e"."NullableIntA", "e"."NullableIntB", "e"."NullableIntC", "e"."NullableStringA", "e"."NullableStringB", "e"."NullableStringC", "e"."StringA", "e"."StringB", "e"."StringC", "e0"."Id", "e0"."BoolA", "e0"."BoolB", "e0"."BoolC", "e0"."IntA", "e0"."IntB", "e0"."IntC", "e0"."NullableBoolA", "e0"."NullableBoolB", "e0"."NullableBoolC", "e0"."NullableIntA", "e0"."NullableIntB", "e0"."NullableIntC", "e0"."NullableStringA", "e0"."NullableStringB", "e0"."NullableStringC", "e0"."StringA", "e0"."StringB", "e0"."StringC"
 FROM "Entities1" AS "e"
 INNER JOIN "Entities2" AS "e0" ON ("e"."NullableStringA" = "e0"."NullableStringB" OR ("e"."NullableStringA" IS NULL AND "e0"."NullableStringB" IS NULL)) AND CASE
-    WHEN ("e"."NullableStringB" <> "e"."NullableStringC" OR "e"."NullableStringB" IS NULL OR "e"."NullableStringC" IS NULL) AND ("e"."NullableStringB" IS NOT NULL OR "e"."NullableStringC" IS NOT NULL) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN ("e"."NullableStringB" <> "e"."NullableStringC" OR "e"."NullableStringB" IS NULL OR "e"."NullableStringC" IS NULL) AND ("e"."NullableStringB" IS NOT NULL OR "e"."NullableStringC" IS NOT NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END = COALESCE("e0"."NullableBoolA", "e0"."BoolC")
 """);
         }
@@ -1829,54 +1834,32 @@ WHERE "e"."NullableIntA" NOT IN (1, 2) AND "e"."NullableIntA" IS NOT NULL
 """);
         }
 
-        [ActianTodo]
         public override async Task Null_semantics_contains_array_with_no_values(bool async)
         {
             await base.Null_semantics_contains_array_with_no_values(async);
 
             AssertSql(
                 """
-@__ids_0='""' (Size = 4000)
-
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."NullableIntA" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" int '$') AS "i"
-)
+WHERE 0 = 1
 """,
                 //
                 """
-@__ids_0='""' (Size = 4000)
-
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."NullableIntA" NOT IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids_0) WITH ("value" int '$') AS "i"
-) OR "e"."NullableIntA" IS NULL
 """,
                 //
                 """
-@__ids2_0_without_nulls='""' (Size = 4000)
-
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."NullableIntA" IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids2_0_without_nulls) AS "i"
-) OR "e"."NullableIntA" IS NULL
+WHERE "e"."NullableIntA" IS NULL
 """,
                 //
                 """
-@__ids2_0_without_nulls='""' (Size = 4000)
-
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."NullableIntA" NOT IN (
-    SELECT "i"."value"
-    FROM OPENJSON(@__ids2_0_without_nulls) AS "i"
-) AND "e"."NullableIntA" IS NOT NULL
+WHERE "e"."NullableIntA" IS NOT NULL
 """,
                 //
                 """
@@ -2146,7 +2129,6 @@ WHERE "e"."NullableIntA" NOT IN (1, 2) AND "e"."NullableIntA" IS NOT NULL AND ("
 """);
         }
 
-        [ActianTodo]
         public override async Task Null_semantics_contains_with_non_nullable_item_and_one_value(bool async)
         {
             await base.Null_semantics_contains_with_non_nullable_item_and_one_value(async);
@@ -2490,8 +2472,51 @@ WHERE "e"."IntA" > @__i_0
             await base.Negated_order_comparison_on_nullable_arguments_doesnt_get_optimized(async);
 
             AssertSql(
-                @"");
+                """
+@__i_0='1' (Nullable = true)
+
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE CASE
+    WHEN "e"."NullableIntA" > @__i_0 THEN CAST(0 AS boolean)
+    ELSE CAST(1 AS boolean)
+END = CAST(1 AS boolean)
+""",
+                //
+                """
+@__i_0='1' (Nullable = true)
+
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE CASE
+    WHEN "e"."NullableIntA" >= @__i_0 THEN CAST(0 AS boolean)
+    ELSE CAST(1 AS boolean)
+END = CAST(1 AS boolean)
+""",
+                //
+                """
+@__i_0='1' (Nullable = true)
+
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE CASE
+    WHEN "e"."NullableIntA" < @__i_0 THEN CAST(0 AS boolean)
+    ELSE CAST(1 AS boolean)
+END = CAST(1 AS boolean)
+""",
+                //
+                """
+@__i_0='1' (Nullable = true)
+
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE CASE
+    WHEN "e"."NullableIntA" <= @__i_0 THEN CAST(0 AS boolean)
+    ELSE CAST(1 AS boolean)
+END = CAST(1 AS boolean)
+""");
         }
+
 
         public override async Task Nullable_column_info_propagates_inside_binary_AndAlso(bool async)
         {
@@ -2535,7 +2560,6 @@ WHERE (("e"."NullableStringA" IS NOT NULL AND "e"."NullableStringB" IS NOT NULL)
 """);
         }
 
-        [ActianTodo]
         public override async Task Nullable_column_info_propagates_inside_conditional(bool async)
         {
             await base.Nullable_column_info_propagates_inside_conditional(async);
@@ -2544,8 +2568,8 @@ WHERE (("e"."NullableStringA" IS NOT NULL AND "e"."NullableStringB" IS NOT NULL)
                 """
 SELECT CASE
     WHEN "e"."NullableStringA" IS NOT NULL THEN CASE
-        WHEN "e"."NullableStringA" <> "e"."StringA" THEN CAST(1 AS bit)
-        ELSE CAST(0 AS bit)
+        WHEN "e"."NullableStringA" <> "e"."StringA" THEN CAST(1 AS boolean)
+        ELSE CAST(0 AS boolean)
     END
     ELSE "e"."BoolA"
 END
@@ -2553,7 +2577,6 @@ FROM "Entities1" AS "e"
 """);
         }
 
-        [ActianTodo]
         public override async Task Nullable_column_info_doesnt_propagate_between_projections(bool async)
         {
             await base.Nullable_column_info_doesnt_propagate_between_projections(async);
@@ -2561,11 +2584,11 @@ FROM "Entities1" AS "e"
             AssertSql(
                 """
 SELECT CASE
-    WHEN "e"."NullableStringA" IS NOT NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."NullableStringA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END AS "Foo", CASE
-    WHEN "e"."NullableStringA" <> "e"."StringA" OR "e"."NullableStringA" IS NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."NullableStringA" <> "e"."StringA" OR "e"."NullableStringA" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END AS "Bar"
 FROM "Entities1" AS "e"
 """);
@@ -2596,7 +2619,6 @@ WHERE "e"."NullableStringA" IS NOT NULL AND "e"."NullableBoolB" IS NOT NULL AND 
 """);
         }
 
-        [ActianTodo]
         public override async Task Empty_subquery_with_contains_returns_false(bool async)
         {
             await base.Empty_subquery_with_contains_returns_false(async);
@@ -2620,7 +2642,6 @@ FROM "Entities1" AS "e"
 """);
         }
 
-        [ActianTodo]
         public override async Task Nullable_string_FirstOrDefault_compared_to_nullable_string_LastOrDefault(bool async)
         {
             await base.Nullable_string_FirstOrDefault_compared_to_nullable_string_LastOrDefault(async);
@@ -2629,7 +2650,7 @@ FROM "Entities1" AS "e"
                 """
 SELECT "e"."Id", "e"."BoolA", "e"."BoolB", "e"."BoolC", "e"."IntA", "e"."IntB", "e"."IntC", "e"."NullableBoolA", "e"."NullableBoolB", "e"."NullableBoolC", "e"."NullableIntA", "e"."NullableIntB", "e"."NullableIntC", "e"."NullableStringA", "e"."NullableStringB", "e"."NullableStringC", "e"."StringA", "e"."StringB", "e"."StringC"
 FROM "Entities1" AS "e"
-WHERE SUBSTRING("e"."NullableStringA", 1, 1) = SUBSTRING("e"."NullableStringB", LEN("e"."NullableStringB"), 1) OR ("e"."NullableStringA" IS NULL AND "e"."NullableStringB" IS NULL)
+WHERE SUBSTRING("e"."NullableStringA", 1, 1) = SUBSTRING("e"."NullableStringB", LENGTH("e"."NullableStringB"), 1) OR ("e"."NullableStringA" IS NULL AND "e"."NullableStringB" IS NULL)
 """);
         }
 
@@ -2816,7 +2837,6 @@ WHERE "e"."NullableIntA" NOT IN (3, 1, 2)
 """);
         }
 
-        [ActianTodo]
         public override async Task Bool_equal_nullable_bool_HasValue(bool async)
         {
             await base.Bool_equal_nullable_bool_HasValue(async);
@@ -2834,8 +2854,8 @@ WHERE "e"."NullableBoolA" IS NOT NULL
 SELECT "e"."Id", "e"."BoolA", "e"."BoolB", "e"."BoolC", "e"."IntA", "e"."IntB", "e"."IntC", "e"."NullableBoolA", "e"."NullableBoolB", "e"."NullableBoolC", "e"."NullableIntA", "e"."NullableIntB", "e"."NullableIntC", "e"."NullableStringA", "e"."NullableStringB", "e"."NullableStringC", "e"."StringA", "e"."StringB", "e"."StringC"
 FROM "Entities1" AS "e"
 WHERE @__prm_0 = CASE
-    WHEN "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """,
                 //
@@ -2843,13 +2863,12 @@ END
 SELECT "e"."Id", "e"."BoolA", "e"."BoolB", "e"."BoolC", "e"."IntA", "e"."IntB", "e"."IntC", "e"."NullableBoolA", "e"."NullableBoolB", "e"."NullableBoolC", "e"."NullableIntA", "e"."NullableIntB", "e"."NullableIntC", "e"."NullableStringA", "e"."NullableStringB", "e"."NullableStringC", "e"."StringA", "e"."StringB", "e"."StringC"
 FROM "Entities1" AS "e"
 WHERE "e"."BoolB" = CASE
-    WHEN "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
         }
 
-        [ActianTodo]
         public override async Task Bool_equal_nullable_bool_compared_to_null(bool async)
         {
             await base.Bool_equal_nullable_bool_compared_to_null(async);
@@ -2867,13 +2886,12 @@ WHERE "e"."NullableBoolA" IS NULL
 SELECT "e"."Id", "e"."BoolA", "e"."BoolB", "e"."BoolC", "e"."IntA", "e"."IntB", "e"."IntC", "e"."NullableBoolA", "e"."NullableBoolB", "e"."NullableBoolC", "e"."NullableIntA", "e"."NullableIntB", "e"."NullableIntC", "e"."NullableStringA", "e"."NullableStringB", "e"."NullableStringC", "e"."StringA", "e"."StringB", "e"."StringC"
 FROM "Entities1" AS "e"
 WHERE @__prm_0 = CASE
-    WHEN "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
         }
 
-        [ActianTodo]
         public override async Task Bool_not_equal_nullable_bool_HasValue(bool async)
         {
             await base.Bool_not_equal_nullable_bool_HasValue(async);
@@ -2891,8 +2909,8 @@ WHERE "e"."NullableBoolA" IS NULL
 SELECT "e"."Id", "e"."BoolA", "e"."BoolB", "e"."BoolC", "e"."IntA", "e"."IntB", "e"."IntC", "e"."NullableBoolA", "e"."NullableBoolB", "e"."NullableBoolC", "e"."NullableIntA", "e"."NullableIntB", "e"."NullableIntC", "e"."NullableStringA", "e"."NullableStringB", "e"."NullableStringC", "e"."StringA", "e"."StringB", "e"."StringC"
 FROM "Entities1" AS "e"
 WHERE @__prm_0 <> CASE
-    WHEN "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """,
                 //
@@ -2900,13 +2918,12 @@ END
 SELECT "e"."Id", "e"."BoolA", "e"."BoolB", "e"."BoolC", "e"."IntA", "e"."IntB", "e"."IntC", "e"."NullableBoolA", "e"."NullableBoolB", "e"."NullableBoolC", "e"."NullableIntA", "e"."NullableIntB", "e"."NullableIntC", "e"."NullableStringA", "e"."NullableStringB", "e"."NullableStringC", "e"."StringA", "e"."StringB", "e"."StringC"
 FROM "Entities1" AS "e"
 WHERE "e"."BoolB" <> CASE
-    WHEN "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
         }
 
-        [ActianTodo]
         public override async Task Bool_not_equal_nullable_int_HasValue(bool async)
         {
             await base.Bool_not_equal_nullable_int_HasValue(async);
@@ -2924,8 +2941,8 @@ WHERE "e"."NullableIntA" IS NULL
 SELECT "e"."Id", "e"."BoolA", "e"."BoolB", "e"."BoolC", "e"."IntA", "e"."IntB", "e"."IntC", "e"."NullableBoolA", "e"."NullableBoolB", "e"."NullableBoolC", "e"."NullableIntA", "e"."NullableIntB", "e"."NullableIntC", "e"."NullableStringA", "e"."NullableStringB", "e"."NullableStringC", "e"."StringA", "e"."StringB", "e"."StringC"
 FROM "Entities1" AS "e"
 WHERE @__prm_0 <> CASE
-    WHEN "e"."NullableIntA" IS NOT NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."NullableIntA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """,
                 //
@@ -2933,13 +2950,12 @@ END
 SELECT "e"."Id", "e"."BoolA", "e"."BoolB", "e"."BoolC", "e"."IntA", "e"."IntB", "e"."IntC", "e"."NullableBoolA", "e"."NullableBoolB", "e"."NullableBoolC", "e"."NullableIntA", "e"."NullableIntB", "e"."NullableIntC", "e"."NullableStringA", "e"."NullableStringB", "e"."NullableStringC", "e"."StringA", "e"."StringB", "e"."StringC"
 FROM "Entities1" AS "e"
 WHERE "e"."BoolB" <> CASE
-    WHEN "e"."NullableIntA" IS NOT NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."NullableIntA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
         }
 
-        [ActianTodo]
         public override async Task Bool_not_equal_nullable_bool_compared_to_null(bool async)
         {
             await base.Bool_not_equal_nullable_bool_compared_to_null(async);
@@ -2957,13 +2973,12 @@ WHERE "e"."NullableBoolA" IS NOT NULL
 SELECT "e"."Id", "e"."BoolA", "e"."BoolB", "e"."BoolC", "e"."IntA", "e"."IntB", "e"."IntC", "e"."NullableBoolA", "e"."NullableBoolB", "e"."NullableBoolC", "e"."NullableIntA", "e"."NullableIntB", "e"."NullableIntC", "e"."NullableStringA", "e"."NullableStringB", "e"."NullableStringC", "e"."StringA", "e"."StringB", "e"."StringC"
 FROM "Entities1" AS "e"
 WHERE @__prm_0 <> CASE
-    WHEN "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
         }
 
-        [ActianTodo]
         public override async Task Bool_logical_operation_with_nullable_bool_HasValue(bool async)
         {
             await base.Bool_logical_operation_with_nullable_bool_HasValue(async);
@@ -2983,14 +2998,11 @@ WHERE 0 = 1
                 """
 SELECT "e"."Id", "e"."BoolA", "e"."BoolB", "e"."BoolC", "e"."IntA", "e"."IntB", "e"."IntC", "e"."NullableBoolA", "e"."NullableBoolB", "e"."NullableBoolC", "e"."NullableIntA", "e"."NullableIntB", "e"."NullableIntC", "e"."NullableStringA", "e"."NullableStringB", "e"."NullableStringC", "e"."StringA", "e"."StringB", "e"."StringC"
 FROM "Entities1" AS "e"
-WHERE "e"."BoolB" | CASE
-    WHEN "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
-END = CAST(1 AS bit)
+WHERE "e"."BoolB" = CAST(1 AS boolean) OR "e"."NullableBoolA" IS NOT NULL
 """);
         }
 
-        [ActianTodo]
+        [BooleanExpession]
         public override async Task Comparison_compared_to_null_check_on_bool(bool async)
         {
             await base.Comparison_compared_to_null_check_on_bool(async);
@@ -3000,11 +3012,11 @@ END = CAST(1 AS bit)
 SELECT "e"."Id", "e"."BoolA", "e"."BoolB", "e"."BoolC", "e"."IntA", "e"."IntB", "e"."IntC", "e"."NullableBoolA", "e"."NullableBoolB", "e"."NullableBoolC", "e"."NullableIntA", "e"."NullableIntB", "e"."NullableIntC", "e"."NullableStringA", "e"."NullableStringB", "e"."NullableStringC", "e"."StringA", "e"."StringB", "e"."StringC"
 FROM "Entities1" AS "e"
 WHERE CASE
-    WHEN "e"."IntA" = "e"."IntB" THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."IntA" = "e"."IntB" THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END <> CASE
-    WHEN "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """,
                 //
@@ -3012,11 +3024,11 @@ END
 SELECT "e"."Id", "e"."BoolA", "e"."BoolB", "e"."BoolC", "e"."IntA", "e"."IntB", "e"."IntC", "e"."NullableBoolA", "e"."NullableBoolB", "e"."NullableBoolC", "e"."NullableIntA", "e"."NullableIntB", "e"."NullableIntC", "e"."NullableStringA", "e"."NullableStringB", "e"."NullableStringC", "e"."StringA", "e"."StringB", "e"."StringC"
 FROM "Entities1" AS "e"
 WHERE CASE
-    WHEN "e"."IntA" <> "e"."IntB" THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."IntA" <> "e"."IntB" THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END = CASE
-    WHEN "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
         }
@@ -3041,7 +3053,7 @@ WHERE "e"."NullableStringA" IS NOT NULL AND "e"."NullableStringA" = N'Foo'
                 """
 SELECT "e"."Id", "e"."BoolA", "e"."BoolB", "e"."BoolC", "e"."IntA", "e"."IntB", "e"."IntC", "e"."NullableBoolA", "e"."NullableBoolB", "e"."NullableBoolC", "e"."NullableIntA", "e"."NullableIntB", "e"."NullableIntC", "e"."NullableStringA", "e"."NullableStringB", "e"."NullableStringC", "e"."StringA", "e"."StringB", "e"."StringC"
 FROM "Entities1" AS "e"
-WHERE "e"."NullableStringA" IS NOT NULL OR ("e"."NullableStringA" = N'Foo' AND "e"."NullableStringA" IS NOT NULL)
+WHERE "e"."NullableStringA" IS NOT NULL OR "e"."NullableStringA" = N'Foo'
 """);
         }
 
@@ -3069,7 +3081,7 @@ WHERE ("e"."NullableStringA" IS NULL AND ("e"."StringA" = N'Foo' OR "e"."Nullabl
 """);
         }
 
-        [ActianTodo]
+        [ActianTodo] //Expected: 18 Actual:   23
         public override async Task Is_null_on_column_followed_by_OrElse_optimizes_nullability_conditional(bool async)
         {
             await base.Is_null_on_column_followed_by_OrElse_optimizes_nullability_conditional(async);
@@ -3081,18 +3093,18 @@ SELECT "e"."Id", "e"."BoolA", "e"."BoolB", "e"."BoolC", "e"."IntA", "e"."IntB", 
 FROM "Entities1" AS "e"
 WHERE CASE
     WHEN "e"."NullableStringA" IS NULL THEN CASE
-        WHEN ("e"."NullableStringA" <> "e"."NullableStringB" OR "e"."NullableStringA" IS NULL OR "e"."NullableStringB" IS NULL) AND ("e"."NullableStringA" IS NOT NULL OR "e"."NullableStringB" IS NOT NULL) THEN CAST(1 AS bit)
-        ELSE CAST(0 AS bit)
+        WHEN ("e"."NullableStringA" <> "e"."NullableStringB" OR "e"."NullableStringA" IS NULL OR "e"."NullableStringB" IS NULL) AND ("e"."NullableStringA" IS NOT NULL OR "e"."NullableStringB" IS NOT NULL) THEN CAST(1 AS boolean)
+        ELSE CAST(0 AS boolean)
     END
     ELSE CASE
-        WHEN ("e"."NullableStringA" <> "e"."NullableStringC" OR "e"."NullableStringA" IS NULL OR "e"."NullableStringC" IS NULL) AND ("e"."NullableStringA" IS NOT NULL OR "e"."NullableStringC" IS NOT NULL) THEN CAST(1 AS bit)
-        ELSE CAST(0 AS bit)
+        WHEN ("e"."NullableStringA" <> "e"."NullableStringC" OR "e"."NullableStringA" IS NULL OR "e"."NullableStringC" IS NULL) AND ("e"."NullableStringA" IS NOT NULL OR "e"."NullableStringC" IS NOT NULL) THEN CAST(1 AS boolean)
+        ELSE CAST(0 AS boolean)
     END
-END = CAST(1 AS bit)
+END = CAST(1 AS boolean)
 """);
         }
 
-        [ActianTodo]
+        [ActianTodo] //Expected: 9 Actual:   12
         public override async Task Is_null_on_column_followed_by_OrElse_optimizes_nullability_conditional_multiple(bool async)
         {
             await base.Is_null_on_column_followed_by_OrElse_optimizes_nullability_conditional_multiple(async);
@@ -3104,18 +3116,18 @@ SELECT "e"."Id", "e"."BoolA", "e"."BoolB", "e"."BoolC", "e"."IntA", "e"."IntB", 
 FROM "Entities1" AS "e"
 WHERE CASE
     WHEN "e"."NullableStringA" IS NULL OR "e"."NullableStringB" IS NULL THEN CASE
-        WHEN ("e"."NullableStringA" = "e"."NullableStringB" AND "e"."NullableStringA" IS NOT NULL AND "e"."NullableStringB" IS NOT NULL) OR ("e"."NullableStringA" IS NULL AND "e"."NullableStringB" IS NULL) THEN CAST(1 AS bit)
-        ELSE CAST(0 AS bit)
+        WHEN ("e"."NullableStringA" = "e"."NullableStringB" AND "e"."NullableStringA" IS NOT NULL AND "e"."NullableStringB" IS NOT NULL) OR ("e"."NullableStringA" IS NULL AND "e"."NullableStringB" IS NULL) THEN CAST(1 AS boolean)
+        ELSE CAST(0 AS boolean)
     END
     ELSE CASE
-        WHEN ("e"."NullableStringA" <> "e"."NullableStringB" OR "e"."NullableStringA" IS NULL OR "e"."NullableStringB" IS NULL) AND ("e"."NullableStringA" IS NOT NULL OR "e"."NullableStringB" IS NOT NULL) THEN CAST(1 AS bit)
-        ELSE CAST(0 AS bit)
+        WHEN ("e"."NullableStringA" <> "e"."NullableStringB" OR "e"."NullableStringA" IS NULL OR "e"."NullableStringB" IS NULL) AND ("e"."NullableStringA" IS NOT NULL OR "e"."NullableStringB" IS NOT NULL) THEN CAST(1 AS boolean)
+        ELSE CAST(0 AS boolean)
     END
-END = CAST(1 AS bit)
+END = CAST(1 AS boolean)
 """);
         }
 
-        [ActianTodo]
+        [ActianTodo] //Expected: 15 Actual:   18
         public override async Task Is_null_on_column_followed_by_OrElse_optimizes_nullability_conditional_negative(bool async)
         {
             await base.Is_null_on_column_followed_by_OrElse_optimizes_nullability_conditional_negative(async);
@@ -3126,18 +3138,18 @@ SELECT "e"."Id", "e"."BoolA", "e"."BoolB", "e"."BoolC", "e"."IntA", "e"."IntB", 
 FROM "Entities1" AS "e"
 WHERE CASE
     WHEN ("e"."NullableStringA" IS NULL OR "e"."NullableStringB" IS NULL) AND "e"."NullableBoolC" IS NULL THEN CASE
-        WHEN ("e"."NullableStringA" = "e"."NullableStringB" AND "e"."NullableStringA" IS NOT NULL AND "e"."NullableStringB" IS NOT NULL) OR ("e"."NullableStringA" IS NULL AND "e"."NullableStringB" IS NULL) THEN CAST(1 AS bit)
-        ELSE CAST(0 AS bit)
+        WHEN ("e"."NullableStringA" = "e"."NullableStringB" AND "e"."NullableStringA" IS NOT NULL AND "e"."NullableStringB" IS NOT NULL) OR ("e"."NullableStringA" IS NULL AND "e"."NullableStringB" IS NULL) THEN CAST(1 AS boolean)
+        ELSE CAST(0 AS boolean)
     END
     ELSE CASE
-        WHEN ("e"."NullableStringA" <> "e"."NullableStringB" OR "e"."NullableStringA" IS NULL OR "e"."NullableStringB" IS NULL) AND ("e"."NullableStringA" IS NOT NULL OR "e"."NullableStringB" IS NOT NULL) THEN CAST(1 AS bit)
-        ELSE CAST(0 AS bit)
+        WHEN ("e"."NullableStringA" <> "e"."NullableStringB" OR "e"."NullableStringA" IS NULL OR "e"."NullableStringB" IS NULL) AND ("e"."NullableStringA" IS NOT NULL OR "e"."NullableStringB" IS NOT NULL) THEN CAST(1 AS boolean)
+        ELSE CAST(0 AS boolean)
     END
-END = CAST(1 AS bit)
+END = CAST(1 AS boolean)
 """);
         }
 
-        [ActianTodo]
+        [ActianTodo] //Expected: 21 Actual:   24
         public override async Task Is_null_on_column_followed_by_OrElse_optimizes_nullability_conditional_with_setup(bool async)
         {
             await base.Is_null_on_column_followed_by_OrElse_optimizes_nullability_conditional_with_setup(async);
@@ -3149,18 +3161,18 @@ SELECT "e"."Id", "e"."BoolA", "e"."BoolB", "e"."BoolC", "e"."IntA", "e"."IntB", 
 FROM "Entities1" AS "e"
 WHERE "e"."NullableBoolA" IS NULL OR CASE
     WHEN "e"."NullableBoolB" IS NULL THEN CASE
-        WHEN "e"."NullableBoolB" <> "e"."NullableBoolA" OR "e"."NullableBoolB" IS NULL THEN CAST(1 AS bit)
-        ELSE CAST(0 AS bit)
+        WHEN "e"."NullableBoolB" <> "e"."NullableBoolA" OR "e"."NullableBoolB" IS NULL THEN CAST(1 AS boolean)
+        ELSE CAST(0 AS boolean)
     END
     ELSE CASE
-        WHEN "e"."NullableBoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolB" IS NULL THEN CAST(1 AS bit)
-        ELSE CAST(0 AS bit)
+        WHEN "e"."NullableBoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolB" IS NULL THEN CAST(1 AS boolean)
+        ELSE CAST(0 AS boolean)
     END
-END = CAST(1 AS bit)
+END = CAST(1 AS boolean)
 """);
         }
 
-        [ActianTodo]
+        [BooleanExpession]
         public override async Task Is_null_on_column_followed_by_OrElse_optimizes_nullability_conditional_nested(bool async)
         {
             await base.Is_null_on_column_followed_by_OrElse_optimizes_nullability_conditional_nested(async);
@@ -3172,22 +3184,21 @@ SELECT "e"."Id", "e"."BoolA", "e"."BoolB", "e"."BoolC", "e"."IntA", "e"."IntB", 
 FROM "Entities1" AS "e"
 WHERE CASE
     WHEN "e"."NullableBoolA" IS NULL THEN CASE
-        WHEN "e"."BoolA" = "e"."BoolB" THEN CAST(1 AS bit)
-        ELSE CAST(0 AS bit)
+        WHEN "e"."BoolA" = "e"."BoolB" THEN CAST(1 AS boolean)
+        ELSE CAST(0 AS boolean)
     END
     WHEN "e"."NullableBoolC" IS NULL THEN CASE
-        WHEN ("e"."NullableBoolA" <> "e"."NullableBoolC" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolC" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolC" IS NOT NULL) THEN CAST(1 AS bit)
-        ELSE CAST(0 AS bit)
+        WHEN ("e"."NullableBoolA" <> "e"."NullableBoolC" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolC" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolC" IS NOT NULL) THEN CAST(1 AS boolean)
+        ELSE CAST(0 AS boolean)
     END
     ELSE CASE
-        WHEN ("e"."NullableBoolC" <> "e"."NullableBoolA" OR "e"."NullableBoolC" IS NULL OR "e"."NullableBoolA" IS NULL) AND ("e"."NullableBoolC" IS NOT NULL OR "e"."NullableBoolA" IS NOT NULL) THEN CAST(1 AS bit)
-        ELSE CAST(0 AS bit)
+        WHEN ("e"."NullableBoolC" <> "e"."NullableBoolA" OR "e"."NullableBoolC" IS NULL OR "e"."NullableBoolA" IS NULL) AND ("e"."NullableBoolC" IS NOT NULL OR "e"."NullableBoolA" IS NOT NULL) THEN CAST(1 AS boolean)
+        ELSE CAST(0 AS boolean)
     END
-END = CAST(1 AS bit)
+END = CAST(1 AS boolean)
 """);
         }
 
-        [ActianTodo]
         public override async Task Sum_function_is_always_considered_non_nullable(bool async)
         {
             await base.Sum_function_is_always_considered_non_nullable(async);
@@ -3195,8 +3206,8 @@ END = CAST(1 AS bit)
             AssertSql(
                 """
 SELECT "e"."NullableIntA" AS "Key", CASE
-    WHEN COALESCE(SUM("e"."IntA"), 0) <> "e"."NullableIntA" OR "e"."NullableIntA" IS NULL THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+    WHEN COALESCE(SUM("e"."IntA"), 0) <> "e"."NullableIntA" OR "e"."NullableIntA" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END AS "Sum"
 FROM "Entities1" AS "e"
 GROUP BY "e"."NullableIntA"
@@ -3316,22 +3327,43 @@ WHERE "e"."NullableStringA" NOT LIKE "e"."NullableStringB" OR "e"."NullableStrin
 """);
         }
 
-        [ActianTodo]
+        private bool LikeLite(string s, string pattern)
+            => s == pattern && s is not null && pattern is not null;
+
         public override async Task Like_with_escape_char(bool async)
         {
-            await base.Like_with_escape_char(async);
+            await AssertQueryScalar(
+                async,
+                ss => ss.Set<NullSemanticsEntity1>().Where(e => EF.Functions.Like(e.StringA, e.StringB, @"\\")).Select(e => e.Id),
+                ss => ss.Set<NullSemanticsEntity1>().Where(e => LikeLite(e.StringA, e.StringB)).Select(e => e.Id));
+
+            await AssertQueryScalar(
+                async,
+                ss => ss.Set<NullSemanticsEntity1>().Where(e => !EF.Functions.Like(e.StringA, e.StringB, @"\\")).Select(e => e.Id),
+                ss => ss.Set<NullSemanticsEntity1>().Where(e => !LikeLite(e.StringA, e.StringB)).Select(e => e.Id));
+
+            await AssertQueryScalar(
+                async,
+                ss => ss.Set<NullSemanticsEntity1>().Where(e => EF.Functions.Like(e.StringA, e.StringB, null)).Select(e => e.Id),
+                ss => ss.Set<NullSemanticsEntity1>().Where(e => false).Select(e => e.Id),
+                assertEmpty: true);
+
+            await AssertQueryScalar(
+                async,
+                ss => ss.Set<NullSemanticsEntity1>().Where(e => !EF.Functions.Like(e.StringA, e.StringB, null)).Select(e => e.Id),
+                ss => ss.Set<NullSemanticsEntity1>().Where(e => true).Select(e => e.Id));
 
             AssertSql(
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."StringA" LIKE "e"."StringB" ESCAPE N'\'
+WHERE "e"."StringA" LIKE "e"."StringB" ESCAPE N'\\'
 """,
                 //
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
-WHERE "e"."StringA" NOT LIKE "e"."StringB" ESCAPE N'\'
+WHERE "e"."StringA" NOT LIKE "e"."StringB" ESCAPE N'\\'
 """,
                 //
                 """
@@ -3343,6 +3375,1189 @@ WHERE 0 = 1
                 """
 SELECT "e"."Id"
 FROM "Entities1" AS "e"
+""");
+        }
+
+        public override async Task CaseOpWhen_predicate(bool async)
+        {
+            await base.CaseOpWhen_predicate(async);
+
+            AssertSql(
+                """
+SELECT "e"."Id", "e"."BoolA", "e"."BoolB", "e"."BoolC", "e"."IntA", "e"."IntB", "e"."IntC", "e"."NullableBoolA", "e"."NullableBoolB", "e"."NullableBoolC", "e"."NullableIntA", "e"."NullableIntB", "e"."NullableIntC", "e"."NullableStringA", "e"."NullableStringB", "e"."NullableStringC", "e"."StringA", "e"."StringB", "e"."StringC"
+FROM "Entities1" AS "e"
+WHERE CASE CASE
+    WHEN "e"."StringA" = N'Foo' THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END
+    WHEN 1 THEN 3
+    WHEN 0 THEN 2
+END = 2
+""");
+        }
+
+        public override async Task CaseOpWhen_projection(bool async)
+        {
+            await base.CaseOpWhen_projection(async);
+
+            AssertSql(
+                """
+SELECT CASE CASE
+    WHEN "e"."StringA" = N'Foo' THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END
+    WHEN 1 THEN 3
+    WHEN 0 THEN 2
+END
+FROM "Entities1" AS "e"
+ORDER BY "e"."Id"
+""");
+        }
+
+        public override async Task CaseWhen_equal_to_first_or_third_select(bool async)
+        {
+            await base.CaseWhen_equal_to_first_or_third_select(async);
+
+            AssertSql(
+                """
+SELECT CASE
+    WHEN CASE
+        WHEN "e"."StringA" = N'Foo' THEN 3
+        WHEN "e"."StringB" = N'Foo' THEN 2
+        WHEN "e"."StringC" = N'Foo' THEN 3
+    END = 3 AND CASE
+        WHEN "e"."StringA" = N'Foo' THEN 3
+        WHEN "e"."StringB" = N'Foo' THEN 2
+        WHEN "e"."StringC" = N'Foo' THEN 3
+    END IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END
+FROM "Entities1" AS "e"
+ORDER BY "e"."Id"
+""");
+        }
+
+        public override async Task CaseWhen_equal_to_second_select(bool async)
+        {
+            await base.CaseWhen_equal_to_second_select(async);
+
+            AssertSql(
+                """
+SELECT CASE
+    WHEN CASE
+        WHEN "e"."StringA" = N'Foo' THEN 3
+        WHEN "e"."StringB" = N'Foo' THEN 2
+        WHEN "e"."StringC" = N'Foo' THEN 3
+    END = 2 AND CASE
+        WHEN "e"."StringA" = N'Foo' THEN 3
+        WHEN "e"."StringB" = N'Foo' THEN 2
+        WHEN "e"."StringC" = N'Foo' THEN 3
+    END IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END
+FROM "Entities1" AS "e"
+ORDER BY "e"."Id"
+""");
+        }
+
+        [BooleanExpession]
+        public override async Task Rewrite_compare_bool_with_bool(bool async)
+        {
+            await base.Rewrite_compare_bool_with_bool(async);
+
+            AssertSql(
+                """
+SELECT "e"."Id", ~("e"."BoolA" ^ "e"."BoolB") AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" = "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."BoolA" = "e"."NullableBoolB" AND "e"."NullableBoolB" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" = "e"."NullableBoolB"
+""",
+                //
+                """
+SELECT "e"."Id", "e"."BoolA" ^ "e"."BoolB" AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" <> "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."BoolA" <> "e"."NullableBoolB" AND "e"."NullableBoolB" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" <> "e"."NullableBoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."NullableBoolA" = "e"."BoolB" AND "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" = "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN ("e"."NullableBoolA" = "e"."NullableBoolB" AND "e"."NullableBoolA" IS NOT NULL AND "e"."NullableBoolB" IS NOT NULL) OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" = "e"."NullableBoolB" OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL)
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."NullableBoolA" <> "e"."BoolB" AND "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" <> "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN ("e"."NullableBoolA" <> "e"."NullableBoolB" AND "e"."NullableBoolA" IS NOT NULL AND "e"."NullableBoolB" IS NOT NULL) OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" <> "e"."NullableBoolB" OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL)
+""",
+                //
+                """
+SELECT "e"."Id", "e"."BoolA" ^ "e"."BoolB" AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" <> "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."BoolA" <> "e"."NullableBoolB" AND "e"."NullableBoolB" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" <> "e"."NullableBoolB"
+""",
+                //
+                """
+SELECT "e"."Id", ~("e"."BoolA" ^ "e"."BoolB") AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" = "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."BoolA" = "e"."NullableBoolB" AND "e"."NullableBoolB" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" = "e"."NullableBoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."NullableBoolA" <> "e"."BoolB" AND "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" <> "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN ("e"."NullableBoolA" <> "e"."NullableBoolB" AND "e"."NullableBoolA" IS NOT NULL AND "e"."NullableBoolB" IS NOT NULL) OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" <> "e"."NullableBoolB" OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL)
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."NullableBoolA" = "e"."BoolB" AND "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" = "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN ("e"."NullableBoolA" = "e"."NullableBoolB" AND "e"."NullableBoolA" IS NOT NULL AND "e"."NullableBoolB" IS NOT NULL) OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" = "e"."NullableBoolB" OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL)
+""",
+                //
+                """
+SELECT "e"."Id", "e"."BoolA" ^ "e"."BoolB" AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" <> "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."BoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolB" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolB" IS NULL
+""",
+                //
+                """
+SELECT "e"."Id", ~("e"."BoolA" ^ "e"."BoolB") AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" = "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."BoolA" = "e"."NullableBoolB" OR "e"."NullableBoolB" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" = "e"."NullableBoolB" OR "e"."NullableBoolB" IS NULL
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."NullableBoolA" <> "e"."BoolB" OR "e"."NullableBoolA" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" <> "e"."BoolB" OR "e"."NullableBoolA" IS NULL
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN ("e"."NullableBoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE ("e"."NullableBoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL)
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."NullableBoolA" = "e"."BoolB" OR "e"."NullableBoolA" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" = "e"."BoolB" OR "e"."NullableBoolA" IS NULL
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN ("e"."NullableBoolA" = "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE ("e"."NullableBoolA" = "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL)
+""",
+                //
+                """
+SELECT "e"."Id", ~("e"."BoolA" ^ "e"."BoolB") AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" = "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."BoolA" = "e"."NullableBoolB" OR "e"."NullableBoolB" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" = "e"."NullableBoolB" OR "e"."NullableBoolB" IS NULL
+""",
+                //
+                """
+SELECT "e"."Id", "e"."BoolA" ^ "e"."BoolB" AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" <> "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."BoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolB" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolB" IS NULL
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."NullableBoolA" = "e"."BoolB" OR "e"."NullableBoolA" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" = "e"."BoolB" OR "e"."NullableBoolA" IS NULL
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN ("e"."NullableBoolA" = "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE ("e"."NullableBoolA" = "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL)
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."NullableBoolA" <> "e"."BoolB" OR "e"."NullableBoolA" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" <> "e"."BoolB" OR "e"."NullableBoolA" IS NULL
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN ("e"."NullableBoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE ("e"."NullableBoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL)
+""",
+                //
+                """
+SELECT "e"."Id", "e"."BoolA" ^ "e"."BoolB" AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" <> "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."BoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolB" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolB" IS NULL
+""",
+                //
+                """
+SELECT "e"."Id", ~("e"."BoolA" ^ "e"."BoolB") AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" = "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."BoolA" = "e"."NullableBoolB" OR "e"."NullableBoolB" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" = "e"."NullableBoolB" OR "e"."NullableBoolB" IS NULL
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."NullableBoolA" <> "e"."BoolB" OR "e"."NullableBoolA" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" <> "e"."BoolB" OR "e"."NullableBoolA" IS NULL
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN ("e"."NullableBoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE ("e"."NullableBoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL)
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."NullableBoolA" = "e"."BoolB" OR "e"."NullableBoolA" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" = "e"."BoolB" OR "e"."NullableBoolA" IS NULL
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN ("e"."NullableBoolA" = "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE ("e"."NullableBoolA" = "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL)
+""",
+                //
+                """
+SELECT "e"."Id", ~("e"."BoolA" ^ "e"."BoolB") AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" = "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."BoolA" = "e"."NullableBoolB" OR "e"."NullableBoolB" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" = "e"."NullableBoolB" OR "e"."NullableBoolB" IS NULL
+""",
+                //
+                """
+SELECT "e"."Id", "e"."BoolA" ^ "e"."BoolB" AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" <> "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."BoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolB" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolB" IS NULL
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."NullableBoolA" = "e"."BoolB" OR "e"."NullableBoolA" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" = "e"."BoolB" OR "e"."NullableBoolA" IS NULL
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN ("e"."NullableBoolA" = "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE ("e"."NullableBoolA" = "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL)
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."NullableBoolA" <> "e"."BoolB" OR "e"."NullableBoolA" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" <> "e"."BoolB" OR "e"."NullableBoolA" IS NULL
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN ("e"."NullableBoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE ("e"."NullableBoolA" <> "e"."NullableBoolB" OR "e"."NullableBoolA" IS NULL OR "e"."NullableBoolB" IS NULL) AND ("e"."NullableBoolA" IS NOT NULL OR "e"."NullableBoolB" IS NOT NULL)
+""",
+                //
+                """
+SELECT "e"."Id", ~("e"."BoolA" ^ "e"."BoolB") AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" = "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."BoolA" = "e"."NullableBoolB" AND "e"."NullableBoolB" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" = "e"."NullableBoolB"
+""",
+                //
+                """
+SELECT "e"."Id", "e"."BoolA" ^ "e"."BoolB" AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" <> "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."BoolA" <> "e"."NullableBoolB" AND "e"."NullableBoolB" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" <> "e"."NullableBoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."NullableBoolA" = "e"."BoolB" AND "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" = "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN ("e"."NullableBoolA" = "e"."NullableBoolB" AND "e"."NullableBoolA" IS NOT NULL AND "e"."NullableBoolB" IS NOT NULL) OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" = "e"."NullableBoolB" OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL)
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."NullableBoolA" <> "e"."BoolB" AND "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" <> "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN ("e"."NullableBoolA" <> "e"."NullableBoolB" AND "e"."NullableBoolA" IS NOT NULL AND "e"."NullableBoolB" IS NOT NULL) OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" <> "e"."NullableBoolB" OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL)
+""",
+                //
+                """
+SELECT "e"."Id", "e"."BoolA" ^ "e"."BoolB" AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" <> "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."BoolA" <> "e"."NullableBoolB" AND "e"."NullableBoolB" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" <> "e"."NullableBoolB"
+""",
+                //
+                """
+SELECT "e"."Id", ~("e"."BoolA" ^ "e"."BoolB") AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" = "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."BoolA" = "e"."NullableBoolB" AND "e"."NullableBoolB" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" = "e"."NullableBoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."NullableBoolA" <> "e"."BoolB" AND "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" <> "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN ("e"."NullableBoolA" <> "e"."NullableBoolB" AND "e"."NullableBoolA" IS NOT NULL AND "e"."NullableBoolB" IS NOT NULL) OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" <> "e"."NullableBoolB" OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL)
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."NullableBoolA" = "e"."BoolB" AND "e"."NullableBoolA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" = "e"."BoolB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN ("e"."NullableBoolA" = "e"."NullableBoolB" AND "e"."NullableBoolA" IS NOT NULL AND "e"."NullableBoolB" IS NOT NULL) OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableBoolA" = "e"."NullableBoolB" OR ("e"."NullableBoolA" IS NULL AND "e"."NullableBoolB" IS NULL)
+""");
+        }
+
+        [BooleanExpession]
+        public override async Task Rewrite_compare_int_with_int(bool async)
+        {
+            await base.Rewrite_compare_int_with_int(async);
+
+            AssertSql(
+                """
+SELECT "e"."Id", ~CAST("e"."IntA" ^ "e"."IntB" AS boolean) AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."IntA" = "e"."IntB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."NullableIntA" = "e"."IntB" AND "e"."NullableIntA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableIntA" = "e"."IntB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."IntA" = "e"."NullableIntB" AND "e"."NullableIntB" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."IntA" = "e"."NullableIntB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN ("e"."NullableIntA" = "e"."NullableIntB" AND "e"."NullableIntA" IS NOT NULL AND "e"."NullableIntB" IS NOT NULL) OR ("e"."NullableIntA" IS NULL AND "e"."NullableIntB" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableIntA" = "e"."NullableIntB" OR ("e"."NullableIntA" IS NULL AND "e"."NullableIntB" IS NULL)
+""",
+                //
+                """
+SELECT "e"."Id", CAST("e"."IntA" ^ "e"."IntB" AS boolean) AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."IntA" <> "e"."IntB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."NullableIntA" <> "e"."IntB" OR "e"."NullableIntA" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableIntA" <> "e"."IntB" OR "e"."NullableIntA" IS NULL
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."IntA" <> "e"."NullableIntB" OR "e"."NullableIntB" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."IntA" <> "e"."NullableIntB" OR "e"."NullableIntB" IS NULL
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN ("e"."NullableIntA" <> "e"."NullableIntB" OR "e"."NullableIntA" IS NULL OR "e"."NullableIntB" IS NULL) AND ("e"."NullableIntA" IS NOT NULL OR "e"."NullableIntB" IS NOT NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE ("e"."NullableIntA" <> "e"."NullableIntB" OR "e"."NullableIntA" IS NULL OR "e"."NullableIntB" IS NULL) AND ("e"."NullableIntA" IS NOT NULL OR "e"."NullableIntB" IS NOT NULL)
+""",
+                //
+                """
+SELECT "e"."Id", CAST("e"."IntA" ^ "e"."IntB" AS boolean) AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."IntA" <> "e"."IntB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."NullableIntA" <> "e"."IntB" OR "e"."NullableIntA" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableIntA" <> "e"."IntB" OR "e"."NullableIntA" IS NULL
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."IntA" <> "e"."NullableIntB" OR "e"."NullableIntB" IS NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."IntA" <> "e"."NullableIntB" OR "e"."NullableIntB" IS NULL
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN ("e"."NullableIntA" <> "e"."NullableIntB" OR "e"."NullableIntA" IS NULL OR "e"."NullableIntB" IS NULL) AND ("e"."NullableIntA" IS NOT NULL OR "e"."NullableIntB" IS NOT NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE ("e"."NullableIntA" <> "e"."NullableIntB" OR "e"."NullableIntA" IS NULL OR "e"."NullableIntB" IS NULL) AND ("e"."NullableIntA" IS NOT NULL OR "e"."NullableIntB" IS NOT NULL)
+""",
+                //
+                """
+SELECT "e"."Id", ~CAST("e"."IntA" ^ "e"."IntB" AS boolean) AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."IntA" = "e"."IntB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."NullableIntA" = "e"."IntB" AND "e"."NullableIntA" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableIntA" = "e"."IntB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN "e"."IntA" = "e"."NullableIntB" AND "e"."NullableIntB" IS NOT NULL THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."IntA" = "e"."NullableIntB"
+""",
+                //
+                """
+SELECT "e"."Id", CASE
+    WHEN ("e"."NullableIntA" = "e"."NullableIntB" AND "e"."NullableIntA" IS NOT NULL AND "e"."NullableIntB" IS NOT NULL) OR ("e"."NullableIntA" IS NULL AND "e"."NullableIntB" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END AS "X"
+FROM "Entities1" AS "e"
+""",
+                //
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."NullableIntA" = "e"."NullableIntB" OR ("e"."NullableIntA" IS NULL AND "e"."NullableIntB" IS NULL)
+""");
+        }
+
+        public override async Task Where_coalesce_shortcircuit(bool async)
+        {
+            await base.Where_coalesce_shortcircuit(async);
+
+            AssertSql(
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE "e"."BoolA" = CAST(1 AS boolean) OR "e"."BoolB" = CAST(1 AS boolean)
+""");
+        }
+
+        public override async Task Where_coalesce_shortcircuit_many(bool async)
+        {
+            await base.Where_coalesce_shortcircuit_many(async);
+
+            AssertSql(
+                """
+SELECT "e"."Id"
+FROM "Entities1" AS "e"
+WHERE COALESCE("e"."NullableBoolA", CASE
+    WHEN "e"."BoolA" = CAST(1 AS boolean) OR "e"."BoolB" = CAST(1 AS boolean) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
+END) = CAST(1 AS boolean)
 """);
         }
 

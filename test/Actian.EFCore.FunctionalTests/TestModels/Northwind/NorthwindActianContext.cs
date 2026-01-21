@@ -1,3 +1,7 @@
+﻿// Copyright (c) 2024 Actian Corporation. All Rights Reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 ﻿namespace Microsoft.EntityFrameworkCore.TestModels.Northwind;
 
 public class NorthwindActianContext : NorthwindRelationalContext
@@ -46,5 +50,7 @@ public class NorthwindActianContext : NorthwindRelationalContext
                 b.Property(p => p.Quantity).HasColumnType("smallint");
                 b.Property(p => p.Discount).HasColumnType("real");
             });
+
+        modelBuilder.Entity<CustomerQuery>().ToSqlQuery("SELECT \"c\".\"CustomerID\", \"c\".\"Address\", \"c\".\"City\", \"c\".\"CompanyName\", \"c\".\"ContactName\", \"c\".\"ContactTitle\", \"c\".\"Country\", \"c\".\"Fax\", \"c\".\"Phone\", \"c\".\"PostalCode\", \"c\".\"Region\" FROM \"Customers\" AS \"c\"");
     }
 }

@@ -1,3 +1,7 @@
+﻿// Copyright (c) 2024 Actian Corporation. All Rights Reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 ﻿using System;
 using Actian.EFCore.Diagnostics.Internal;
 using Actian.EFCore.Infrastructure;
@@ -112,6 +116,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 .TryAdd<IQuerySqlGeneratorFactory, ActianQuerySqlGeneratorFactory>()
                 .TryAdd<IRelationalSqlTranslatingExpressionVisitorFactory, ActianSqlTranslatingExpressionVisitorFactory>()
                 .TryAdd<IQueryTranslationPostprocessorFactory, ActianQueryTranslationPostprocessorFactory>()
+                .TryAdd<IRelationalParameterBasedSqlProcessorFactory, ActianParameterBasedSqlProcessorFactory>()
                 .TryAdd<ISingletonOptions, IActianSingletonOptions>(p => p.GetRequiredService<IActianSingletonOptions>())
                 .TryAddProviderSpecificServices(b => b
                     .TryAddSingleton<IActianSingletonOptions, ActianSingletonOptions>()

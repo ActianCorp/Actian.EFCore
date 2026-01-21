@@ -1,3 +1,7 @@
+﻿// Copyright (c) 2024 Actian Corporation. All Rights Reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 ﻿using System.Threading.Tasks;
 using Actian.EFCore.TestUtilities;
 using Microsoft.EntityFrameworkCore.TestUtilities;
@@ -536,7 +540,6 @@ WHERE "c"."CustomerID" = @__customerID
 """);
     }
 
-    [ActianTodo]
     public override async Task Keyless_query_first_async()
     {
         await base.Keyless_query_first_async();
@@ -551,7 +554,6 @@ ORDER BY "m"."CompanyName"
 """);
     }
 
-    [ActianTodo]
     public override async Task Query_with_closure_async_null()
     {
         await base.Query_with_closure_async_null();
@@ -608,7 +610,6 @@ WHERE "c"."CustomerID" = @__customerID
 """);
     }
 
-    [ActianTodo]
     public override async Task Keyless_query_async()
     {
         await base.Keyless_query_async();
@@ -645,7 +646,6 @@ WHERE "c"."CustomerID" = @__customerID
 """);
     }
 
-    [ActianTodo]
     public override void Keyless_query_first()
     {
         base.Keyless_query_first();
@@ -660,7 +660,6 @@ ORDER BY "m"."CompanyName"
 """);
     }
 
-    [ActianTodo]
     public override void Query_with_closure_null()
     {
         base.Query_with_closure_null();
@@ -723,7 +722,6 @@ FROM "Customers" AS "c"
 """);
     }
 
-    [ActianTodo]
     public override void Keyless_query()
     {
         base.Keyless_query();

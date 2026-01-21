@@ -1,4 +1,5 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+﻿// Copyright (c) 2024 Actian Corporation. All Rights Reserved.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Linq;
@@ -7,6 +8,7 @@ using Actian.EFCore.TestUtilities;
 using Microsoft.EntityFrameworkCore.TestUtilities;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.EntityFrameworkCore.TestModels.Northwind;
 
 namespace Microsoft.EntityFrameworkCore.Query;
 
@@ -21,9 +23,6 @@ public class NorthwindGroupByQueryActianTest : NorthwindGroupByQueryRelationalTe
         Fixture.TestSqlLoggerFactory.Clear();
         Fixture.TestSqlLoggerFactory.SetTestOutputHelper(testOutputHelper);
     }
-
-    protected override bool CanExecuteQueryString
-        => true;
 
     [ConditionalFact]
     public virtual void Check_all_tests_overridden()
@@ -263,12 +262,12 @@ GROUP BY "o"."CustomerID"
 
         AssertSql(
             """
-SELECT "t"."Name", "t"."CustomerID" AS "Value", COUNT(*) AS "Count"
+SELECT "o0"."Name", "o0"."CustomerID" AS "Value", COUNT(*) AS "Count"
 FROM (
     SELECT "o"."CustomerID", N'CustomerID' AS "Name"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Name", "t"."CustomerID"
+) AS "o0"
+GROUP BY "o0"."Name", "o0"."CustomerID"
 """);
     }
 
@@ -647,12 +646,12 @@ GROUP BY "o"."CustomerID", "o"."EmployeeID"
 
         AssertSql(
             """
-SELECT COALESCE(SUM("t"."OrderID"), 0) AS "Sum", MIN("t"."OrderID") AS "Min", "t"."Key", MAX("t"."OrderID") AS "Max", AVG(CAST("t"."OrderID" AS float)) AS "Avg"
+SELECT COALESCE(SUM("o0"."OrderID"), 0) AS "Sum", MIN("o0"."OrderID") AS "Min", "o0"."Key", MAX("o0"."OrderID") AS "Max", AVG(CAST("o0"."OrderID" AS float)) AS "Avg"
 FROM (
     SELECT "o"."OrderID", 2 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
@@ -662,12 +661,12 @@ GROUP BY "t"."Key"
 
         AssertSql(
             """
-SELECT COALESCE(SUM("t"."OrderID"), 0) AS "Sum"
+SELECT COALESCE(SUM("o0"."OrderID"), 0) AS "Sum"
 FROM (
     SELECT "o"."OrderID", 2 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
@@ -677,12 +676,12 @@ GROUP BY "t"."Key"
 
         AssertSql(
             """
-SELECT COALESCE(SUM("t"."OrderID"), 0) AS "Sum"
+SELECT COALESCE(SUM("o0"."OrderID"), 0) AS "Sum"
 FROM (
     SELECT "o"."OrderID", 2 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
@@ -692,12 +691,12 @@ GROUP BY "t"."Key"
 
         AssertSql(
             """
-SELECT COALESCE(SUM("t"."OrderID"), 0) AS "Sum"
+SELECT COALESCE(SUM("o0"."OrderID"), 0) AS "Sum"
 FROM (
     SELECT "o"."OrderID", 2 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
@@ -707,13 +706,13 @@ GROUP BY "t"."Key"
 
         AssertSql(
             """
-SELECT COALESCE(SUM("t"."OrderID"), 0) AS "Sum", MIN("t"."OrderID") AS "Min", "t"."Key" AS "Random", MAX("t"."OrderID") AS "Max", AVG(CAST("t"."OrderID" AS float)) AS "Avg"
+SELECT COALESCE(SUM("o0"."OrderID"), 0) AS "Sum", MIN("o0"."OrderID") AS "Min", "o0"."Key" AS "Random", MAX("o0"."OrderID") AS "Max", AVG(CAST("o0"."OrderID" AS float)) AS "Avg"
 FROM (
     SELECT "o"."OrderID", 2 AS "Key"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" > 10500
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
@@ -723,12 +722,12 @@ GROUP BY "t"."Key"
 
         AssertSql(
             """
-SELECT COALESCE(SUM("t"."OrderID"), 0) AS "Sum", "t"."Key"
+SELECT COALESCE(SUM("o0"."OrderID"), 0) AS "Sum", "o0"."Key"
 FROM (
     SELECT "o"."OrderID", 2 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
@@ -739,127 +738,149 @@ GROUP BY "t"."Key"
         AssertSql(
             """
 SELECT MIN(CASE
-    WHEN 1 = "t"."Key" THEN "t"."OrderDate"
+    WHEN 1 = "o0"."Key" THEN "o0"."OrderDate"
 END) AS "Min", MAX(CASE
-    WHEN 1 = "t"."Key" THEN "t"."OrderDate"
+    WHEN 1 = "o0"."Key" THEN "o0"."OrderDate"
 END) AS "Max", COALESCE(SUM(CASE
-    WHEN 1 = "t"."Key" THEN "t"."OrderID"
+    WHEN 1 = "o0"."Key" THEN "o0"."OrderID"
 END), 0) AS "Sum", AVG(CASE
-    WHEN 1 = "t"."Key" THEN CAST("t"."OrderID" AS float)
+    WHEN 1 = "o0"."Key" THEN CAST("o0"."OrderID" AS float)
 END) AS "Average"
 FROM (
     SELECT "o"."OrderID", "o"."OrderDate", 1 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
-ORDER BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
+ORDER BY "o0"."Key"
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_param_Select_Sum_Min_Key_Max_Avg(bool async)
     {
-        await base.GroupBy_param_Select_Sum_Min_Key_Max_Avg(async);
+        await AssertQuery(
+            async,
+            ss => ss.Set<Order>().GroupBy(o => 2).Select(
+                g =>
+                    new
+                    {
+                        Sum = g.Sum(o => o.OrderID),
+                        Min = g.Min(o => o.OrderID),
+                        g.Key,
+                        Max = g.Max(o => o.OrderID),
+                        Avg = g.Average(o => o.OrderID)
+                    }),
+            e => e.Min + " " + e.Max);
 
         AssertSql(
             """
-@__a_0='2'
-
-SELECT COALESCE(SUM("t"."OrderID"), 0) AS "Sum", MIN("t"."OrderID") AS "Min", "t"."Key", MAX("t"."OrderID") AS "Max", AVG(CAST("t"."OrderID" AS float)) AS "Avg"
+SELECT COALESCE(SUM("o0"."OrderID"), 0) AS "Sum", MIN("o0"."OrderID") AS "Min", "o0"."Key", MAX("o0"."OrderID") AS "Max", AVG(CAST("o0"."OrderID" AS float)) AS "Avg"
 FROM (
-    SELECT "o"."OrderID", @__a_0 AS "Key"
+    SELECT "o"."OrderID", 2 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_param_with_element_selector_Select_Sum(bool async)
     {
-        await base.GroupBy_param_with_element_selector_Select_Sum(async);
+        await AssertQuery(
+            async,
+            ss => ss.Set<Order>().GroupBy(o => 2, o => new { o.OrderID, o.OrderDate }).Select(
+                g =>
+                    new { Sum = g.Sum(o => o.OrderID) }),
+            e => e.Sum);
 
         AssertSql(
             """
-@__a_0='2'
-
-SELECT COALESCE(SUM("t"."OrderID"), 0) AS "Sum"
+SELECT COALESCE(SUM("o0"."OrderID"), 0) AS "Sum"
 FROM (
-    SELECT "o"."OrderID", @__a_0 AS "Key"
+    SELECT "o"."OrderID", 2 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_param_with_element_selector_Select_Sum2(bool async)
     {
-        await base.GroupBy_param_with_element_selector_Select_Sum2(async);
+        await AssertQuery(
+            async,
+            ss => ss.Set<Order>().GroupBy(o => 2, o => new { o.OrderID }).Select(
+                g =>
+                    new { Sum = g.Sum(o => o.OrderID) }),
+            e => e.Sum);
 
         AssertSql(
             """
-@__a_0='2'
-
-SELECT COALESCE(SUM("t"."OrderID"), 0) AS "Sum"
+SELECT COALESCE(SUM("o0"."OrderID"), 0) AS "Sum"
 FROM (
-    SELECT "o"."OrderID", @__a_0 AS "Key"
+    SELECT "o"."OrderID", 2 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_param_with_element_selector_Select_Sum3(bool async)
     {
-        await base.GroupBy_param_with_element_selector_Select_Sum3(async);
+        await AssertQuery(
+            async,
+            ss => ss.Set<Order>().GroupBy(
+                o => 2, o => new
+                {
+                    o.OrderID,
+                    o.OrderDate,
+                    o.CustomerID
+                }).Select(
+                g =>
+                    new { Sum = g.Sum(o => o.OrderID) }),
+            e => e.Sum);
 
         AssertSql(
             """
-@__a_0='2'
-
-SELECT COALESCE(SUM("t"."OrderID"), 0) AS "Sum"
+SELECT COALESCE(SUM("o0"."OrderID"), 0) AS "Sum"
 FROM (
-    SELECT "o"."OrderID", @__a_0 AS "Key"
+    SELECT "o"."OrderID", 2 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_param_with_element_selector_Select_Sum_Min_Key_Max_Avg(bool async)
     {
-        await base.GroupBy_param_with_element_selector_Select_Sum_Min_Key_Max_Avg(async);
+        await AssertQuery(
+            async,
+            ss => ss.Set<Order>().GroupBy(o => 2, o => o.OrderID).Select(
+                g =>
+                    new { Sum = g.Sum(), g.Key }),
+            e => e.Sum);
 
         AssertSql(
             """
-@__a_0='2'
-
-SELECT COALESCE(SUM("t"."OrderID"), 0) AS "Sum", "t"."Key"
+SELECT COALESCE(SUM("o0"."OrderID"), 0) AS "Sum", "o0"."Key"
 FROM (
-    SELECT "o"."OrderID", @__a_0 AS "Key"
+    SELECT "o"."OrderID", 2 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_anonymous_key_type_mismatch_with_aggregate(bool async)
     {
         await base.GroupBy_anonymous_key_type_mismatch_with_aggregate(async);
 
         AssertSql(
             """
-SELECT COUNT(*) AS "I0", "t"."I0" AS "I1"
+SELECT COUNT(*) AS "I0", "o0"."I0" AS "I1"
 FROM (
-    SELECT DATEPART(year, "o"."OrderDate") AS "I0"
+    SELECT DATE_PART('YEAR', "o"."OrderDate") AS "I0"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."I0"
-ORDER BY "t"."I0"
+) AS "o0"
+GROUP BY "o0"."I0"
+ORDER BY "o0"."I0"
 """);
     }
 
@@ -1100,19 +1121,18 @@ GROUP BY "o"."OrderID"
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_conditional_properties(bool async)
     {
         await base.GroupBy_conditional_properties(async);
 
         AssertSql(
             """
-SELECT "t"."OrderMonth", "t"."CustomerID" AS "Customer", COUNT(*) AS "Count"
+SELECT "o0"."OrderMonth", "o0"."CustomerID" AS "Customer", COUNT(*) AS "Count"
 FROM (
     SELECT "o"."CustomerID", NULL AS "OrderMonth"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."OrderMonth", "t"."CustomerID"
+) AS "o0"
+GROUP BY "o0"."OrderMonth", "o0"."CustomerID"
 """);
     }
 
@@ -1122,12 +1142,12 @@ GROUP BY "t"."OrderMonth", "t"."CustomerID"
 
         AssertSql(
             """
-SELECT COALESCE(SUM("t"."OrderID"), 0)
+SELECT COALESCE(SUM("o0"."OrderID"), 0)
 FROM (
     SELECT "o"."OrderID", 1 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
@@ -1137,12 +1157,12 @@ GROUP BY "t"."Key"
 
         AssertSql(
             """
-SELECT COALESCE(SUM("t"."OrderID"), 0) AS "Sum"
+SELECT COALESCE(SUM("o0"."OrderID"), 0) AS "Sum"
 FROM (
     SELECT "o"."OrderID", 1 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
@@ -1158,7 +1178,6 @@ GROUP BY "o"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_Skip_GroupBy_Aggregate(bool async)
     {
         await base.OrderBy_Skip_GroupBy_Aggregate(async);
@@ -1167,18 +1186,17 @@ GROUP BY "o"."CustomerID"
             """
 @__p_0='80'
 
-SELECT AVG(CAST("t"."OrderID" AS float))
+SELECT AVG(CAST("o0"."OrderID" AS float))
 FROM (
     SELECT "o"."OrderID", "o"."CustomerID"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderID"
-    OFFSET @__p_0 ROWS
-) AS "t"
-GROUP BY "t"."CustomerID"
+    OFFSET @__p_0
+) AS "o0"
+GROUP BY "o0"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_Take_GroupBy_Aggregate(bool async)
     {
         await base.OrderBy_Take_GroupBy_Aggregate(async);
@@ -1187,17 +1205,16 @@ GROUP BY "t"."CustomerID"
             """
 @__p_0='500'
 
-SELECT MIN("t"."OrderID")
+SELECT MIN("o0"."OrderID")
 FROM (
-    SELECT TOP(@__p_0) "o"."OrderID", "o"."CustomerID"
+    SELECT FIRST @__p_0 "o"."OrderID", "o"."CustomerID"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderID"
-) AS "t"
-GROUP BY "t"."CustomerID"
+) AS "o0"
+GROUP BY "o0"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task OrderBy_Skip_Take_GroupBy_Aggregate(bool async)
     {
         await base.OrderBy_Skip_Take_GroupBy_Aggregate(async);
@@ -1207,14 +1224,14 @@ GROUP BY "t"."CustomerID"
 @__p_0='80'
 @__p_1='500'
 
-SELECT MAX("t"."OrderID")
+SELECT MAX("o0"."OrderID")
 FROM (
     SELECT "o"."OrderID", "o"."CustomerID"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderID"
-    OFFSET @__p_0 ROWS FETCH NEXT @__p_1 ROWS ONLY
-) AS "t"
-GROUP BY "t"."CustomerID"
+    OFFSET @__p_0 FETCH NEXT @__p_1 ROWS ONLY
+) AS "o0"
+GROUP BY "o0"."CustomerID"
 """);
     }
 
@@ -1224,12 +1241,12 @@ GROUP BY "t"."CustomerID"
 
         AssertSql(
             """
-SELECT "t"."CustomerID" AS "Key", COUNT(*) AS "c"
+SELECT "o0"."CustomerID" AS "Key", COUNT(*) AS "c"
 FROM (
     SELECT DISTINCT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."CustomerID"
+) AS "o0"
+GROUP BY "o0"."CustomerID"
 """);
     }
 
@@ -1239,12 +1256,12 @@ GROUP BY "t"."CustomerID"
 
         AssertSql(
             """
-SELECT "t"."EmployeeID" AS "Key", COUNT(*) AS "c"
+SELECT "o0"."EmployeeID" AS "Key", COUNT(*) AS "c"
 FROM (
     SELECT DISTINCT "o"."OrderID", "o"."EmployeeID"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."EmployeeID"
+) AS "o0"
+GROUP BY "o0"."EmployeeID"
 """);
     }
 
@@ -1287,7 +1304,6 @@ GROUP BY "o0"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Join_complex_GroupBy_Aggregate(bool async)
     {
         await base.Join_complex_GroupBy_Aggregate(async);
@@ -1298,21 +1314,21 @@ GROUP BY "o0"."CustomerID"
 @__p_1='10'
 @__p_2='50'
 
-SELECT "t0"."CustomerID" AS "Key", AVG(CAST("t"."OrderID" AS float)) AS "Count"
+SELECT "c0"."CustomerID" AS "Key", AVG(CAST("o0"."OrderID" AS float)) AS "Count"
 FROM (
-    SELECT TOP(@__p_0) "o"."OrderID", "o"."CustomerID"
+    SELECT FIRST @__p_0 "o"."OrderID", "o"."CustomerID"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" < 10400
     ORDER BY "o"."OrderDate"
-) AS "t"
+) AS "o0"
 INNER JOIN (
     SELECT "c"."CustomerID"
     FROM "Customers" AS "c"
     WHERE "c"."CustomerID" NOT IN (N'DRACD', N'FOLKO')
     ORDER BY "c"."City"
-    OFFSET @__p_1 ROWS FETCH NEXT @__p_2 ROWS ONLY
-) AS "t0" ON "t"."CustomerID" = "t0"."CustomerID"
-GROUP BY "t0"."CustomerID"
+    OFFSET @__p_1 FETCH NEXT @__p_2 ROWS ONLY
+) AS "c0" ON "o0"."CustomerID" = "c0"."CustomerID"
+GROUP BY "c0"."CustomerID"
 """);
     }
 
@@ -1395,7 +1411,7 @@ GROUP BY "c"."Country"
 """);
     }
 
-    [ActianTodo]
+    [ActianTodo] //Expected: 20 Actual: 15
     public override async Task GroupJoin_complex_GroupBy_Aggregate(bool async)
     {
         await base.GroupJoin_complex_GroupBy_Aggregate(async);
@@ -1459,7 +1475,7 @@ GROUP BY "o0"."CustomerID", "p"."ProductName"
 
         AssertSql(
             """
-SELECT "t"."City" AS "Key", COUNT(*) AS "Total"
+SELECT "u"."City" AS "Key", COUNT(*) AS "Total"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
@@ -1468,8 +1484,8 @@ FROM (
     SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM "Customers" AS "c0"
     WHERE "c0"."City" = N'México D.F.'
-) AS "t"
-GROUP BY "t"."City"
+) AS "u"
+GROUP BY "u"."City"
 """);
     }
 
@@ -1505,12 +1521,12 @@ GROUP BY "c"."CustomerID"
 
         AssertSql(
             """
-SELECT "t"."CustomerID" AS "Key", COUNT(*) AS "Count"
+SELECT "o0"."CustomerID" AS "Key", COUNT(*) AS "Count"
 FROM (
     SELECT DISTINCT "o"."CustomerID", "o"."OrderID"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."CustomerID"
+) AS "o0"
+GROUP BY "o0"."CustomerID"
 """);
     }
 
@@ -1520,32 +1536,31 @@ GROUP BY "t"."CustomerID"
 
         AssertSql(
             """
-SELECT "t"."Key", COUNT(*) AS "Count"
+SELECT "s"."Key", COUNT(*) AS "Count"
 FROM (
     SELECT SUBSTRING("c"."CustomerID", 0 + 1, 1) AS "Key"
     FROM "Orders" AS "o"
     LEFT JOIN "Customers" AS "c" ON "o"."CustomerID" = "c"."CustomerID"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "s"
+GROUP BY "s"."Key"
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_complex_key_aggregate_2(bool async)
     {
         await base.GroupBy_complex_key_aggregate_2(async);
 
         AssertSql(
             """
-SELECT "t"."Key" AS "Month", COALESCE(SUM("t"."OrderID"), 0) AS "Total", (
-    SELECT COALESCE(SUM("o0"."OrderID"), 0)
-    FROM "Orders" AS "o0"
-    WHERE DATEPART(month, "o0"."OrderDate") = "t"."Key" OR ("o0"."OrderDate" IS NULL AND "t"."Key" IS NULL)) AS "Payment"
+SELECT "o0"."Key" AS "Month", COALESCE(SUM("o0"."OrderID"), 0) AS "Total", (
+    SELECT COALESCE(SUM("o1"."OrderID"), 0)
+    FROM "Orders" AS "o1"
+    WHERE DATE_PART('MONTH', "o1"."OrderDate") = "o0"."Key" OR ("o1"."OrderDate" IS NULL AND "o0"."Key" IS NULL)) AS "Payment"
 FROM (
-    SELECT "o"."OrderID", DATEPART(month, "o"."OrderDate") AS "Key"
+    SELECT "o"."OrderID", DATE_PART('MONTH', "o"."OrderDate") AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
@@ -1616,7 +1631,6 @@ WHERE EXISTS (
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_aggregate_Pushdown(bool async)
     {
         await base.GroupBy_aggregate_Pushdown(async);
@@ -1626,20 +1640,19 @@ WHERE EXISTS (
 @__p_0='20'
 @__p_1='4'
 
-SELECT "t"."CustomerID"
+SELECT "o0"."CustomerID"
 FROM (
-    SELECT TOP(@__p_0) "o"."CustomerID"
+    SELECT FIRST @__p_0 "o"."CustomerID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 10
     ORDER BY "o"."CustomerID"
-) AS "t"
-ORDER BY "t"."CustomerID"
-OFFSET @__p_1 ROWS
+) AS "o0"
+ORDER BY "o0"."CustomerID"
+OFFSET @__p_1
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_aggregate_using_grouping_key_Pushdown(bool async)
     {
         await base.GroupBy_aggregate_using_grouping_key_Pushdown(async);
@@ -1649,20 +1662,19 @@ OFFSET @__p_1 ROWS
 @__p_0='20'
 @__p_1='4'
 
-SELECT "t"."Key", "t"."Max"
+SELECT "o0"."Key", "o0"."Max"
 FROM (
-    SELECT TOP(@__p_0) "o"."CustomerID" AS "Key", MAX("o"."CustomerID") AS "Max"
+    SELECT FIRST @__p_0 "o"."CustomerID" AS "Key", MAX("o"."CustomerID") AS "Max"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 10
     ORDER BY "o"."CustomerID"
-) AS "t"
-ORDER BY "t"."Key"
-OFFSET @__p_1 ROWS
+) AS "o0"
+ORDER BY "o0"."Key"
+OFFSET @__p_1
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_aggregate_Pushdown_followed_by_projecting_Length(bool async)
     {
         await base.GroupBy_aggregate_Pushdown_followed_by_projecting_Length(async);
@@ -1672,20 +1684,19 @@ OFFSET @__p_1 ROWS
 @__p_0='20'
 @__p_1='4'
 
-SELECT CAST(LEN("t"."CustomerID") AS int)
+SELECT CAST(LENGTH("o0"."CustomerID") AS integer)
 FROM (
-    SELECT TOP(@__p_0) "o"."CustomerID"
+    SELECT FIRST @__p_0 "o"."CustomerID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 10
     ORDER BY "o"."CustomerID"
-) AS "t"
-ORDER BY "t"."CustomerID"
-OFFSET @__p_1 ROWS
+) AS "o0"
+ORDER BY "o0"."CustomerID"
+OFFSET @__p_1
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_aggregate_Pushdown_followed_by_projecting_constant(bool async)
     {
         await base.GroupBy_aggregate_Pushdown_followed_by_projecting_constant(async);
@@ -1697,14 +1708,14 @@ OFFSET @__p_1 ROWS
 
 SELECT 5
 FROM (
-    SELECT TOP(@__p_0) "o"."CustomerID"
+    SELECT FIRST @__p_0 "o"."CustomerID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 10
     ORDER BY "o"."CustomerID"
-) AS "t"
-ORDER BY "t"."CustomerID"
-OFFSET @__p_1 ROWS
+) AS "o0"
+ORDER BY "o0"."CustomerID"
+OFFSET @__p_1
 """);
     }
 
@@ -1740,12 +1751,12 @@ HAVING COUNT(*) > 4
 
         AssertSql(
             """
-SELECT "t"."Key" AS "Name", COUNT(*) AS "Count"
+SELECT "o0"."Key" AS "Name", COUNT(*) AS "Count"
 FROM (
     SELECT N'Order' AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 HAVING COUNT(*) > 0
 """);
     }
@@ -1770,15 +1781,15 @@ ORDER BY COUNT(*), "o"."CustomerID"
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
 FROM (
     SELECT "o"."CustomerID", MAX("o"."OrderID") AS "LastOrderID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 5
-) AS "t"
-INNER JOIN "Customers" AS "c" ON "t"."CustomerID" = "c"."CustomerID"
-INNER JOIN "Orders" AS "o0" ON "t"."LastOrderID" = "o0"."OrderID"
+) AS "o0"
+INNER JOIN "Customers" AS "c" ON "o0"."CustomerID" = "c"."CustomerID"
+INNER JOIN "Orders" AS "o1" ON "o0"."LastOrderID" = "o1"."OrderID"
 """);
     }
 
@@ -1791,11 +1802,11 @@ INNER JOIN "Orders" AS "o0" ON "t"."LastOrderID" = "o0"."OrderID"
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 INNER JOIN (
-    SELECT "o"."CustomerID", MAX("o"."OrderID") AS "LastOrderID"
+    SELECT "o"."CustomerID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 5
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
+) AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
 """);
     }
 
@@ -1808,11 +1819,11 @@ INNER JOIN (
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 LEFT JOIN (
-    SELECT "o"."CustomerID", MAX("o"."OrderID") AS "LastOrderID"
+    SELECT "o"."CustomerID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 5
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
+) AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
 """);
     }
 
@@ -1822,15 +1833,15 @@ LEFT JOIN (
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
 FROM "Customers" AS "c"
 INNER JOIN (
     SELECT "o"."CustomerID", MAX("o"."OrderID") AS "LastOrderID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 5
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
-INNER JOIN "Orders" AS "o0" ON "t"."LastOrderID" = "o0"."OrderID"
+) AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
+INNER JOIN "Orders" AS "o1" ON "o0"."LastOrderID" = "o1"."OrderID"
 """);
     }
 
@@ -1840,14 +1851,14 @@ INNER JOIN "Orders" AS "o0" ON "t"."LastOrderID" = "o0"."OrderID"
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "t"."LastOrderID"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o0"."LastOrderID"
 FROM "Customers" AS "c"
 INNER JOIN (
     SELECT "o"."CustomerID", MAX("o"."OrderID") AS "LastOrderID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 5
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
+) AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
 """);
     }
 
@@ -1857,36 +1868,35 @@ INNER JOIN (
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "t"."LastOrderID", "o0"."OrderID"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o0"."LastOrderID", "o1"."OrderID"
 FROM "Customers" AS "c"
 INNER JOIN (
     SELECT "o"."CustomerID", MAX("o"."OrderID") AS "LastOrderID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 5
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
-INNER JOIN "Orders" AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
+) AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
+INNER JOIN "Orders" AS "o1" ON "c"."CustomerID" = "o1"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Join_GroupBy_Aggregate_distinct_single_join(bool async)
     {
         await base.Join_GroupBy_Aggregate_distinct_single_join(async);
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "t0"."LastOrderID"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o1"."LastOrderID"
 FROM "Customers" AS "c"
 INNER JOIN (
-    SELECT DISTINCT "t"."CustomerID", MAX("t"."OrderID") AS "LastOrderID"
+    SELECT DISTINCT "o0"."CustomerID", MAX("o0"."OrderID") AS "LastOrderID"
     FROM (
-        SELECT "o"."OrderID", "o"."CustomerID", DATEPART(year, "o"."OrderDate") AS "Year"
+        SELECT "o"."OrderID", "o"."CustomerID", DATE_PART('YEAR', "o"."OrderDate") AS "Year"
         FROM "Orders" AS "o"
-    ) AS "t"
-    GROUP BY "t"."CustomerID", "t"."Year"
+    ) AS "o0"
+    GROUP BY "o0"."CustomerID", "o0"."Year"
     HAVING COUNT(*) > 5
-) AS "t0" ON "c"."CustomerID" = "t0"."CustomerID"
+) AS "o1" ON "c"."CustomerID" = "o1"."CustomerID"
 """);
     }
 
@@ -1896,14 +1906,14 @@ INNER JOIN (
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "t"."LastOrderID"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o0"."LastOrderID"
 FROM "Customers" AS "c"
 LEFT JOIN (
     SELECT "o"."CustomerID", MAX("o"."OrderID") AS "LastOrderID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 5
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
+) AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
 WHERE "c"."CustomerID" LIKE N'A%'
 """);
     }
@@ -1914,18 +1924,18 @@ WHERE "c"."CustomerID" LIKE N'A%'
 
         AssertSql(
             """
-SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate", "t0"."CustomerID", "t0"."Address", "t0"."City", "t0"."CompanyName", "t0"."ContactName", "t0"."ContactTitle", "t0"."Country", "t0"."Fax", "t0"."Phone", "t0"."PostalCode", "t0"."Region"
+SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate", "s"."CustomerID", "s"."Address", "s"."City", "s"."CompanyName", "s"."ContactName", "s"."ContactTitle", "s"."Country", "s"."Fax", "s"."Phone", "s"."PostalCode", "s"."Region"
 FROM "Orders" AS "o"
 INNER JOIN (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
     INNER JOIN (
-        SELECT "o0"."CustomerID", MAX("o0"."OrderID") AS "LastOrderID"
+        SELECT "o0"."CustomerID"
         FROM "Orders" AS "o0"
         GROUP BY "o0"."CustomerID"
         HAVING COUNT(*) > 5
-    ) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
-) AS "t0" ON "o"."CustomerID" = "t0"."CustomerID"
+    ) AS "o1" ON "c"."CustomerID" = "o1"."CustomerID"
+) AS "s" ON "o"."CustomerID" = "s"."CustomerID"
 WHERE "o"."OrderID" < 10400
 """);
     }
@@ -1936,14 +1946,14 @@ WHERE "o"."OrderID" < 10400
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "t"."LastOrderID"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o0"."LastOrderID"
 FROM "Customers" AS "c"
 INNER JOIN (
     SELECT "o"."CustomerID" AS "Key", MAX("o"."OrderID") AS "LastOrderID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 5
-) AS "t" ON "c"."CustomerID" = "t"."Key"
+) AS "o0" ON "c"."CustomerID" = "o0"."Key"
 """);
     }
 
@@ -1989,13 +1999,13 @@ GROUP BY "o"."CustomerID"
 
         AssertSql(
             """
-SELECT "t"."CustomerID" AS "Key", COUNT(*) AS "c"
+SELECT "o0"."CustomerID" AS "Key", COUNT(*) AS "c"
 FROM (
     SELECT DISTINCT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."CustomerID"
-ORDER BY "t"."CustomerID"
+) AS "o0"
+GROUP BY "o0"."CustomerID"
+ORDER BY "o0"."CustomerID"
 """);
     }
 
@@ -2010,8 +2020,8 @@ SELECT CASE
     WHEN EXISTS (
         SELECT 1
         FROM "Orders" AS "o"
-        WHERE "c"."CustomerID" = "o"."CustomerID") THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "c"."CustomerID" = "o"."CustomerID") THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END, "c"."CustomerID", "t"."OrderID"
 FROM "Customers" AS "c"
 OUTER APPLY (
@@ -2068,7 +2078,6 @@ ORDER BY "o"."OrderID", "t"."ProductID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_GroupBy_All(bool async)
     {
         await base.Select_GroupBy_All(async);
@@ -2080,8 +2089,8 @@ SELECT CASE
         SELECT 1
         FROM "Orders" AS "o"
         GROUP BY "o"."CustomerID"
-        HAVING "o"."CustomerID" <> N'ALFKI' OR "o"."CustomerID" IS NULL) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        HAVING "o"."CustomerID" <> N'ALFKI' OR "o"."CustomerID" IS NULL) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
@@ -2170,7 +2179,6 @@ GROUP BY "o"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_Where_Count_with_predicate(bool async)
     {
         await base.GroupBy_Where_Count_with_predicate(async);
@@ -2178,14 +2186,13 @@ GROUP BY "o"."CustomerID"
         AssertSql(
             """
 SELECT COUNT(CASE
-    WHEN "o"."OrderID" < 10300 AND "o"."OrderDate" IS NOT NULL AND DATEPART(year, "o"."OrderDate") = 1997 THEN 1
+    WHEN "o"."OrderID" < 10300 AND "o"."OrderDate" IS NOT NULL AND DATE_PART('YEAR', "o"."OrderDate") = 1997 THEN 1
 END)
 FROM "Orders" AS "o"
 GROUP BY "o"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_Where_Where_Count(bool async)
     {
         await base.GroupBy_Where_Where_Count(async);
@@ -2193,14 +2200,13 @@ GROUP BY "o"."CustomerID"
         AssertSql(
             """
 SELECT COUNT(CASE
-    WHEN "o"."OrderID" < 10300 AND "o"."OrderDate" IS NOT NULL AND DATEPART(year, "o"."OrderDate") = 1997 THEN 1
+    WHEN "o"."OrderID" < 10300 AND "o"."OrderDate" IS NOT NULL AND DATE_PART('YEAR', "o"."OrderDate") = 1997 THEN 1
 END)
 FROM "Orders" AS "o"
 GROUP BY "o"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_Where_Select_Where_Count(bool async)
     {
         await base.GroupBy_Where_Select_Where_Count(async);
@@ -2208,14 +2214,13 @@ GROUP BY "o"."CustomerID"
         AssertSql(
             """
 SELECT COUNT(CASE
-    WHEN "o"."OrderID" < 10300 AND "o"."OrderDate" IS NOT NULL AND DATEPART(year, "o"."OrderDate") = 1997 THEN 1
+    WHEN "o"."OrderID" < 10300 AND "o"."OrderDate" IS NOT NULL AND DATE_PART('YEAR', "o"."OrderDate") = 1997 THEN 1
 END)
 FROM "Orders" AS "o"
 GROUP BY "o"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_Where_Select_Where_Select_Min(bool async)
     {
         await base.GroupBy_Where_Select_Where_Select_Min(async);
@@ -2223,7 +2228,7 @@ GROUP BY "o"."CustomerID"
         AssertSql(
             """
 SELECT MIN(CASE
-    WHEN "o"."OrderID" < 10300 AND "o"."OrderDate" IS NOT NULL AND DATEPART(year, "o"."OrderDate") = 1997 THEN "o"."OrderID"
+    WHEN "o"."OrderID" < 10300 AND "o"."OrderDate" IS NOT NULL AND DATE_PART('YEAR', "o"."OrderDate") = 1997 THEN "o"."OrderID"
 END)
 FROM "Orders" AS "o"
 GROUP BY "o"."CustomerID"
@@ -2306,7 +2311,6 @@ GROUP BY "o"."OrderID", "o"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_with_aggregate_through_navigation_property(bool async)
     {
         await base.GroupBy_with_aggregate_through_navigation_property(async);
@@ -2362,22 +2366,22 @@ GROUP BY "e"."Title"
 
         AssertSql(
             """
-SELECT "t0"."EmployeeID", "t0"."City", "t0"."Country", "t0"."FirstName", "t0"."ReportsTo", "t0"."Title"
+SELECT "e3"."EmployeeID", "e3"."City", "e3"."Country", "e3"."FirstName", "e3"."ReportsTo", "e3"."Title"
 FROM (
     SELECT "e"."Title"
     FROM "Employees" AS "e"
     WHERE "e"."Title" = N'Sales Representative' AND "e"."EmployeeID" = 1
     GROUP BY "e"."Title"
-) AS "t"
+) AS "e1"
 LEFT JOIN (
-    SELECT "t1"."EmployeeID", "t1"."City", "t1"."Country", "t1"."FirstName", "t1"."ReportsTo", "t1"."Title"
+    SELECT "e2"."EmployeeID", "e2"."City", "e2"."Country", "e2"."FirstName", "e2"."ReportsTo", "e2"."Title"
     FROM (
         SELECT "e0"."EmployeeID", "e0"."City", "e0"."Country", "e0"."FirstName", "e0"."ReportsTo", "e0"."Title", ROW_NUMBER() OVER(PARTITION BY "e0"."Title" ORDER BY "e0"."EmployeeID") AS "row"
         FROM "Employees" AS "e0"
         WHERE "e0"."Title" = N'Sales Representative' AND "e0"."EmployeeID" = 1
-    ) AS "t1"
-    WHERE "t1"."row" <= 1
-) AS "t0" ON "t"."Title" = "t0"."Title"
+    ) AS "e2"
+    WHERE "e2"."row" <= 1
+) AS "e3" ON "e1"."Title" = "e3"."Title"
 """);
     }
 
@@ -2404,14 +2408,14 @@ GROUP BY "e"."EmployeeID"
 
         AssertSql(
             """
-SELECT "t"."City", "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
+SELECT "c1"."City", "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
     SELECT "c"."City"
     FROM "Customers" AS "c"
     GROUP BY "c"."City"
-) AS "t"
-LEFT JOIN "Customers" AS "c0" ON "t"."City" = "c0"."City"
-ORDER BY "t"."City"
+) AS "c1"
+LEFT JOIN "Customers" AS "c0" ON "c1"."City" = "c0"."City"
+ORDER BY "c1"."City"
 """);
     }
 
@@ -2421,14 +2425,14 @@ ORDER BY "t"."City"
 
         AssertSql(
             """
-SELECT "t"."City", "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
+SELECT "c1"."City", "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
     SELECT "c"."City"
     FROM "Customers" AS "c"
     GROUP BY "c"."City"
-) AS "t"
-LEFT JOIN "Customers" AS "c0" ON "t"."City" = "c0"."City"
-ORDER BY "t"."City"
+) AS "c1"
+LEFT JOIN "Customers" AS "c0" ON "c1"."City" = "c0"."City"
+ORDER BY "c1"."City"
 """);
     }
 
@@ -2438,18 +2442,18 @@ ORDER BY "t"."City"
 
         AssertSql(
             """
-SELECT "t"."City", "t0"."CustomerID", "t0"."Address", "t0"."City", "t0"."CompanyName", "t0"."ContactName", "t0"."ContactTitle", "t0"."Country", "t0"."Fax", "t0"."Phone", "t0"."PostalCode", "t0"."Region"
+SELECT "c1"."City", "c2"."CustomerID", "c2"."Address", "c2"."City", "c2"."CompanyName", "c2"."ContactName", "c2"."ContactTitle", "c2"."Country", "c2"."Fax", "c2"."Phone", "c2"."PostalCode", "c2"."Region"
 FROM (
     SELECT "c"."City"
     FROM "Customers" AS "c"
     GROUP BY "c"."City"
-) AS "t"
+) AS "c1"
 LEFT JOIN (
     SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM "Customers" AS "c0"
     WHERE "c0"."CustomerID" LIKE N'A%'
-) AS "t0" ON "t"."City" = "t0"."City"
-ORDER BY "t"."City"
+) AS "c2" ON "c1"."City" = "c2"."City"
+ORDER BY "c1"."City"
 """);
     }
 
@@ -2459,14 +2463,14 @@ ORDER BY "t"."City"
 
         AssertSql(
             """
-SELECT "t"."City", "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
+SELECT "c1"."City", "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
     SELECT "c"."City"
     FROM "Customers" AS "c"
     GROUP BY "c"."City"
-) AS "t"
-LEFT JOIN "Customers" AS "c0" ON "t"."City" = "c0"."City"
-ORDER BY "t"."City", "c0"."CustomerID"
+) AS "c1"
+LEFT JOIN "Customers" AS "c0" ON "c1"."City" = "c0"."City"
+ORDER BY "c1"."City", "c0"."CustomerID"
 """);
     }
 
@@ -2485,10 +2489,10 @@ ORDER BY "t"."City", "c0"."CustomerID"
             """
 SELECT COUNT(*)
 FROM (
-    SELECT "o"."CustomerID"
+    SELECT 1
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
+) AS "o0"
 """);
     }
 
@@ -2500,10 +2504,10 @@ FROM (
             """
 SELECT COUNT(*)
 FROM (
-    SELECT "o"."CustomerID"
+    SELECT 1
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
+) AS "o0"
 """);
     }
 
@@ -2551,25 +2555,24 @@ GROUP BY "o"."CustomerID"
 
         AssertSql(
             """
-SELECT MIN("t"."c")
+SELECT MIN("o0"."c")
 FROM (
     SELECT COALESCE(SUM("o"."OrderID"), 0) AS "c"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
+) AS "o0"
 """,
-            //
-            """
-SELECT MAX("t"."c")
+                //
+                """
+SELECT MAX("o0"."c")
 FROM (
     SELECT COALESCE(SUM("o"."OrderID"), 0) AS "c"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
+) AS "o0"
 """);
     }
     
-    [ActianTodo]
     public override async Task All_after_GroupBy_aggregate(bool async)
     {
         await base.All_after_GroupBy_aggregate(async);
@@ -2581,8 +2584,8 @@ SELECT CASE
         SELECT 1
         FROM "Orders" AS "o"
         GROUP BY "o"."CustomerID"
-        HAVING 0 = 1) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        HAVING 0 = 1) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
@@ -2599,13 +2602,12 @@ SELECT CASE
         SELECT 1
         FROM "Orders" AS "o"
         GROUP BY "o"."CustomerID"
-        HAVING COALESCE(SUM("o"."OrderID"), 0) < 0) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        HAVING COALESCE(SUM("o"."OrderID"), 0) < 0) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
 
-    [ActianTodo]
     public override async Task Any_after_GroupBy_aggregate(bool async)
     {
         await base.Any_after_GroupBy_aggregate(async);
@@ -2616,8 +2618,8 @@ SELECT CASE
     WHEN EXISTS (
         SELECT 1
         FROM "Orders" AS "o"
-        GROUP BY "o"."CustomerID") THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        GROUP BY "o"."CustomerID") THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
@@ -2630,10 +2632,10 @@ END
             """
 SELECT COUNT(*)
 FROM (
-    SELECT "o"."CustomerID"
+    SELECT 1
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
+) AS "o0"
 """);
     }
 
@@ -2645,11 +2647,11 @@ FROM (
             """
 SELECT COUNT(*)
 FROM (
-    SELECT "o"."CustomerID"
+    SELECT 1
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 1
-) AS "t"
+) AS "o0"
 """);
     }
 
@@ -2661,10 +2663,10 @@ FROM (
             """
 SELECT COUNT(*)
 FROM (
-    SELECT "o"."CustomerID"
+    SELECT 1
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
+) AS "o0"
 """);
     }
 
@@ -2676,15 +2678,14 @@ FROM (
             """
 SELECT COUNT(*)
 FROM (
-    SELECT "o"."CustomerID"
+    SELECT 1
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING COUNT(*) > 1
-) AS "t"
+) AS "o0"
 """);
     }
 
-    [ActianTodo]
     public override async Task Any_after_GroupBy_without_aggregate(bool async)
     {
         await base.Any_after_GroupBy_without_aggregate(async);
@@ -2695,8 +2696,8 @@ SELECT CASE
     WHEN EXISTS (
         SELECT 1
         FROM "Orders" AS "o"
-        GROUP BY "o"."CustomerID") THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        GROUP BY "o"."CustomerID") THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
@@ -2713,8 +2714,8 @@ SELECT CASE
         SELECT 1
         FROM "Orders" AS "o"
         GROUP BY "o"."CustomerID"
-        HAVING COUNT(*) > 1) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        HAVING COUNT(*) > 1) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
@@ -2731,29 +2732,28 @@ SELECT CASE
         SELECT 1
         FROM "Orders" AS "o"
         GROUP BY "o"."CustomerID"
-        HAVING COUNT(*) <= 1) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        HAVING COUNT(*) <= 1) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_aggregate_followed_by_another_GroupBy_aggregate(bool async)
     {
         await base.GroupBy_aggregate_followed_by_another_GroupBy_aggregate(async);
 
         AssertSql(
             """
-SELECT "t0"."Key0" AS "Key", COALESCE(SUM("t0"."Count"), 0) AS "Count"
+SELECT "o1"."Key0" AS "Key", COALESCE(SUM("o1"."Count"), 0) AS "Count"
 FROM (
-    SELECT "t"."Count", 1 AS "Key0"
+    SELECT "o0"."Count", 1 AS "Key0"
     FROM (
         SELECT COUNT(*) AS "Count"
         FROM "Orders" AS "o"
         GROUP BY "o"."CustomerID"
-    ) AS "t"
-) AS "t0"
-GROUP BY "t0"."Key0"
+    ) AS "o0"
+) AS "o1"
+GROUP BY "o1"."Key0"
 """);
     }
 
@@ -2768,8 +2768,8 @@ SELECT "o"."OrderID", "o"."OrderDate", CASE
     WHEN EXISTS (
         SELECT 1
         FROM "Order Details" AS "o0"
-        WHERE "o"."OrderID" = "o0"."OrderID" AND "o0"."ProductID" < 25) THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        WHERE "o"."OrderID" = "o0"."OrderID" AND "o0"."ProductID" < 25) THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END AS "HasOrderDetails", CASE
     WHEN (
         SELECT COUNT(*)
@@ -2779,8 +2779,8 @@ END AS "HasOrderDetails", CASE
             INNER JOIN "Products" AS "p" ON "o1"."ProductID" = "p"."ProductID"
             WHERE "o"."OrderID" = "o1"."OrderID" AND "o1"."ProductID" < 25
             GROUP BY "p"."ProductName"
-        ) AS "t") > 1 THEN CAST(1 AS bit)
-    ELSE CAST(0 AS bit)
+        ) AS "t") > 1 THEN CAST(1 AS boolean)
+    ELSE CAST(0 AS boolean)
 END AS "HasMultipleProducts"
 FROM "Orders" AS "o"
 WHERE "o"."OrderDate" IS NOT NULL
@@ -2795,10 +2795,10 @@ WHERE "o"."OrderDate" IS NOT NULL
             """
 SELECT COUNT(*)
 FROM (
-    SELECT "o"."CustomerID"
+    SELECT 1
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
+) AS "o0"
 """);
     }
 
@@ -2820,12 +2820,12 @@ GROUP BY "c"."City"
 
         AssertSql(
             """
-SELECT "t"."Renamed" AS "Key", COUNT(*) AS "Count"
+SELECT "c0"."Renamed" AS "Key", COUNT(*) AS "Count"
 FROM (
     SELECT DISTINCT "c"."City" AS "Renamed", "c"."CustomerID"
     FROM "Customers" AS "c"
-) AS "t"
-GROUP BY "t"."Renamed"
+) AS "c0"
+GROUP BY "c0"."Renamed"
 """);
     }
 
@@ -2849,12 +2849,12 @@ ORDER BY "o"."OrderDate"
 
         AssertSql(
             """
-SELECT N'TotalAmount' AS "Name", COALESCE(SUM(CAST("t"."OrderID" AS decimal(18,2))), 0.0) AS "Value"
+SELECT N'TotalAmount' AS "Name", COALESCE(SUM(CAST("o0"."OrderID" AS decimal(18,2))), 0.0) AS "Value"
 FROM (
     SELECT "o"."OrderID", 1 AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
@@ -2932,7 +2932,6 @@ GROUP BY "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
         AssertSql();
     }
 
-    [ActianTodo]
     public override async Task GroupBy_with_order_by_skip_and_another_order_by(bool async)
     {
         await base.GroupBy_with_order_by_skip_and_another_order_by(async);
@@ -2941,14 +2940,14 @@ GROUP BY "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
             """
 @__p_0='80'
 
-SELECT COALESCE(SUM("t"."OrderID"), 0)
+SELECT COALESCE(SUM("o0"."OrderID"), 0)
 FROM (
     SELECT "o"."OrderID", "o"."CustomerID"
     FROM "Orders" AS "o"
     ORDER BY "o"."CustomerID", "o"."OrderID"
-    OFFSET @__p_0 ROWS
-) AS "t"
-GROUP BY "t"."CustomerID"
+    OFFSET @__p_0
+) AS "o0"
+GROUP BY "o0"."CustomerID"
 """);
     }
 
@@ -3049,13 +3048,13 @@ GROUP BY "o"."CustomerID"
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "t"."Count"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o0"."Count"
 FROM (
     SELECT "o"."CustomerID" AS "Key", COUNT(*) AS "Count"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
-INNER JOIN "Customers" AS "c" ON "t"."Key" = "c"."CustomerID"
+) AS "o0"
+INNER JOIN "Customers" AS "c" ON "o0"."Key" = "c"."CustomerID"
 """);
     }
 
@@ -3070,12 +3069,11 @@ FROM (
     SELECT "o"."CustomerID" AS "Key", MAX("o"."OrderDate") AS "LastOrderDate"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
-INNER JOIN "Orders" AS "o0" ON ("t"."Key" = "o0"."CustomerID" OR ("t"."Key" IS NULL AND "o0"."CustomerID" IS NULL)) AND ("t"."LastOrderDate" = "o0"."OrderDate" OR ("t"."LastOrderDate" IS NULL AND "o0"."OrderDate" IS NULL))
+) AS "o1"
+INNER JOIN "Orders" AS "o0" ON ("o1"."Key" = "o0"."CustomerID" OR ("o1"."Key" IS NULL AND "o0"."CustomerID" IS NULL)) AND ("o1"."LastOrderDate" = "o0"."OrderDate" OR ("o1"."LastOrderDate" IS NULL AND "o0"."OrderDate" IS NULL))
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_aggregate_from_right_side_of_join(bool async)
     {
         await base.GroupBy_aggregate_from_right_side_of_join(async);
@@ -3084,58 +3082,55 @@ INNER JOIN "Orders" AS "o0" ON ("t"."Key" = "o0"."CustomerID" OR ("t"."Key" IS N
             """
 @__p_0='10'
 
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "t"."Max"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o0"."Max"
 FROM "Customers" AS "c"
 INNER JOIN (
     SELECT "o"."CustomerID" AS "Key", MAX("o"."OrderDate") AS "Max"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t" ON "c"."CustomerID" = "t"."Key"
-ORDER BY "t"."Max", "c"."CustomerID"
-OFFSET @__p_0 ROWS FETCH NEXT @__p_0 ROWS ONLY
+) AS "o0" ON "c"."CustomerID" = "o0"."Key"
+ORDER BY "o0"."Max", "c"."CustomerID"
+OFFSET @__p_0 FETCH NEXT @__p_0 ROWS ONLY
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_aggregate_join_another_GroupBy_aggregate(bool async)
     {
         await base.GroupBy_aggregate_join_another_GroupBy_aggregate(async);
 
         AssertSql(
             """
-SELECT "t"."Key", "t"."Total", "t0"."ThatYear"
+SELECT "o1"."Key", "o1"."Total", "o2"."ThatYear"
 FROM (
     SELECT "o"."CustomerID" AS "Key", COUNT(*) AS "Total"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
+) AS "o1"
 INNER JOIN (
     SELECT "o0"."CustomerID" AS "Key", COUNT(*) AS "ThatYear"
     FROM "Orders" AS "o0"
-    WHERE DATEPART(year, "o0"."OrderDate") = 1997
+    WHERE DATE_PART('YEAR', "o0"."OrderDate") = 1997
     GROUP BY "o0"."CustomerID"
-) AS "t0" ON "t"."Key" = "t0"."Key"
+) AS "o2" ON "o1"."Key" = "o2"."Key"
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_aggregate_after_skip_0_take_0(bool async)
     {
         await base.GroupBy_aggregate_after_skip_0_take_0(async);
 
         AssertSql(
             """
-SELECT "t"."CustomerID" AS "Key", COUNT(*) AS "Total"
+SELECT "o0"."CustomerID" AS "Key", COUNT(*) AS "Total"
 FROM (
     SELECT "o"."CustomerID"
     FROM "Orders" AS "o"
     WHERE 0 = 1
-) AS "t"
-GROUP BY "t"."CustomerID"
+) AS "o0"
+GROUP BY "o0"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_skip_0_take_0_aggregate(bool async)
     {
         await base.GroupBy_skip_0_take_0_aggregate(async);
@@ -3150,23 +3145,22 @@ HAVING 0 = 1
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_aggregate_followed_another_GroupBy_aggregate(bool async)
     {
         await base.GroupBy_aggregate_followed_another_GroupBy_aggregate(async);
 
         AssertSql(
             """
-SELECT "t0"."CustomerID" AS "Key", COUNT(*) AS "Count"
+SELECT "o1"."CustomerID" AS "Key", COUNT(*) AS "Count"
 FROM (
-    SELECT "t"."CustomerID"
+    SELECT "o0"."CustomerID"
     FROM (
-        SELECT "o"."CustomerID", DATEPART(year, "o"."OrderDate") AS "Year"
+        SELECT "o"."CustomerID", DATE_PART('YEAR', "o"."OrderDate") AS "Year"
         FROM "Orders" AS "o"
-    ) AS "t"
-    GROUP BY "t"."CustomerID", "t"."Year"
-) AS "t0"
-GROUP BY "t0"."CustomerID"
+    ) AS "o0"
+    GROUP BY "o0"."CustomerID", "o0"."Year"
+) AS "o1"
+GROUP BY "o1"."CustomerID"
 """);
     }
 
@@ -3181,9 +3175,9 @@ FROM (
     SELECT MIN("o"."OrderID") AS "c"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
+) AS "o1"
 CROSS JOIN "Orders" AS "o0"
-WHERE "o0"."OrderID" = "t"."c"
+WHERE "o0"."OrderID" = "o1"."c"
 """);
     }
 
@@ -3210,49 +3204,47 @@ WHERE "o0"."OrderID" = "t"."c"
 
         AssertSql(
             """
-SELECT "t"."CustomerID", "o0"."CustomerID", "o0"."OrderID"
+SELECT "o1"."CustomerID", "o0"."CustomerID", "o0"."OrderID"
 FROM (
     SELECT "o"."CustomerID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
-) AS "t"
-LEFT JOIN "Orders" AS "o0" ON "t"."CustomerID" = "o0"."CustomerID"
-ORDER BY "t"."CustomerID"
+) AS "o1"
+LEFT JOIN "Orders" AS "o0" ON "o1"."CustomerID" = "o0"."CustomerID"
+ORDER BY "o1"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_with_grouping_key_using_Like(bool async)
     {
         await base.GroupBy_with_grouping_key_using_Like(async);
 
         AssertSql(
             """
-SELECT "t"."Key", COUNT(*) AS "Count"
+SELECT "o0"."Key", COUNT(*) AS "Count"
 FROM (
     SELECT CASE
-        WHEN "o"."CustomerID" LIKE N'A%' AND "o"."CustomerID" IS NOT NULL THEN CAST(1 AS bit)
-        ELSE CAST(0 AS bit)
+        WHEN ("o"."CustomerID" LIKE N'A%') AND "o"."CustomerID" IS NOT NULL THEN CAST(1 AS boolean)
+        ELSE CAST(0 AS boolean)
     END AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupBy_with_grouping_key_DateTime_Day(bool async)
     {
         await base.GroupBy_with_grouping_key_DateTime_Day(async);
 
         AssertSql(
             """
-SELECT "t"."Key", COUNT(*) AS "Count"
+SELECT "o0"."Key", COUNT(*) AS "Count"
 FROM (
-    SELECT DATEPART(day, "o"."OrderDate") AS "Key"
+    SELECT DATE_PART('DAY', "o"."OrderDate") AS "Key"
     FROM "Orders" AS "o"
-) AS "t"
-GROUP BY "t"."Key"
+) AS "o0"
+GROUP BY "o0"."Key"
 """);
     }
 
@@ -3336,7 +3328,6 @@ GROUP BY "o"."OrderID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Where_select_function_groupby_followed_by_another_select_with_aggregates(bool async)
     {
         await base.Where_select_function_groupby_followed_by_another_select_with_aggregates(async);
@@ -3344,10 +3335,10 @@ GROUP BY "o"."OrderID"
         AssertSql(
             """
 SELECT "o"."CustomerID" AS "Key", COALESCE(SUM(CASE
-    WHEN 2020 - DATEPART(year, "o"."OrderDate") <= 30 THEN "o"."OrderID"
+    WHEN (2020 - DATE_PART('YEAR', "o"."OrderDate")) <= 30 THEN "o"."OrderID"
     ELSE 0
 END), 0) AS "Sum1", COALESCE(SUM(CASE
-    WHEN 2020 - DATEPART(year, "o"."OrderDate") > 30 AND 2020 - DATEPART(year, "o"."OrderDate") <= 60 THEN "o"."OrderID"
+    WHEN (2020 - DATE_PART('YEAR', "o"."OrderDate")) > 30 AND (2020 - DATE_PART('YEAR', "o"."OrderDate")) <= 60 THEN "o"."OrderID"
     ELSE 0
 END), 0) AS "Sum2"
 FROM "Orders" AS "o"
@@ -3382,14 +3373,13 @@ GROUP BY "o"."OrderID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Group_by_with_arithmetic_operation_inside_aggregate(bool async)
     {
         await base.Group_by_with_arithmetic_operation_inside_aggregate(async);
 
         AssertSql(
             """
-SELECT "o"."CustomerID" AS "Key", COALESCE(SUM("o"."OrderID" + CAST(LEN("o"."CustomerID") AS int)), 0) AS "Sum"
+SELECT "o"."CustomerID" AS "Key", COALESCE(SUM("o"."OrderID" + CAST(LENGTH("o"."CustomerID") AS integer)), 0) AS "Sum"
 FROM "Orders" AS "o"
 GROUP BY "o"."CustomerID"
 """);
@@ -3562,15 +3552,15 @@ ORDER BY "t"."City", "t0"."ProductID"
 
         AssertSql(
             """
-SELECT "t"."CustomerID", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+SELECT "c0"."CustomerID", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM (
     SELECT "c"."CustomerID"
     FROM "Customers" AS "c"
     GROUP BY "c"."CustomerID"
     HAVING "c"."CustomerID" LIKE N'F%'
-) AS "t"
-LEFT JOIN "Orders" AS "o" ON "t"."CustomerID" = "o"."CustomerID"
-ORDER BY "t"."CustomerID"
+) AS "c0"
+LEFT JOIN "Orders" AS "o" ON "c0"."CustomerID" = "o"."CustomerID"
+ORDER BY "c0"."CustomerID"
 """);
     }
 
@@ -3580,15 +3570,15 @@ ORDER BY "t"."CustomerID"
 
         AssertSql(
             """
-SELECT "t"."CustomerID", "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
+SELECT "o1"."CustomerID", "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
 FROM (
     SELECT "o"."CustomerID"
     FROM "Orders" AS "o"
     GROUP BY "o"."CustomerID"
     HAVING "o"."CustomerID" LIKE N'F%'
-) AS "t"
-LEFT JOIN "Orders" AS "o0" ON "t"."CustomerID" = "o0"."CustomerID"
-ORDER BY "t"."CustomerID"
+) AS "o1"
+LEFT JOIN "Orders" AS "o0" ON "o1"."CustomerID" = "o0"."CustomerID"
+ORDER BY "o1"."CustomerID"
 """);
     }
 
@@ -3730,12 +3720,12 @@ ORDER BY "c"."City", "c"."Region"
 
         AssertSql(
             """
-SELECT "t"."City", "t"."Region", "t"."Constant", "t"."CustomerID", "t"."Address", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode"
+SELECT "c0"."City", "c0"."Region", "c0"."Constant", "c0"."CustomerID", "c0"."Address", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", 1 AS "Constant"
     FROM "Customers" AS "c"
-) AS "t"
-ORDER BY "t"."City", "t"."Region", "t"."Constant"
+) AS "c0"
+ORDER BY "c0"."City", "c0"."Region", "c0"."Constant"
 """);
     }
 
@@ -3745,12 +3735,12 @@ ORDER BY "t"."City", "t"."Region", "t"."Constant"
 
         AssertSql(
             """
-SELECT "t"."City", "t"."Constant", "t"."CustomerID", "t"."Address", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT "c0"."City", "c0"."Constant", "c0"."CustomerID", "c0"."Address", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", 1 AS "Constant"
     FROM "Customers" AS "c"
-) AS "t"
-ORDER BY "t"."City", "t"."Constant"
+) AS "c0"
+ORDER BY "c0"."City", "c0"."Constant"
 """);
     }
 
@@ -3800,13 +3790,13 @@ ORDER BY "c"."City", "c"."CustomerID"
 
         AssertSql(
             """
-SELECT "c"."City", "c"."CustomerID", "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate"
+SELECT "c"."City", "c"."CustomerID", "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
 FROM "Customers" AS "c"
 LEFT JOIN (
     SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" < 11000
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
+) AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
 WHERE "c"."Country" = N'USA'
 ORDER BY "c"."City", "c"."CustomerID"
 """);
@@ -3818,21 +3808,21 @@ ORDER BY "c"."City", "c"."CustomerID"
 
         AssertSql(
             """
-SELECT "c"."City", "c"."CustomerID", "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate", "t0"."OrderID", "t0"."CustomerID", "t0"."EmployeeID", "t0"."OrderDate"
+SELECT "c"."City", "c"."CustomerID", "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate", "o3"."OrderID", "o3"."CustomerID", "o3"."EmployeeID", "o3"."OrderDate"
 FROM "Customers" AS "c"
 LEFT JOIN (
     SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" < 11000
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
+) AS "o1" ON "c"."CustomerID" = "o1"."CustomerID"
 LEFT JOIN (
-    SELECT "t1"."OrderID", "t1"."CustomerID", "t1"."EmployeeID", "t1"."OrderDate"
+    SELECT "o2"."OrderID", "o2"."CustomerID", "o2"."EmployeeID", "o2"."OrderDate"
     FROM (
         SELECT "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate", ROW_NUMBER() OVER(PARTITION BY "o0"."CustomerID" ORDER BY "o0"."OrderDate" DESC) AS "row"
         FROM "Orders" AS "o0"
-    ) AS "t1"
-    WHERE "t1"."row" <= 1
-) AS "t0" ON "c"."CustomerID" = "t0"."CustomerID"
+    ) AS "o2"
+    WHERE "o2"."row" <= 1
+) AS "o3" ON "c"."CustomerID" = "o3"."CustomerID"
 WHERE "c"."Country" = N'USA'
 ORDER BY "c"."City", "c"."CustomerID"
 """);
@@ -3893,29 +3883,29 @@ ORDER BY "c"."City", "c"."CustomerID"
 
         AssertSql(
             """
-SELECT "t0"."Key", "t1"."OrderID", "t1"."CustomerID", "t1"."EmployeeID", "t1"."OrderDate", "t1"."CustomerID0"
+SELECT "s1"."Key", "s3"."OrderID", "s3"."CustomerID", "s3"."EmployeeID", "s3"."OrderDate", "s3"."CustomerID0"
 FROM (
-    SELECT "t"."Key"
+    SELECT "s"."Key"
     FROM (
         SELECT SUBSTRING("c"."CustomerID", 0 + 1, 1) AS "Key"
         FROM "Orders" AS "o"
         LEFT JOIN "Customers" AS "c" ON "o"."CustomerID" = "c"."CustomerID"
-    ) AS "t"
-    GROUP BY "t"."Key"
-) AS "t0"
+    ) AS "s"
+    GROUP BY "s"."Key"
+) AS "s1"
 LEFT JOIN (
-    SELECT "t2"."OrderID", "t2"."CustomerID", "t2"."EmployeeID", "t2"."OrderDate", "t2"."CustomerID0", "t2"."Key"
+    SELECT "s2"."OrderID", "s2"."CustomerID", "s2"."EmployeeID", "s2"."OrderDate", "s2"."CustomerID0", "s2"."Key"
     FROM (
-        SELECT "t3"."OrderID", "t3"."CustomerID", "t3"."EmployeeID", "t3"."OrderDate", "t3"."CustomerID0", "t3"."Key", ROW_NUMBER() OVER(PARTITION BY "t3"."Key" ORDER BY "t3"."OrderID", "t3"."CustomerID0") AS "row"
+        SELECT "s0"."OrderID", "s0"."CustomerID", "s0"."EmployeeID", "s0"."OrderDate", "s0"."CustomerID0", "s0"."Key", ROW_NUMBER() OVER(PARTITION BY "s0"."Key" ORDER BY "s0"."OrderID", "s0"."CustomerID0") AS "row"
         FROM (
             SELECT "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate", "c0"."CustomerID" AS "CustomerID0", SUBSTRING("c0"."CustomerID", 0 + 1, 1) AS "Key"
             FROM "Orders" AS "o0"
             LEFT JOIN "Customers" AS "c0" ON "o0"."CustomerID" = "c0"."CustomerID"
-        ) AS "t3"
-    ) AS "t2"
-    WHERE 1 < "t2"."row" AND "t2"."row" <= 3
-) AS "t1" ON "t0"."Key" = "t1"."Key"
-ORDER BY "t0"."Key", "t1"."OrderID"
+        ) AS "s0"
+    ) AS "s2"
+    WHERE 1 < "s2"."row" AND "s2"."row" <= 3
+) AS "s3" ON "s1"."Key" = "s3"."Key"
+ORDER BY "s1"."Key", "s3"."OrderID"
 """);
     }
 

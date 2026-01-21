@@ -1,4 +1,9 @@
-﻿using Actian.EFCore.TestUtilities;
+﻿// Copyright (c) 2024 Actian Corporation. All Rights Reserved.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+﻿using System.Linq;
+using Actian.EFCore.TestUtilities;
 using Microsoft.EntityFrameworkCore.TestModels.Northwind;
 using Microsoft.EntityFrameworkCore.TestUtilities;
 using Xunit;
@@ -53,7 +58,27 @@ FROM "Employees" AS "e"
 
     public override void Can_disable_and_reenable_query_result_tracking_query_caching_using_options()
     {
-        base.Can_disable_and_reenable_query_result_tracking_query_caching_using_options();
+        //base.Can_disable_and_reenable_query_result_tracking_query_caching_using_options();
+
+        using (var context = CreateContext())
+        {
+            Assert.Equal(QueryTrackingBehavior.TrackAll, context.ChangeTracker.QueryTrackingBehavior);
+
+            var results = context.Employees.ToList();
+
+            Assert.Equal(9, results.Count);
+            Assert.Equal(9, context.ChangeTracker.Entries().Count());
+        }
+
+        using (var context = CreateNoTrackingContext())
+        {
+            Assert.Equal(QueryTrackingBehavior.NoTracking, context.ChangeTracker.QueryTrackingBehavior);
+
+            var results = context.Employees.ToList();
+
+            Assert.Equal(9, results.Count);
+            Assert.Empty(context.ChangeTracker.Entries());
+        }
 
         AssertSql(
             """
@@ -67,7 +92,6 @@ FROM "Employees" AS "e"
 """);
     }
 
-    [ActianTodo]
     public override void Can_disable_and_reenable_query_result_tracking()
     {
         base.Can_disable_and_reenable_query_result_tracking();
@@ -76,7 +100,7 @@ FROM "Employees" AS "e"
             """
 @__p_0='1'
 
-SELECT TOP(@__p_0) "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
+SELECT FIRST @__p_0 "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
 ORDER BY "e"."EmployeeID"
 """,
@@ -87,7 +111,7 @@ ORDER BY "e"."EmployeeID"
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
 ORDER BY "e"."EmployeeID"
-OFFSET @__p_0 ROWS FETCH NEXT @__p_0 ROWS ONLY
+OFFSET @__p_0 FETCH NEXT @__p_0 ROWS ONLY
 """,
             //
             """
@@ -97,7 +121,6 @@ ORDER BY "e"."EmployeeID"
 """);
     }
 
-    [ActianTodo]
     public override void Entity_range_does_not_revert_when_attached_dbSet()
     {
         base.Entity_range_does_not_revert_when_attached_dbSet();
@@ -106,33 +129,33 @@ ORDER BY "e"."EmployeeID"
             """
 @__p_0='2'
 
-SELECT TOP(1) "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT FIRST 1 "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+    SELECT FIRST @__p_0 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
     ORDER BY "c"."CustomerID"
-) AS "t"
-ORDER BY "t"."CustomerID"
+) AS "c0"
+ORDER BY "c0"."CustomerID"
 """,
             //
             """
 @__p_0='2'
 @__p_1='1'
 
-SELECT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+    SELECT FIRST @__p_0 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
     ORDER BY "c"."CustomerID"
-) AS "t"
-ORDER BY "t"."CustomerID"
-OFFSET @__p_1 ROWS FETCH NEXT 1 ROWS ONLY
+) AS "c0"
+ORDER BY "c0"."CustomerID"
+OFFSET @__p_1 FETCH NEXT 1 ROWS ONLY
 """,
             //
             """
 @__p_0='2'
 
-SELECT TOP(@__p_0) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+SELECT FIRST @__p_0 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 ORDER BY "c"."CustomerID"
 """);
@@ -178,7 +201,6 @@ FROM "Employees" AS "e"
 """);
     }
 
-    [ActianTodo]
     public override void Entity_range_does_not_revert_when_attached_dbContext()
     {
         base.Entity_range_does_not_revert_when_attached_dbContext();
@@ -187,33 +209,33 @@ FROM "Employees" AS "e"
             """
 @__p_0='2'
 
-SELECT TOP(1) "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT FIRST 1 "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+    SELECT FIRST @__p_0 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
     ORDER BY "c"."CustomerID"
-) AS "t"
-ORDER BY "t"."CustomerID"
+) AS "c0"
+ORDER BY "c0"."CustomerID"
 """,
             //
             """
 @__p_0='2'
 @__p_1='1'
 
-SELECT "t"."CustomerID", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+    SELECT FIRST @__p_0 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
     ORDER BY "c"."CustomerID"
-) AS "t"
-ORDER BY "t"."CustomerID"
-OFFSET @__p_1 ROWS FETCH NEXT 1 ROWS ONLY
+) AS "c0"
+ORDER BY "c0"."CustomerID"
+OFFSET @__p_1 FETCH NEXT 1 ROWS ONLY
 """,
             //
             """
 @__p_0='2'
 
-SELECT TOP(@__p_0) "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+SELECT FIRST @__p_0 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 ORDER BY "c"."CustomerID"
 """);
@@ -243,7 +265,6 @@ WHERE "c"."CustomerID" = N'ALFKI'
 """);
     }
 
-    [ActianTodo]
     public override void Can_disable_and_reenable_query_result_tracking_starting_with_NoTracking()
     {
         base.Can_disable_and_reenable_query_result_tracking_starting_with_NoTracking();
@@ -252,7 +273,7 @@ WHERE "c"."CustomerID" = N'ALFKI'
             """
 @__p_0='1'
 
-SELECT TOP(@__p_0) "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
+SELECT FIRST @__p_0 "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
 ORDER BY "e"."EmployeeID"
 """,
@@ -263,7 +284,7 @@ ORDER BY "e"."EmployeeID"
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
 ORDER BY "e"."EmployeeID"
-OFFSET @__p_0 ROWS FETCH NEXT @__p_0 ROWS ONLY
+OFFSET @__p_0 FETCH NEXT @__p_0 ROWS ONLY
 """);
     }
 
@@ -351,8 +372,11 @@ WHERE "c"."CustomerID" = N'ALFKI'
     private void AssertSql(params string[] expected)
         => Fixture.TestSqlLoggerFactory.AssertBaseline(expected);
 
+    //protected override NorthwindContext CreateNoTrackingContext()
+    //    => new NorthwindActianContext(
+    //        new DbContextOptionsBuilder(Fixture.CreateOptions()).Options);
     protected override NorthwindContext CreateNoTrackingContext()
-        => new NorthwindActianContext(
-            new DbContextOptionsBuilder(Fixture.CreateOptions())
-                .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking).Options);
+    => new NorthwindActianContext(
+        new DbContextOptionsBuilder(Fixture.CreateOptions())
+            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking).Options);
 }
