@@ -20,10 +20,10 @@
 
   <ItemGroup>
     <PackageReference Include="Actian.Client" Version="8.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.12" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational.Specification.Tests" Version="9.0.0" />
-    <PackageReference Include="System.Diagnostics.EventLog" Version="9.0.0" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.0" />
+    <PackageReference Include="System.Diagnostics.EventLog" Version="9.0.12" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.12" />
     <PackageReference Include="xunit.analyzers" Version="1.17.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -49,12 +49,6 @@
     <Content Include="xunit.runner.json" CopyToOutputDirectory="Always" />
     <ProjectReference Include="..\..\src\Actian.EFCore\Actian.EFCore.csproj" />
     <ProjectReference Include="..\Actian.EFCore.Test.Common\Actian.EFCore.Test.Common.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Microsoft.EntityFrameworkCore">
-      <HintPath>..\..\..\efcore9\artifacts\bin\EFCore.Relational\Debug\net8.0\Microsoft.EntityFrameworkCore.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
   <ItemGroup>
