@@ -6385,12 +6385,12 @@ FROM "Customers" AS "c"
 INNER JOIN "Orders" AS "o" ON "c"."CustomerID" = "o"."CustomerID"
 WHERE "c"."CustomerID" = N'ALFKI'
 """,
-            //
-            """
+                //
+                """
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Orders" AS "o"
 LEFT JOIN "Customers" AS "c" ON "o"."CustomerID" = "c"."CustomerID"
-WHERE "o"."OrderID" IN (10643, 10692, 10702, 10835, 10952, 11011)
+WHERE "o"."OrderID" IN (11011, 10835, 10643, 10702, 10952, 10692)
 """);
     }
 
