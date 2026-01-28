@@ -3639,6 +3639,40 @@ FROM INFORMATION_SCHEMA.COLUMNS
             return actual;
         }
 
+        // Ensure escape sequences for 
+        //      unicode strings = ESCAPE N'\\' 
+        //      and for ascii   = ESCAPE '\' 
+        [ConditionalFact]
+        public virtual void Can_query_using_like_escape_literal_with_unicode_and_ansi()
+        {
+
+            using var context = CreateContext();
+
+            context.Add(
+                new UnicodeDataTypes
+                {
+                    Id = 1001,
+                    StringDefault = "BAR",
+                    StringAnsi = "BAR",
+                    StringAnsi3 = "BAR",
+                    StringAnsi9000 = "BAR",
+                    StringUnicode = "BAR"
+                });
+
+            context.SaveChanges();
+            Fixture.TestSqlLoggerFactory.Clear();
+
+            var pattern = "AR";
+
+            _ = context.Set<UnicodeDataTypes>().Where(e => e.StringUnicode.Contains(pattern)).ToList();
+            _ = context.Set<UnicodeDataTypes>().Where(e => e.StringAnsi.Contains(pattern)).ToList();
+
+            var sql = Fixture.TestSqlLoggerFactory.Sql;
+
+            Assert.Contains("ESCAPE N'\\\\'", sql);
+            Assert.Contains("ESCAPE '\\'", sql);
+        }
+
         private void AssertSql(params string[] expected)
             => Fixture.TestSqlLoggerFactory.AssertBaseline(expected);
 
