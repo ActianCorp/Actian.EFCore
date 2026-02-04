@@ -4,6 +4,7 @@
 
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,7 @@ using Actian.EFCore.Extensions;
 using Actian.EFCore.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Update;
 
 #nullable enable
@@ -39,7 +41,186 @@ namespace Actian.EFCore.Update.Internal
             int commandPosition,
             out bool requiresTransaction)
         {
-            return AppendInsertAndSelectOperation(commandStringBuilder, command, commandPosition, out requiresTransaction);
+            // Filter out table_key columns before processing
+            var filteredCommand = FilterSystemMaintainedColumns(command);
+            return AppendInsertAndSelectOperation(commandStringBuilder, filteredCommand, commandPosition, out requiresTransaction);
+        }
+
+        /// <summary>
+        /// Filters out system-maintained columns (like table_key) from the modification command
+        /// </summary>
+        private IReadOnlyModificationCommand FilterSystemMaintainedColumns(IReadOnlyModificationCommand command)
+        {
+            // Check if any columns need to be filtered
+            var hasSystemMaintainedColumns = command.ColumnModifications.Any(IsSystemMaintainedColumn);
+            
+            if (!hasSystemMaintainedColumns)
+            {
+                // No filtering needed, return original command
+                return command;
+            }
+
+            // Create a filtered modification command wrapper
+            return new FilteredModificationCommand(command, IsSystemMaintainedColumn);
+        }
+
+        /// <summary>
+        /// Checks if a column is system-maintained (table_key type)
+        /// </summary>
+        private bool IsSystemMaintainedColumn(IColumnModification columnModification)
+        {
+            var property = columnModification.Property;
+            if (property != null)
+            {
+                // Get the column type configured in the model
+                var storeType = property.GetColumnType();
+                
+                // Check for table_key data type (case-insensitive)
+                // The type might include length like "table_key(8)", so use StartsWith
+                if (storeType != null && storeType.StartsWith("table_key", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Wrapper class to filter out system-maintained columns from a modification command
+        /// </summary>
+        private class FilteredModificationCommand : IReadOnlyModificationCommand
+        {
+            private readonly IReadOnlyModificationCommand _innerCommand;
+            private readonly Func<IColumnModification, bool> _shouldExclude;
+            private readonly IReadOnlyList<IColumnModification> _filteredColumnModifications;
+
+            public FilteredModificationCommand(
+                IReadOnlyModificationCommand innerCommand,
+                Func<IColumnModification, bool> shouldExclude)
+            {
+                _innerCommand = innerCommand;
+                _shouldExclude = shouldExclude;
+                
+                // Filter out system-maintained columns from write operations
+                _filteredColumnModifications = innerCommand.ColumnModifications
+                    .Select(cm => 
+                    {
+                        if (cm.IsWrite && shouldExclude(cm))
+                        {
+                            // Create a wrapper that marks this column as not-write
+                            return new FilteredColumnModification(cm, isWrite: false);
+                        }
+                        return cm;
+                    })
+                    .ToList();
+            }
+
+            public string TableName => _innerCommand.TableName;
+            public string? Schema => _innerCommand.Schema;
+            public IReadOnlyList<IColumnModification> ColumnModifications => _filteredColumnModifications;
+            public EntityState EntityState => _innerCommand.EntityState;
+            // Forward other members that exist on the IReadOnlyModificationCommand interface in this EF Core version
+            public IReadOnlyList<IUpdateEntry> Entries => _innerCommand.Entries;
+            public IStoreStoredProcedure? StoreStoredProcedure => _innerCommand.StoreStoredProcedure;
+            public IColumnBase? RowsAffectedColumn => _innerCommand.RowsAffectedColumn;
+            public ITable? Table => _innerCommand.Table;
+            
+            public void PropagateResults(RelationalDataReader relationalReader)
+                => _innerCommand.PropagateResults(relationalReader);
+            
+            public void PropagateOutputParameters(DbParameterCollection parameterCollection, int baseParameterIndex)
+                => _innerCommand.PropagateOutputParameters(parameterCollection, baseParameterIndex);
+
+            // Wrapper for column modifications to override IsWrite property
+            private class FilteredColumnModification : IColumnModification
+            {
+                private readonly IColumnModification _inner;
+                private readonly bool _isWrite;
+
+                public FilteredColumnModification(IColumnModification inner, bool isWrite)
+                {
+                    _inner = inner;
+                    _isWrite = isWrite;
+                }
+
+                public IProperty? Property => _inner.Property;
+                public IColumnBase? Column => _inner.Column;
+                public string ColumnName => _inner.ColumnName;
+                public string? ColumnType => _inner.ColumnType;
+                public bool? IsNullable => _inner.IsNullable;
+
+                // These interface members have setters on newer EF Core versions; forward to inner for getter and no-op for setter
+                public bool IsKey
+                {
+                    get => _inner.IsKey;
+                    set { /* no-op: we don't need to change this on the inner */ }
+                }
+
+                public bool IsCondition
+                {
+                    get => _inner.IsCondition;
+                    set { /* no-op */ }
+                }
+
+                public bool IsRead
+                {
+                    get => _inner.IsRead;
+                    set { /* no-op */ }
+                }
+
+                public bool IsWrite
+                {
+                    get => _isWrite;
+                    set { /* no-op: keep write override */ }
+                }
+
+                public object? Value
+                {
+                    get => _inner.Value;
+                    set { /* no-op */ }
+                }
+
+                public object? OriginalValue
+                {
+                    get => _inner.OriginalValue;
+                    set { /* no-op */ }
+                }
+
+                public string? ParameterName => _inner.ParameterName;
+                public string? OriginalParameterName => _inner.OriginalParameterName;
+                public bool UseCurrentValue => _inner.UseCurrentValue;
+                public bool UseCurrentValueParameter => _inner.UseCurrentValueParameter;
+                public bool UseOriginalValue => _inner.UseOriginalValue;
+                public bool UseOriginalValueParameter => _inner.UseOriginalValueParameter;
+                public bool UseParameter => _inner.UseParameter;
+                public string? JsonPath => _inner.JsonPath;
+
+                // Entry on IColumnModification expects IUpdateEntry
+                public IUpdateEntry Entry => (IUpdateEntry)_inner.Entry!;
+
+                public void AddSharedColumnModification(IColumnModification sharedColumnModification)
+                 => _inner.AddSharedColumnModification(sharedColumnModification);
+
+                public void ResetParameterNames()
+                 => _inner.ResetParameterNames();
+
+                // TypeMapping property exists on newer EF Core - use safe dynamic access
+                public RelationalTypeMapping? TypeMapping
+                {
+                    get
+                    {
+                        try
+                        {
+                            return (_inner as dynamic)?.TypeMapping as RelationalTypeMapping;
+                        }
+                        catch
+                        {
+                            return null;
+                        }
+                    }
+                }
+            }
         }
 
         protected override void AppendInsertCommand(

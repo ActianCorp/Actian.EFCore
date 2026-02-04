@@ -52,6 +52,9 @@ namespace Actian.EFCore.Storage.Internal
         private readonly ActianTimeTypeMapping _timeWithoutTimeZone = new ActianTimeTypeMapping("time without time zone", typeof(TimeSpan));
         private readonly ActianTimeTypeMapping _timeWithLocalTimeZone = new ActianTimeTypeMapping("time with local time zone", typeof(TimeSpan));
         private readonly ActianTimeTypeMapping _timeWithTimeZone = new ActianTimeTypeMapping("time with time zone", typeof(DateTimeOffset), withTimeZone: true);
+        // Interval type mappings
+        private readonly ActianTimeTypeMapping _intervalDayToSecond = new ActianTimeTypeMapping("interval day to second", typeof(TimeSpan), precision: 6);
+        private readonly ActianTimeTypeMapping _intervalYearToMonth = new ActianTimeTypeMapping("interval year to month", typeof(TimeSpan));
         private readonly ActianTimestampTypeMapping _timestamp = new ActianTimestampTypeMapping("timestamp", typeof(DateTime));
         private readonly ActianTimestampTypeMapping _timestampWithoutTimeZone = new ActianTimestampTypeMapping("timestamp without time zone", typeof(DateTime));
         private readonly ActianTimestampTypeMapping _timestampWithLocalTimeZone = new ActianTimestampTypeMapping("timestamp with local time zone", typeof(DateTime));
@@ -133,11 +136,16 @@ namespace Actian.EFCore.Storage.Internal
                 { "time without time zone", _timeWithoutTimeZone },
                 { "time with local time zone", _timeWithLocalTimeZone },
                 { "time with time zone", _timeWithTimeZone },
+                { "interval day to second", _intervalDayToSecond },
+                { "interval year to month", _intervalYearToMonth },
                 { "timestamp", _timestamp },
                 { "timestamp without time zone", _timestampWithoutTimeZone },
                 { "timestamp with local time zone", _timestampWithLocalTimeZone },
                 { "timestamp with time zone", _timestampWithTimeZone }
             };
+
+            // Add alternate names for binary types to support database types like "byte varying"
+            _storeTypeMappings["byte varying"] = _varbinary;
         }
 
         protected override void ValidateMapping(CoreTypeMapping mapping, IProperty property)
@@ -166,6 +174,29 @@ namespace Actian.EFCore.Storage.Internal
 
             if (storeTypeName != null)
             {
+                // Handle table_key as an alias for char
+                if (storeTypeName.StartsWith("table_key", StringComparison.OrdinalIgnoreCase))
+                {
+                    // Extract length from "table_key(8)" or default to 8
+                    var length = 8;
+                    var openParen = storeTypeName.IndexOf('(');
+                    if (openParen > 0)
+                    {
+                        var closeParen = storeTypeName.IndexOf(')');
+                        if (closeParen > openParen)
+                        {
+                            var lengthStr = storeTypeName.Substring(openParen + 1, closeParen - openParen - 1);
+                            if (int.TryParse(lengthStr, out var parsedLength))
+                            {
+                                length = parsedLength;
+                            }
+                        }
+                    }
+                    
+                    // Return char mapping with appropriate length
+                    return new ActianStringTypeMapping(unicode: false, size: length, fixedLength: true);
+                }
+
                 if (clrType == typeof(float)
                     && mappingInfo.Size != null
                     && mappingInfo.Size <= 24
@@ -178,9 +209,21 @@ namespace Actian.EFCore.Storage.Internal
                 if (_storeTypeMappings.TryGetValue(storeTypeName, out var mapping) ||
                     _storeTypeMappings.TryGetValue(storeTypeNameBase, out mapping))
                 {
-                    return clrType == null || mapping.ClrType == clrType
-                        ? mapping
-                        : null;
+                    // If the requested CLR type matches the mapping's CLR type, return it.
+                    if (clrType == null || mapping.ClrType == clrType)
+                        return mapping;
+
+                    // Special-case: if the property CLR type is DateTimeOffset but the
+                    // requested store type is an interval (e.g. "interval day to second"),
+                    // prefer the provider's timestamp-with-time-zone mapping. This avoids
+                    // the model validation error where DateTimeOffset cannot be mapped to
+                    // interval columns.
+                    if (clrType == typeof(DateTimeOffset) && mapping == _intervalDayToSecond)
+                    {
+                        return _timestampWithTimeZone;
+                    }
+
+                    return null;
                 }
             }
 
