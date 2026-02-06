@@ -125,8 +125,8 @@ The environment variable `ACTIAN_TEST_CONNECTION_STRING` must be have a valid va
 
 ## Team
 
-This theme is maintained by the following person(s) and [awesome contributors](https://github.com/dracula/putty/graphs/contributors).
+This theme is maintained by the following person(s) and [contributors](https://github.com/ActianCorp/Actian.EFCore/graphs/contributors).
 
-| [![Marius Ianculovici](https://github.com/mianculovici.png?size=100)](https://github.com/mianculovici) | [![Chris Clark](https://github.com/clach04.png?size=100)](https://github.com/clach04) |
-------------------------------------------------------------------------------------| ------------------------------------------------------------------------------------|
-| [Marius Ianculovici](https://github.com/mianculovici)                                               | [Chris Clark](https://github.com/clach04)                                              |
+| [![Marius Ianculovici](https://github.com/mianculovici.png?size=100)](https://github.com/mianculovici) | [![Chris Clark](https://github.com/clach04.png?size=100)](https://github.com/clach04) |[![Doug White](https://github.com/dougwhite.png?size=100)](https://github.com/dougwhite) |
+------------------------------------------------------------------------------------| ------------------------------------------------------------------------------------| ------------------------------------------------------------------------------------|
+| [Marius Ianculovici](https://github.com/mianculovici)                                               | [Chris Clark](https://github.com/clach04)                                              | [Doug White](https://github.com/dougwhite)                                              |
