@@ -12,7 +12,7 @@
     <Description>Actian Entity Framework Core Provider</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 
-    <VersionPrefix>9.0.1</VersionPrefix>
+    <VersionPrefix>9.0.2</VersionPrefix>
     <MinClientVersion>4.3</MinClientVersion>
 
     <RepositoryType>git</RepositoryType>
