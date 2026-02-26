@@ -11,8 +11,10 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using Actian.EFCore.Storage.Internal;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+using Microsoft.EntityFrameworkCore.Storage;
 using ExpressionExtensions = Microsoft.EntityFrameworkCore.Query.ExpressionExtensions;
 
 #nullable enable
@@ -69,8 +71,12 @@ namespace Actian.EFCore.Query.Internal
         private static readonly MethodInfo EscapeLikePatternParameterMethod =
             typeof(ActianSqlTranslatingExpressionVisitor).GetTypeInfo().GetDeclaredMethod(nameof(ConstructLikePatternParameter))!;
 
+        private static ActianStringTypeMapping CreateLikeEscapeTypeMapping(RelationalTypeMapping? stringTypeMapping)
+            => new ActianStringTypeMapping(unicode: stringTypeMapping?.IsUnicode ?? false, fixedLength: true, size: 1);
+
         private const char LikeEscapeChar = '\\';
-        private const string LikeEscapeString = @"\\";
+        private const string LikeEscapeString = "\\";
+        private const string LikeEscapeUnicodeString = @"\\";
 
         public ActianSqlTranslatingExpressionVisitor(
             RelationalSqlTranslatingExpressionVisitorDependencies dependencies,
@@ -198,6 +204,8 @@ namespace Actian.EFCore.Query.Internal
                 }
 
                 var stringTypeMapping = ExpressionExtensions.InferTypeMapping(translatedInstance, translatedPattern);
+                var escapeTypeMapping = CreateLikeEscapeTypeMapping(stringTypeMapping);
+                var escapeValue = stringTypeMapping?.IsUnicode == true ? LikeEscapeUnicodeString : LikeEscapeString;
 
                 translatedInstance = _sqlExpressionFactory.ApplyTypeMapping(translatedInstance, stringTypeMapping);
                 translatedPattern = _sqlExpressionFactory.ApplyTypeMapping(translatedPattern, stringTypeMapping);
@@ -230,7 +238,7 @@ namespace Actian.EFCore.Query.Internal
 
                                             _ => throw new ArgumentOutOfRangeException(nameof(methodType), methodType, null)
                                         }),
-                                    _sqlExpressionFactory.Constant(LikeEscapeString))
+                                    _sqlExpressionFactory.Constant(escapeValue, escapeTypeMapping))
                                 : _sqlExpressionFactory.Like(
                                     translatedInstance,
                                     _sqlExpressionFactory.Constant(
@@ -270,7 +278,7 @@ namespace Actian.EFCore.Query.Internal
                         translation = _sqlExpressionFactory.Like(
                             translatedInstance,
                             new SqlParameterExpression(escapedPatternParameter.Name!, escapedPatternParameter.Type, stringTypeMapping),
-                            _sqlExpressionFactory.Constant(LikeEscapeString));
+                            _sqlExpressionFactory.Constant(escapeValue, escapeTypeMapping));
 
                         return true;
                     }

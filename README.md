@@ -37,7 +37,7 @@ Alternatively contact support.
 
 ### Before installing
 
-Actian.EFCore 9.0 relies on Actian.Client (Actian .NET Data Provider) version 8.0.6 and above to work. Actian.Client has not been published to [NuGet.org], so it will have to be added to a local or private NuGet feed, which the project has access to.
+Actian.EFCore 9.0.2, released on Februrary 3, 2026, relies on Actian.Client (Actian .NET Data Provider) version 8.0.8 and above to work. Actian.Client has not been published to [NuGet.org], so it will have to be added to a local or private NuGet feed, which the project has access to.
 
 Actian.Client (Actian .NET Data Provider) can be downloaded from [Customer Downloads Provider].
 
@@ -122,3 +122,11 @@ The environment variable `ACTIAN_TEST_CONNECTION_STRING` must be have a valid va
 [Customer Downloads Provider]: https://esd.actian.com/product/drivers/.Net_Data_Provider/Windows_64-Bit/.Net_Data_Provider_GA
 [Setting up Local NuGet Feeds | Microsoft Docs]: https://docs.microsoft.com/en-us/nuget/hosting-packages/local-feeds
 [NuGet.org]: https://www.nuget.org/
+
+## Team
+
+This project is maintained by the following person(s) and [contributors](https://github.com/ActianCorp/Actian.EFCore/graphs/contributors).
+
+| [![Marius Ianculovici](https://github.com/mianculovici.png?size=100)](https://github.com/mianculovici) | [![Chris Clark](https://github.com/clach04.png?size=100)](https://github.com/clach04) |[![Doug White](https://github.com/dougwhite.png?size=100)](https://github.com/dougwhite) |
+------------------------------------------------------------------------------------| ------------------------------------------------------------------------------------| ------------------------------------------------------------------------------------|
+| [Marius Ianculovici](https://github.com/mianculovici)                                               | [Chris Clark](https://github.com/clach04)                                              | [Doug White](https://github.com/dougwhite)                                              |

@@ -2035,7 +2035,7 @@ ORDER BY "c0"."CustomerID"
 SELECT "o"."OrderID", "o"."ProductID", "o"."Discount", "o"."Quantity", "o"."UnitPrice"
 FROM "Order Details" AS "o"
 INNER JOIN "Orders" AS "o0" ON "o"."OrderID" = "o0"."OrderID"
-WHERE "o0"."OrderID" IN (11011, 10835, 10643, 10702, 10952, 10692)
+WHERE "o0"."OrderID" IN (10643, 10702, 10835, 11011, 10692, 10952)
 """);
     }
 

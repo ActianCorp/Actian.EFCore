@@ -168,6 +168,7 @@ namespace Actian.EFCore.Scaffolding.Internal
 
             var column_always_ident = iicolumnsColumns.Contains(dbNameCase.Normalize("column_always_ident")) ? "c.column_always_ident" : "'N'";
             var column_bydefault_ident = iicolumnsColumns.Contains(dbNameCase.Normalize("column_bydefault_ident")) ? "c.column_bydefault_ident" : "'N'";
+            var column_system_maintained = iicolumnsColumns.Contains(dbNameCase.Normalize("column_system_maintained")) ? "c.column_system_maintained" : "'N'";
 
             var tableLocations = connection.Select($@"
                 select t.table_owner,
@@ -204,6 +205,7 @@ namespace Actian.EFCore.Scaffolding.Internal
                        t.location_name,
                        c.column_name,
                        c.column_datatype,
+                       c.column_internal_datatype,
                        c.column_length,
                        c.column_scale,
                        c.column_nulls,
@@ -211,7 +213,8 @@ namespace Actian.EFCore.Scaffolding.Internal
                        c.key_sequence,
                        c.column_default_val,
                        column_always_ident = {column_always_ident},
-                       column_bydefault_ident = {column_bydefault_ident}
+                       column_bydefault_ident = {column_bydefault_ident},
+                       column_system_maintained = {column_system_maintained}
                   from $ingres.iitables t
                   join $ingres.iicolumns c on
                        c.table_owner = t.table_owner
@@ -233,6 +236,9 @@ namespace Actian.EFCore.Scaffolding.Internal
                 IsJournalled = reader.GetTrimmedChar("is_journalled", dbNameCase),
                 LocationName = reader.GetTrimmedChar("location_name", dbNameCase),
                 ColumnName = reader.GetTrimmedChar("column_name", dbNameCase),
+                ColumnDataType = reader.GetTrimmedChar("column_datatype", dbNameCase),
+                ColumnInternalDataType = reader.GetTrimmedChar("column_internal_datatype", dbNameCase),
+                SystemMaintained = reader.GetTrimmedChar("column_system_maintained", dbNameCase) == "Y",
                 IsNullable = reader.GetTrimmedChar("column_nulls", dbNameCase) == "Y",
                 StoreType = GetStoreType(
                     reader.GetTrimmedChar("column_datatype", dbNameCase),
@@ -244,9 +250,9 @@ namespace Actian.EFCore.Scaffolding.Internal
                     reader.GetValueOrDefault<int>("column_length", dbNameCase)
                 ),
                 DefaultValueSql = reader.GetTrimmedChar("column_defaults", dbNameCase) == "Y"
-                    ? reader.GetTrimmedChar("column_default_val", dbNameCase)?.TrimEnd()
+                    ? (reader.GetTrimmedChar("column_default_val", dbNameCase)?.TrimEnd() is string defaultVal && !string.IsNullOrWhiteSpace(defaultVal) ? defaultVal : null)
                     : null,
-                ValueGenerated = GetValueGenerated(reader, dbNameCase, dbDelimitedCase)
+                ValueGenerated = GetValueGeneratedFromReader(reader, dbNameCase, dbDelimitedCase)
             }).GroupBy(t => (t.Schema, t.TableName)).Select(t =>
             {
                 _logger.TableFound(DisplayName(t.Key.Schema, t.Key.TableName));
@@ -271,11 +277,17 @@ namespace Actian.EFCore.Scaffolding.Internal
                 {
                     Name = column.ColumnName,
                     IsNullable = column.IsNullable,
-                    StoreType = column.StoreType,
+                    // Use "table_key" as store type for system-maintained columns
+                    // This will cause EF Core to emit .HasColumnType("table_key")
+                    StoreType = (column.SystemMaintained && 
+                                 column.ColumnInternalDataType != null && 
+                                 column.ColumnInternalDataType.StartsWith("TABLE_KEY", StringComparison.OrdinalIgnoreCase))
+                        ? "table_key"
+                        : column.StoreType,
                     DefaultValue = TryParseClrDefault(column.DataTypeName, column.DefaultValueSql!),
                     DefaultValueSql = column.DefaultValueSql,
                     ComputedColumnSql = null,
-                    ValueGenerated = column.ValueGenerated
+                    ValueGenerated = GetValueGenerated(column.ColumnDataType, column.StoreType, column.ValueGenerated, column.SystemMaintained, column.ColumnInternalDataType)
                 });
 
                 var locations = new[] { table.LocationName };
@@ -971,13 +983,13 @@ namespace Actian.EFCore.Scaffolding.Internal
                 case "TIME WITH TIME ZONE" when (scale ?? 0) == 0:
                     return "time with time zone";
 
-                case "TIME":
+                case "TIME" when (scale ?? 0) > 0:
                     return $"time({scale})";
-                case "TIME WITHOUT TIME ZONE":
+                case "TIME WITHOUT TIME ZONE" when (scale ?? 0) > 0:
                     return $"time({scale}) without time zone";
-                case "TIME WITH LOCAL TIME ZONE":
+                case "TIME WITH LOCAL TIME ZONE" when (scale ?? 0) > 0:
                     return $"time({scale}) with local time zone";
-                case "TIME WITH TIME ZONE":
+                case "TIME WITH TIME ZONE" when (scale ?? 0) > 0:
                     return $"time({scale}) with time zone";
 
                 case "TIMESTAMP" when (scale ?? 6) == 6:
@@ -1018,15 +1030,75 @@ namespace Actian.EFCore.Scaffolding.Internal
             };
         }
 
-        private static ValueGenerated? GetValueGenerated(
+        private static ValueGenerated? GetValueGeneratedFromReader(
             DbDataReader reader,
             ActianCasing dbNameCase,
             ActianCasing dbDelimitedCase)
         {
+            // Check for identity columns
             var always = reader.GetTrimmedChar("column_always_ident", dbNameCase) == "Y";
             var byDefault = reader.GetTrimmedChar("column_bydefault_ident", dbNameCase) == "Y";
+            
+            // Check for system-maintained columns (like table_key)
+            var systemMaintained = reader.GetTrimmedChar("column_system_maintained", dbNameCase) == "Y";
+            var dataType = reader.GetTrimmedChar("column_datatype", dbNameCase);
+            
             if (always || byDefault)
+            {
                 return ValueGenerated.OnAdd;
+            }
+            
+            // Check for system-maintained columns (like table_key)
+            if (systemMaintained)
+            {
+                return ValueGenerated.OnAdd;
+            }
+            
+            // Check for table_key data type (fallback)
+            if (dataType != null && dataType.StartsWith("TABLE_KEY", StringComparison.OrdinalIgnoreCase))
+            {
+                return ValueGenerated.OnAdd;
+            }
+            return null;
+        }
+
+        private static ValueGenerated? GetValueGenerated(
+            string? columnDataType,
+            string? storeType,
+            ValueGenerated? fromReader,
+            bool systemMaintained = false,
+            string? internalDataType = null)
+        {           
+            // If already determined from reader (identity columns or system-maintained), use that
+            if (fromReader.HasValue)
+            {
+                return fromReader.Value;
+            }
+            
+            // Check system-maintained flag
+            if (systemMaintained)
+            {
+                return ValueGenerated.OnAdd;
+            }
+            
+            // Check internal data type for table_key
+            if (internalDataType != null && internalDataType.StartsWith("TABLE_KEY", StringComparison.OrdinalIgnoreCase))
+            {
+                return ValueGenerated.OnAdd;
+            }
+            
+            // Check column data type for table_key
+            if (columnDataType != null && columnDataType.StartsWith("TABLE_KEY", StringComparison.OrdinalIgnoreCase))
+            {
+                return ValueGenerated.OnAdd;
+            }
+            
+            // Check store type for table_key (might include length like "table_key(8)")
+            if (storeType != null && storeType.StartsWith("table_key", StringComparison.OrdinalIgnoreCase))
+            {
+                return ValueGenerated.OnAdd;
+            }
+
             return null;
         }
 
