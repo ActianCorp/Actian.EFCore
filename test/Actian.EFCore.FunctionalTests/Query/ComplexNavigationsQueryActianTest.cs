@@ -2453,7 +2453,6 @@ INNER JOIN "LevelTwo" AS "l0" ON "l"."Id" = "l0"."Level1_Optional_Id"
 """);
         }
 
-        [ActianTodo]
         public override async Task GroupJoin_with_subquery_on_inner(bool async)
         {
             await base.GroupJoin_with_subquery_on_inner(async);
@@ -2462,16 +2461,18 @@ INNER JOIN "LevelTwo" AS "l0" ON "l"."Id" = "l0"."Level1_Optional_Id"
                 """
 SELECT "l"."Id"
 FROM "LevelOne" AS "l"
-OUTER APPLY (
-    SELECT TOP(10) "l0"."Id", "l0"."Date", "l0"."Level1_Optional_Id", "l0"."Level1_Required_Id", "l0"."Name", "l0"."OneToMany_Optional_Inverse2Id", "l0"."OneToMany_Optional_Self_Inverse2Id", "l0"."OneToMany_Required_Inverse2Id", "l0"."OneToMany_Required_Self_Inverse2Id", "l0"."OneToOne_Optional_PK_Inverse2Id", "l0"."OneToOne_Optional_Self2Id"
-    FROM "LevelTwo" AS "l0"
-    WHERE "l"."Id" = "l0"."Level1_Optional_Id" AND "l0"."Id" > 0
-    ORDER BY "l0"."Id"
-) AS "t"
+LEFT JOIN (
+    SELECT "l1"."Level1_Optional_Id"
+    FROM (
+        SELECT "l0"."Level1_Optional_Id", ROW_NUMBER() OVER(PARTITION BY "l0"."Level1_Optional_Id" ORDER BY "l0"."Id") AS "row"
+        FROM "LevelTwo" AS "l0"
+        WHERE "l0"."Id" > 0
+    ) AS "l1"
+    WHERE "l1"."row" <= 10
+) AS "l2" ON "l"."Id" = "l2"."Level1_Optional_Id"
 """);
         }
 
-        [ActianTodo]
         public override async Task GroupJoin_with_subquery_on_inner_and_no_DefaultIfEmpty(bool async)
         {
             await base.GroupJoin_with_subquery_on_inner_and_no_DefaultIfEmpty(async);
@@ -2480,12 +2481,15 @@ OUTER APPLY (
                 """
 SELECT "l"."Id"
 FROM "LevelOne" AS "l"
-CROSS APPLY (
-    SELECT TOP(10) "l0"."Id", "l0"."Date", "l0"."Level1_Optional_Id", "l0"."Level1_Required_Id", "l0"."Name", "l0"."OneToMany_Optional_Inverse2Id", "l0"."OneToMany_Optional_Self_Inverse2Id", "l0"."OneToMany_Required_Inverse2Id", "l0"."OneToMany_Required_Self_Inverse2Id", "l0"."OneToOne_Optional_PK_Inverse2Id", "l0"."OneToOne_Optional_Self2Id"
-    FROM "LevelTwo" AS "l0"
-    WHERE "l"."Id" = "l0"."Level1_Optional_Id" AND "l0"."Id" > 0
-    ORDER BY "l0"."Id"
-) AS "t"
+INNER JOIN (
+    SELECT "l1"."Level1_Optional_Id"
+    FROM (
+        SELECT "l0"."Level1_Optional_Id", ROW_NUMBER() OVER(PARTITION BY "l0"."Level1_Optional_Id" ORDER BY "l0"."Id") AS "row"
+        FROM "LevelTwo" AS "l0"
+        WHERE "l0"."Id" > 0
+    ) AS "l1"
+    WHERE "l1"."row" <= 10
+) AS "l2" ON "l"."Id" = "l2"."Level1_Optional_Id"
 """);
         }
 

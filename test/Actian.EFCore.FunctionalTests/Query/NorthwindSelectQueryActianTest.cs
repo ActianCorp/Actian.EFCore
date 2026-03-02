@@ -912,7 +912,6 @@ WHERE "o"."OrderID" < 10300
 """);
     }
 
-    [ActianTodo]
     public override async Task Project_single_element_from_collection_with_OrderBy_over_navigation_Take_and_FirstOrDefault_2(
         bool async)
     {
@@ -920,19 +919,17 @@ WHERE "o"."OrderID" < 10300
 
         AssertSql(
             """
-SELECT "t0"."OrderID", "t0"."ProductID", "t0"."Discount", "t0"."Quantity", "t0"."UnitPrice"
+SELECT "s0"."OrderID", "s0"."ProductID", "s0"."Discount", "s0"."Quantity", "s0"."UnitPrice"
 FROM "Orders" AS "o"
-OUTER APPLY (
-    SELECT TOP(1) "t"."OrderID", "t"."ProductID", "t"."Discount", "t"."Quantity", "t"."UnitPrice"
+LEFT JOIN (
+    SELECT "s"."OrderID", "s"."ProductID", "s"."Discount", "s"."Quantity", "s"."UnitPrice"
     FROM (
-        SELECT TOP(1) "o0"."OrderID", "o0"."ProductID", "o0"."Discount", "o0"."Quantity", "o0"."UnitPrice", "p"."ProductName"
+        SELECT "o0"."OrderID", "o0"."ProductID", "o0"."Discount", "o0"."Quantity", "o0"."UnitPrice", ROW_NUMBER() OVER(PARTITION BY "o0"."OrderID" ORDER BY "p"."ProductName") AS "row"
         FROM "Order Details" AS "o0"
         INNER JOIN "Products" AS "p" ON "o0"."ProductID" = "p"."ProductID"
-        WHERE "o"."OrderID" = "o0"."OrderID"
-        ORDER BY "p"."ProductName"
-    ) AS "t"
-    ORDER BY "t"."ProductName"
-) AS "t0"
+    ) AS "s"
+    WHERE "s"."row" <= 1
+) AS "s0" ON "o"."OrderID" = "s0"."OrderID"
 WHERE "o"."OrderID" < 10250
 """);
     }
@@ -1827,7 +1824,6 @@ ORDER BY "t"."CustomerID" DESC
 """);
     }
 
-    [ActianTodo]
     public override async Task Reverse_in_projection_subquery(bool async)
     {
         await base.Reverse_in_projection_subquery(async);
@@ -1836,25 +1832,24 @@ ORDER BY "t"."CustomerID" DESC
             """
 SELECT "c"."CustomerID", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM "Customers" AS "c"
-OUTER APPLY "Orders" AS "o"
+LEFT OUTER JOIN "Orders" AS "o" ON CAST(1 AS boolean) = CAST(1 AS boolean)
 ORDER BY "c"."CustomerID", "o"."OrderDate" DESC, "o"."OrderID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Reverse_in_projection_subquery_single_result(bool async)
     {
         await base.Reverse_in_projection_subquery_single_result(async);
 
         AssertSql(
             """
-SELECT "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate"
+SELECT "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
 FROM "Customers" AS "c"
-OUTER APPLY (
-    SELECT TOP(1) "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+LEFT OUTER JOIN (
+    SELECT FIRST 1 "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderDate" DESC, "o"."OrderID"
-) AS "t"
+) AS "o0" ON CAST(1 AS boolean) = CAST(1 AS boolean)
 ORDER BY "c"."CustomerID"
 """);
     }

@@ -681,23 +681,22 @@ ORDER BY "l"."Id", "l0"."Id"
 """);
         }
 
-        [ActianTodo]
         public override async Task Include_inside_subquery(bool async)
         {
             await base.Include_inside_subquery(async);
 
             AssertSql(
                 """
-SELECT "l"."Id", "t"."Id", "t"."Date", "t"."Level1_Optional_Id", "t"."Level1_Required_Id", "t"."Name", "t"."OneToMany_Optional_Inverse2Id", "t"."OneToMany_Optional_Self_Inverse2Id", "t"."OneToMany_Required_Inverse2Id", "t"."OneToMany_Required_Self_Inverse2Id", "t"."OneToOne_Optional_PK_Inverse2Id", "t"."OneToOne_Optional_Self2Id", "t"."Id0", "t"."Level2_Optional_Id", "t"."Level2_Required_Id", "t"."Name0", "t"."OneToMany_Optional_Inverse3Id", "t"."OneToMany_Optional_Self_Inverse3Id", "t"."OneToMany_Required_Inverse3Id", "t"."OneToMany_Required_Self_Inverse3Id", "t"."OneToOne_Optional_PK_Inverse3Id", "t"."OneToOne_Optional_Self3Id"
+SELECT "l"."Id", "s"."Id", "s"."Date", "s"."Level1_Optional_Id", "s"."Level1_Required_Id", "s"."Name", "s"."OneToMany_Optional_Inverse2Id", "s"."OneToMany_Optional_Self_Inverse2Id", "s"."OneToMany_Required_Inverse2Id", "s"."OneToMany_Required_Self_Inverse2Id", "s"."OneToOne_Optional_PK_Inverse2Id", "s"."OneToOne_Optional_Self2Id", "s"."Id0", "s"."Level2_Optional_Id", "s"."Level2_Required_Id", "s"."Name0", "s"."OneToMany_Optional_Inverse3Id", "s"."OneToMany_Optional_Self_Inverse3Id", "s"."OneToMany_Required_Inverse3Id", "s"."OneToMany_Required_Self_Inverse3Id", "s"."OneToOne_Optional_PK_Inverse3Id", "s"."OneToOne_Optional_Self3Id"
 FROM "LevelOne" AS "l"
-OUTER APPLY (
+LEFT OUTER JOIN (
     SELECT "l0"."Id", "l0"."Date", "l0"."Level1_Optional_Id", "l0"."Level1_Required_Id", "l0"."Name", "l0"."OneToMany_Optional_Inverse2Id", "l0"."OneToMany_Optional_Self_Inverse2Id", "l0"."OneToMany_Required_Inverse2Id", "l0"."OneToMany_Required_Self_Inverse2Id", "l0"."OneToOne_Optional_PK_Inverse2Id", "l0"."OneToOne_Optional_Self2Id", "l1"."Id" AS "Id0", "l1"."Level2_Optional_Id", "l1"."Level2_Required_Id", "l1"."Name" AS "Name0", "l1"."OneToMany_Optional_Inverse3Id", "l1"."OneToMany_Optional_Self_Inverse3Id", "l1"."OneToMany_Required_Inverse3Id", "l1"."OneToMany_Required_Self_Inverse3Id", "l1"."OneToOne_Optional_PK_Inverse3Id", "l1"."OneToOne_Optional_Self3Id"
     FROM "LevelTwo" AS "l0"
     LEFT JOIN "LevelThree" AS "l1" ON "l0"."Id" = "l1"."OneToMany_Optional_Inverse3Id"
     WHERE "l0"."Id" > 0
-) AS "t"
+) AS "s" ON CAST(1 AS boolean) = CAST(1 AS boolean)
 WHERE "l"."Id" < 3
-ORDER BY "l"."Id", "t"."Id"
+ORDER BY "l"."Id", "s"."Id"
 """);
         }
 

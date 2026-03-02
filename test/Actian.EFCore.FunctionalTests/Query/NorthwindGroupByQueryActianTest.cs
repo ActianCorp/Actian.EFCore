@@ -2035,46 +2035,44 @@ ORDER BY "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_uncorrelated_collection_with_groupby_works(bool async)
     {
         await base.Select_uncorrelated_collection_with_groupby_works(async);
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "t"."OrderID"
+SELECT "c"."CustomerID", "o0"."OrderID"
 FROM "Customers" AS "c"
-OUTER APPLY (
+LEFT OUTER JOIN (
     SELECT "o"."OrderID"
     FROM "Orders" AS "o"
     GROUP BY "o"."OrderID"
-) AS "t"
+) AS "o0" ON CAST(1 AS boolean) = CAST(1 AS boolean)
 WHERE "c"."CustomerID" LIKE N'A%'
 ORDER BY "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_uncorrelated_collection_with_groupby_multiple_collections_work(bool async)
     {
         await base.Select_uncorrelated_collection_with_groupby_multiple_collections_work(async);
 
         AssertSql(
             """
-SELECT "o"."OrderID", "t"."ProductID", "t0"."c", "t0"."ProductID"
+SELECT "o"."OrderID", "p1"."ProductID", "p2"."c", "p2"."ProductID"
 FROM "Orders" AS "o"
-OUTER APPLY (
+LEFT OUTER JOIN (
     SELECT "p"."ProductID"
     FROM "Products" AS "p"
     GROUP BY "p"."ProductID"
-) AS "t"
-OUTER APPLY (
+) AS "p1" ON CAST(1 AS boolean) = CAST(1 AS boolean)
+LEFT OUTER JOIN (
     SELECT COUNT(*) AS "c", "p0"."ProductID"
     FROM "Products" AS "p0"
     GROUP BY "p0"."ProductID"
-) AS "t0"
+) AS "p2" ON CAST(1 AS boolean) = CAST(1 AS boolean)
 WHERE "o"."CustomerID" LIKE N'A%'
-ORDER BY "o"."OrderID", "t"."ProductID"
+ORDER BY "o"."OrderID", "p1"."ProductID"
 """);
     }
 
@@ -3518,31 +3516,30 @@ GROUP BY "o"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Select_uncorrelated_collection_with_groupby_when_outer_is_distinct(bool async)
     {
         await base.Select_uncorrelated_collection_with_groupby_when_outer_is_distinct(async);
 
         AssertSql(
             """
-SELECT "t"."City", "t0"."ProductID", "t1"."c", "t1"."ProductID"
+SELECT "s"."City", "p1"."ProductID", "p2"."c", "p2"."ProductID"
 FROM (
     SELECT DISTINCT "c"."City"
     FROM "Orders" AS "o"
     LEFT JOIN "Customers" AS "c" ON "o"."CustomerID" = "c"."CustomerID"
     WHERE "o"."CustomerID" LIKE N'A%'
-) AS "t"
-OUTER APPLY (
+) AS "s"
+LEFT OUTER JOIN (
     SELECT "p"."ProductID"
     FROM "Products" AS "p"
     GROUP BY "p"."ProductID"
-) AS "t0"
-OUTER APPLY (
+) AS "p1" ON CAST(1 AS boolean) = CAST(1 AS boolean)
+LEFT OUTER JOIN (
     SELECT COUNT(*) AS "c", "p0"."ProductID"
     FROM "Products" AS "p0"
     GROUP BY "p0"."ProductID"
-) AS "t1"
-ORDER BY "t"."City", "t0"."ProductID"
+) AS "p2" ON CAST(1 AS boolean) = CAST(1 AS boolean)
+ORDER BY "s"."City", "p1"."ProductID"
 """);
     }
 
@@ -3586,7 +3583,6 @@ ORDER BY "o1"."CustomerID"
     public override async Task Select_correlated_collection_after_GroupBy_aggregate_when_identifier_changes_to_complex(bool async)
         => await base.Select_correlated_collection_after_GroupBy_aggregate_when_identifier_changes_to_complex(async);
 
-    //AssertSql(" ");
     [ActianTodo]
     public override async Task Complex_query_with_group_by_in_subquery5(bool async)
     {
