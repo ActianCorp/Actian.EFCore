@@ -27,19 +27,14 @@ namespace Actian.EFCore.TestUtilities
         public virtual IRelationalCommandBuilder Create()
             => new TestRelationalCommandBuilder(Dependencies);
 
-        private class TestRelationalCommandBuilder : IRelationalCommandBuilder
+        private class TestRelationalCommandBuilder(
+            RelationalCommandBuilderDependencies dependencies) : IRelationalCommandBuilder
         {
-            private readonly List<IRelationalParameter> _parameters = new();
-
-            public TestRelationalCommandBuilder(
-                RelationalCommandBuilderDependencies dependencies)
-            {
-                Dependencies = dependencies;
-            }
+            private readonly List<IRelationalParameter> _parameters = [];
 
             public IndentedStringBuilder Instance { get; } = new();
 
-            public RelationalCommandBuilderDependencies Dependencies { get; }
+            public RelationalCommandBuilderDependencies Dependencies { get; } = dependencies;
 
             public IReadOnlyList<IRelationalParameter> Parameters
                 => _parameters;
@@ -66,9 +61,17 @@ namespace Actian.EFCore.TestUtilities
                 => new TestRelationalCommand(
                     Dependencies,
                     Instance.ToString(),
+                    Instance.ToString(),
                     Parameters);
 
-            public IRelationalCommandBuilder Append(string value)
+            public IRelationalCommandBuilder Append(string value, bool sensitive = false)
+            {
+                Instance.Append(value);
+
+                return this;
+            }
+
+            public IRelationalCommandBuilder Append(FormattableString value, bool sensitive = false)
             {
                 Instance.Append(value);
 
@@ -100,20 +103,19 @@ namespace Actian.EFCore.TestUtilities
                 => Instance.Length;
         }
 
-        private class TestRelationalCommand : IRelationalCommand
+        private class TestRelationalCommand(
+            RelationalCommandBuilderDependencies dependencies,
+            string commandText,
+            string logCommandText,
+            IReadOnlyList<IRelationalParameter> parameters) : IRelationalCommand
         {
-            private readonly RelationalCommand _realRelationalCommand;
-
-            public TestRelationalCommand(
-                RelationalCommandBuilderDependencies dependencies,
-                string commandText,
-                IReadOnlyList<IRelationalParameter> parameters)
-            {
-                _realRelationalCommand = new RelationalCommand(dependencies, commandText, parameters);
-            }
+            private readonly RelationalCommand _realRelationalCommand = new(dependencies, commandText, logCommandText, parameters);
 
             public string CommandText
                 => _realRelationalCommand.CommandText;
+
+            public string LogCommandText
+                => _realRelationalCommand.LogCommandText;
 
             public IReadOnlyList<IRelationalParameter> Parameters
                 => _realRelationalCommand.Parameters;

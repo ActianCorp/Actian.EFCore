@@ -492,11 +492,11 @@ WHERE ("t"."FoundOn" = CAST(0 AS tinyint)) AND "t"."FoundOn" IS NOT NULL
 
             AssertSql(
                 """
-@__p_0='5'
+@p='5'
 
 SELECT DISTINCT "a0"."Id", "a0"."CountryId", "a0"."Discriminator", "a0"."Name", "a0"."Species", "a0"."EagleId", "a0"."IsFlightless", "a0"."FoundOn"
 FROM (
-    SELECT FIRST @__p_0 "a"."Id", "a"."CountryId", "a"."Discriminator", "a"."Name", "a"."Species", "a"."EagleId", "a"."IsFlightless", "a"."FoundOn"
+    SELECT FIRST @p "a"."Id", "a"."CountryId", "a"."Discriminator", "a"."Name", "a"."Species", "a"."EagleId", "a"."IsFlightless", "a"."FoundOn"
     FROM "Animals" AS "a"
     ORDER BY "a"."Species"
 ) AS "a0"
@@ -552,7 +552,6 @@ WHERE "a"."Discriminator" = N'Eagle'
 """);
         }
 
-        [ActianTodo]
         public override async Task Is_operator_on_result_of_FirstOrDefault(bool async)
         {
             await base.Is_operator_on_result_of_FirstOrDefault(async);
@@ -663,7 +662,7 @@ WHERE @@ROW_COUNT = 1 AND "Id" = LAST_IDENTITY();
                 """
 SELECT "a"."Id", "a"."CountryId", "a"."Discriminator", "a"."Name", "a"."Species", "a"."EagleId", "a"."IsFlightless", "a"."Group", "a"."FoundOn"
 FROM "Animals" AS "a"
-WHERE 0 = 1
+WHERE CAST(0 AS boolean) = CAST(1 AS boolean)
 """);
         }
 
@@ -675,7 +674,7 @@ WHERE 0 = 1
                 """
 SELECT "a"."Id", "a"."CountryId", "a"."Discriminator", "a"."Name", "a"."Species", "a"."EagleId", "a"."IsFlightless", "a"."Group"
 FROM "Animals" AS "a"
-WHERE 0 = 1
+WHERE CAST(0 AS boolean) = CAST(1 AS boolean)
 """);
         }
 
@@ -694,7 +693,7 @@ WHERE 0 = 1
                 """
 SELECT "a"."Id", "a"."CountryId", "a"."Discriminator", "a"."Name", "a"."Species", "a"."EagleId", "a"."IsFlightless", "a"."Group", "a"."FoundOn"
 FROM "Animals" AS "a"
-WHERE 0 = 1
+WHERE CAST(0 AS boolean) = CAST(1 AS boolean)
 """);
         }
 
@@ -706,7 +705,7 @@ WHERE 0 = 1
                 """
 SELECT "a"."Id", "a"."CountryId", "a"."Discriminator", "a"."Name", "a"."Species", "a"."EagleId", "a"."IsFlightless", "a"."Group", "a"."FoundOn"
 FROM "Animals" AS "a"
-WHERE 0 = 1
+WHERE CAST(0 AS boolean) = CAST(1 AS boolean)
 """);
         }
 

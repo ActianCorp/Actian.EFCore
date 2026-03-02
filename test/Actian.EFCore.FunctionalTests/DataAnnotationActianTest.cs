@@ -233,22 +233,22 @@ WHERE "s"."Unique_No" = 1
                 //
                 """
 @p2='1'
-@p0='ModifiedData' (Nullable = false)
+@p1='ModifiedData' (Nullable = false)
 @p1='00000000-0000-0000-0003-000000000001'
 @p3='00000001-0000-0000-0000-000000000001'
 
-UPDATE "Sample" SET "Name" = @p0, "RowVersion" = @p1
+UPDATE "Sample" SET "Name" = @p1, "RowVersion" = @p1
 WHERE "Unique_No" = @p2 AND "RowVersion" = @p3;
 SELECT @@ROW_COUNT;
 """,
                 //
                 """
 @p2='1'
-@p0='ChangedData' (Nullable = false)
+@p1='ChangedData' (Nullable = false)
 @p1='00000000-0000-0000-0002-000000000001'
 @p3='00000001-0000-0000-0000-000000000001'
 
-UPDATE "Sample" SET "Name" = @p0, "RowVersion" = @p1
+UPDATE "Sample" SET "Name" = @p1, "RowVersion" = @p1
 WHERE "Unique_No" = @p2 AND "RowVersion" = @p3;
 SELECT @@ROW_COUNT;
 """);
@@ -283,7 +283,7 @@ WHERE @@ROW_COUNT = 1 AND "Unique_No" = LAST_IDENTITY();
 
             AssertSql(
                 """
-@p0='Short'
+@p1='Short'
 @p1='ValidString' (Nullable = false)
 @p2='00000000-0000-0000-0000-000000000001'
 @p3='Third Additional Name'
@@ -292,14 +292,14 @@ WHERE @@ROW_COUNT = 1 AND "Unique_No" = LAST_IDENTITY();
 @p6='0' (Nullable = true)
 
 INSERT INTO "Sample" ("MaxLengthProperty", "Name", "RowVersion", "AdditionalDetails_Name", "AdditionalDetails_Value", "Details_Name", "Details_Value")
-VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6);
+VALUES (@p1, @p1, @p2, @p3, @p4, @p5, @p6);
 SELECT "Unique_No"
 FROM "Sample"
 WHERE @@ROW_COUNT = 1 AND "Unique_No" = LAST_IDENTITY();
 """,
                 //
                 """
-@p0='VeryVeryVeryVeryVeryVeryLongString'
+@p1='VeryVeryVeryVeryVeryVeryLongString'
 @p1='ValidString' (Nullable = false)
 @p2='00000000-0000-0000-0000-000000000002'
 @p3='Third Additional Name'
@@ -308,7 +308,7 @@ WHERE @@ROW_COUNT = 1 AND "Unique_No" = LAST_IDENTITY();
 @p6='0' (Nullable = true)
 
 INSERT INTO "Sample" ("MaxLengthProperty", "Name", "RowVersion", "AdditionalDetails_Name", "AdditionalDetails_Value", "Details_Name", "Details_Value")
-VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6);
+VALUES (@p1, @p1, @p2, @p3, @p4, @p5, @p6);
 SELECT "Unique_No"
 FROM "Sample"
 WHERE @@ROW_COUNT = 1 AND "Unique_No" = LAST_IDENTITY();
@@ -322,20 +322,20 @@ WHERE @@ROW_COUNT = 1 AND "Unique_No" = LAST_IDENTITY();
 
             AssertSql(
                 """
-@p0='ValidString'
+@p1='ValidString'
 
 INSERT INTO "Two" ("Data")
-VALUES (@p0);
+VALUES (@p1);
 SELECT "Id", "Timestamp"
 FROM "Two"
 WHERE @@ROW_COUNT = 1 AND "Id" = LAST_IDENTITY();
 """,
                 //
                 """
-@p0='ValidButLongString'
+@p1='ValidButLongString'
 
 INSERT INTO "Two" ("Data")
-VALUES (@p0);
+VALUES (@p1);
 SELECT "Id", "Timestamp"
 FROM "Two"
 WHERE @@ROW_COUNT = 1 AND "Id" = LAST_IDENTITY();

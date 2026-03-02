@@ -2,18 +2,22 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-﻿using System;
-using Actian.EFCore.Infrastructure.Internal;
+using System;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
-namespace Microsoft.EntityFrameworkCore.Actian.Infrastructure.Internal;
+namespace Actian.EFCore.Infrastructure.Internal;
 
 public class ActianSingletonOptions : IActianSingletonOptions
 {
     public virtual int CompatibilityLevel { get; private set; } = ActianOptionsExtension.DefaultCompatibilityLevel;
 
     public virtual int? CompatibilityLevelWithoutDefault { get; private set; }
+
+    public virtual bool ExpandCollectionParameters { get; private set; } = true; // Default to true for EF Core 8/9 behavior
+
+    public virtual bool? ExpandCollectionParametersWithoutDefault { get; private set; }
 
     public virtual void Initialize(IDbContextOptions options)
     {
@@ -22,6 +26,8 @@ public class ActianSingletonOptions : IActianSingletonOptions
         {
             CompatibilityLevel = actianOptions.CompatibilityLevel;
             CompatibilityLevelWithoutDefault = actianOptions.CompatibilityLevelWithoutDefault;
+            ExpandCollectionParameters = actianOptions.ExpandCollectionParameters;
+            ExpandCollectionParametersWithoutDefault = actianOptions.ExpandCollectionParametersWithoutDefault;
         }
     }
 
@@ -31,7 +37,9 @@ public class ActianSingletonOptions : IActianSingletonOptions
 
         if (actianOptions != null
             && (CompatibilityLevelWithoutDefault != actianOptions.CompatibilityLevelWithoutDefault
-                || CompatibilityLevel != actianOptions.CompatibilityLevel))
+                || CompatibilityLevel != actianOptions.CompatibilityLevel
+                || ExpandCollectionParametersWithoutDefault != actianOptions.ExpandCollectionParametersWithoutDefault
+                || ExpandCollectionParameters != actianOptions.ExpandCollectionParameters))
         {
             throw new InvalidOperationException(
                 CoreStrings.SingletonOptionChanged(

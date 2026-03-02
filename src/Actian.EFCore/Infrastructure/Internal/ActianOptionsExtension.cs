@@ -2,9 +2,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Text;
 using JetBrains.Annotations;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,8 +15,10 @@ namespace Actian.EFCore.Infrastructure.Internal
     {
         private DbContextOptionsExtensionInfo _info;
         private int? _compatibilityLevel;
+        private bool? _expandCollectionParameters;
 
         public static readonly int DefaultCompatibilityLevel = 160;
+        public static readonly bool DefaultExpandCollectionParameters = true;
 
         public ActianOptionsExtension()
         {
@@ -27,6 +30,7 @@ namespace Actian.EFCore.Infrastructure.Internal
             : base(copyFrom)
         {
             _compatibilityLevel = copyFrom._compatibilityLevel;
+            _expandCollectionParameters = copyFrom._expandCollectionParameters;
         }
 
         /// <inheritdoc />
@@ -43,11 +47,26 @@ namespace Actian.EFCore.Infrastructure.Internal
         public virtual int? CompatibilityLevelWithoutDefault
             => _compatibilityLevel;
 
+        public virtual bool ExpandCollectionParameters
+            => _expandCollectionParameters ?? DefaultExpandCollectionParameters;
+
+        public virtual bool? ExpandCollectionParametersWithoutDefault
+            => _expandCollectionParameters;
+
         public virtual ActianOptionsExtension WithCompatibilityLevel(int? compatibilityLevel)
         {
             var clone = (ActianOptionsExtension)Clone();
 
             clone._compatibilityLevel = compatibilityLevel;
+
+            return clone;
+        }
+
+        public virtual ActianOptionsExtension WithExpandCollectionParameters(bool? expandCollectionParameters)
+        {
+            var clone = (ActianOptionsExtension)Clone();
+
+            clone._expandCollectionParameters = expandCollectionParameters;
 
             return clone;
         }
@@ -85,7 +104,15 @@ namespace Actian.EFCore.Infrastructure.Internal
                         {
                             builder
                                 .Append("CompatibilityLevel=")
-                                .Append(compatibilityLevel);
+                                .Append(compatibilityLevel)
+                                .Append(' ');
+                        }
+
+                        if (Extension._expandCollectionParameters is bool expandCollectionParameters)
+                        {
+                            builder
+                                .Append("ExpandCollectionParameters=")
+                                .Append(expandCollectionParameters);
                         }
 
                         _logFragment = builder.ToString();
@@ -99,7 +126,9 @@ namespace Actian.EFCore.Infrastructure.Internal
             {
                 if (_serviceProviderHash == null)
                 {
-                    _serviceProviderHash = base.GetServiceProviderHashCode();
+                    var hashCode = base.GetServiceProviderHashCode();
+                    hashCode = (hashCode * 397) ^ Extension._expandCollectionParameters.GetHashCode();
+                    _serviceProviderHash = hashCode;
                 }
 
                 return (int)_serviceProviderHash.Value;
@@ -107,11 +136,14 @@ namespace Actian.EFCore.Infrastructure.Internal
 
             public override void PopulateDebugInfo(IDictionary<string, string> debugInfo)
             {
-                //debugInfo[$"Actian:{nameof(ActianDbContextOptionsBuilder.UseRowNumberForPaging)}"]
-                //    = (Extension._rowNumberPaging?.GetHashCode() ?? 0L).ToString(CultureInfo.InvariantCulture);
                 if (Extension.CompatibilityLevel is int compatibilityLevel)
                 {
                     debugInfo["CompatibilityLevel"] = compatibilityLevel.ToString();
+                }
+
+                if (Extension._expandCollectionParameters is bool expandCollectionParameters)
+                {
+                    debugInfo["Actian:ExpandCollectionParameters"] = expandCollectionParameters.ToString();
                 }
             }
         }

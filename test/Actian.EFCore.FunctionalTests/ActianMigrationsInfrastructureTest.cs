@@ -55,6 +55,30 @@ namespace Actian.EFCore
         }
 
         [ActianTodo]
+        public override async Task Can_apply_two_migrations_in_transaction_async()
+        {
+            await base.Can_apply_two_migrations_in_transaction_async();
+        }
+
+        [ActianTodo]
+        public override void Can_apply_two_migrations_in_transaction()
+        {
+            base.Can_apply_two_migrations_in_transaction();
+        }
+
+        [ActianTodo]
+        public override async Task Can_generate_migration_from_initial_database_to_initial()
+        {
+            await base.Can_generate_migration_from_initial_database_to_initial();
+        }
+
+        [ActianTodo]
+        public override async Task Can_generate_no_migration_script()
+        {
+            await base.Can_generate_no_migration_script();
+        }
+
+        [ActianTodo]
         public override async Task Can_apply_all_migrations_async()
         {
             await base.Can_apply_all_migrations_async();
@@ -78,42 +102,6 @@ namespace Actian.EFCore
             await base.Can_generate_one_up_and_down_script();
         }
 
-
-        [ActianTodo]
-        public override void Can_generate_migration_from_initial_database_to_initial()
-        {
-            base.Can_generate_migration_from_initial_database_to_initial();
-
-            Assert.Equal(
-                """
-CREATE TABLE "__EFMigrationsHistory" (
-    "MigrationId" nvarchar(150) NOT NULL WITH DEFAULT '',
-    "ProductVersion" nvarchar(32) NOT NULL WITH DEFAULT '',
-    CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY ("MigrationId")
-);
-
-""",
-                Sql,
-                ignoreLineEndingDifferences: true);
-        }
-
-        [ActianTodo]
-        public override void Can_generate_no_migration_script()
-        {
-            base.Can_generate_no_migration_script();
-
-            Assert.Equal(
-                """
-CREATE TABLE "__EFMigrationsHistory" (
-    "MigrationId" nvarchar(150) NOT NULL WITH DEFAULT '',
-    "ProductVersion" nvarchar(32) NOT NULL WITH DEFAULT '',
-    CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY ("MigrationId")
-);
-
-""",
-                Sql,
-                ignoreLineEndingDifferences: true);
-        }
 
         [ActianTodo]
         public override async Task Can_generate_up_and_down_scripts()

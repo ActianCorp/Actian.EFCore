@@ -2,7 +2,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using Actian.EFCore.Infrastructure.Internal;
 using Microsoft.EntityFrameworkCore.Query;
@@ -26,6 +26,115 @@ namespace Actian.EFCore.Query.Internal
             _typeMappingSource = typeMappingSource;
             _sqlGenerationHelper = dependencies.SqlGenerationHelper;
             _actianCompatibilityLevel = actianSingletonOptions.CompatibilityLevel;
+        }
+
+        // Transform OUTER APPLY to LEFT OUTER JOIN for Ingres compatibility
+        protected override Expression VisitOuterApply(OuterApplyExpression outerApplyExpression)
+        {
+            Sql.Append("LEFT OUTER JOIN ");
+            
+            // Visit the table part - this handles the subquery
+            Visit(outerApplyExpression.Table);
+            
+            // Add alias if present
+            if (!string.IsNullOrEmpty(outerApplyExpression.Alias))
+            {
+                Sql.Append(" AS ");
+                Sql.Append(_sqlGenerationHelper.DelimitIdentifier(outerApplyExpression.Alias));
+            }
+            
+            // For OUTER APPLY, the correlation is implicit in the subquery
+            // We need to add an ON clause, but since the correlation is in the WHERE clause
+            // of the subquery, we use ON 1=1 (or ON CAST(1 AS boolean) = CAST(1 AS boolean) for Actian)
+            Sql.Append(" ON CAST(1 AS boolean) = CAST(1 AS boolean)");
+            
+            return outerApplyExpression;
+        }
+
+        // Transform CROSS APPLY to INNER JOIN for Ingres compatibility
+        protected override Expression VisitCrossApply(CrossApplyExpression crossApplyExpression)
+        {
+            Sql.Append("INNER JOIN ");
+            
+            // Visit the table part - this handles the subquery
+            Visit(crossApplyExpression.Table);
+            
+            // Add alias if present
+            if (!string.IsNullOrEmpty(crossApplyExpression.Alias))
+            {
+                Sql.Append(" AS ");
+                Sql.Append(_sqlGenerationHelper.DelimitIdentifier(crossApplyExpression.Alias));
+            }
+            
+            // For CROSS APPLY, use ON 1=1
+            Sql.Append(" ON CAST(1 AS boolean) = CAST(1 AS boolean)");
+            
+            return crossApplyExpression;
+        }
+
+        // Add this method inside the ActianQuerySqlGenerator class
+        protected override Expression VisitSqlConstant(SqlConstantExpression sqlConstantExpression)
+        {
+            // EFCore 10: TypeMapping can be null, which causes NullReferenceException in base implementation
+            if (sqlConstantExpression.TypeMapping == null)
+            {
+                // Generate SQL directly for constants without type mappings
+                if (sqlConstantExpression.Value == null)
+                {
+                    Sql.Append("NULL");
+                    return sqlConstantExpression;
+                }
+
+                if (sqlConstantExpression.Value is bool boolValue)
+                {
+                    Sql.Append(boolValue ? "CAST(1 AS boolean)" : "CAST(0 AS boolean)");
+                    return sqlConstantExpression;
+                }
+
+                // For other types, try to infer type mapping
+                var typeMapping = _typeMappingSource.FindMapping(sqlConstantExpression.Type);
+                if (typeMapping != null)
+                {
+                    Sql.Append(typeMapping.GenerateSqlLiteral(sqlConstantExpression.Value));
+                }
+                else
+                {
+                    // Ultimate fallback: use ToString
+                    Sql.Append(sqlConstantExpression.Value.ToString());
+                }
+                return sqlConstantExpression;
+            }
+
+            // TypeMapping exists, use base implementation
+            return base.VisitSqlConstant(sqlConstantExpression);
+        }
+
+        protected override Expression VisitSqlUnary(SqlUnaryExpression sqlUnaryExpression)
+        {
+            // Check if this is a Convert operation to a string type
+            if (sqlUnaryExpression.OperatorType == ExpressionType.Convert
+                && sqlUnaryExpression.Type == typeof(string))
+            {
+                // Check if we're converting from a numeric type or if the type mapping suggests string
+                var operandType = sqlUnaryExpression.Operand.Type;
+                var isNumericToString = operandType.IsNumeric();
+
+                // Also check if the store type is a character type that might need trimming
+                var storeType = sqlUnaryExpression.TypeMapping?.StoreType?.ToLowerInvariant();
+                var needsTrim = isNumericToString 
+                    || (storeType != null && (storeType.Contains("char") || storeType.Contains("varchar")));
+
+                if (needsTrim)
+                {
+                    // Wrap the CAST with TRIM to remove trailing spaces
+                    Sql.Append("TRIM(");
+                    base.VisitSqlUnary(sqlUnaryExpression);
+                    Sql.Append(")");
+                    return sqlUnaryExpression;
+                }
+            }
+
+            return base.VisitSqlUnary(sqlUnaryExpression);
         }
 
         protected override void GenerateTop(SelectExpression selectExpression)

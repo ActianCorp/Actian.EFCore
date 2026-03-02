@@ -2,5 +2,8 @@
   "appDomain": "denied",
   "diagnosticMessages": true,
   "longRunningTestSeconds": 30,
-  "maxParallelThreads": 1
+  "maxParallelThreads": 1,
+  "shadowCopy": false,
+  "$schema": "https://xunit.net/schema/current/xunit.runner.schema.json",
+  "preEnumerateTheories": false
 }

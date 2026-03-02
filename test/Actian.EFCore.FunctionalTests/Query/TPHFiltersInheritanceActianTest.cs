@@ -159,11 +159,11 @@ WHERE "a"."Discriminator" = N'Eagle'
 """,
                 //
                 """
-@__p_0='1'
+@p='1'
 
 SELECT FIRST 1 "a"."Id", "a"."CountryId", "a"."Discriminator", "a"."Name", "a"."Species", "a"."EagleId", "a"."IsFlightless", "a"."Group"
 FROM "Animals" AS "a"
-WHERE "a"."Discriminator" = N'Eagle' AND "a"."Id" = @__p_0
+WHERE "a"."Discriminator" = N'Eagle' AND "a"."Id" = @p
 """);
         }
 

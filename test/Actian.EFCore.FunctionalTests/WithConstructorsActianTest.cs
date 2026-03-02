@@ -234,15 +234,11 @@ namespace Actian.EFCore
         {
             protected override ITestStoreFactory TestStoreFactory => ActianTestStoreFactory.Instance;
 
-            [System.Obsolete]
-#pragma warning disable CS0809 // Obsolete member overrides non-obsolete member
             protected override void OnModelCreating(ModelBuilder modelBuilder, DbContext context)
-#pragma warning restore CS0809 // Obsolete member overrides non-obsolete member
             {
                 base.OnModelCreating(modelBuilder, context);
 
-                modelBuilder.Entity<BlogQuery>().HasNoKey().ToQuery(
-                    () => context.Set<BlogQuery>().FromSqlRaw("SELECT * FROM Blog"));
+                modelBuilder.Entity<BlogQuery>().HasNoKey().ToSqlQuery("SELECT * FROM Blog");
             }
         }
     }

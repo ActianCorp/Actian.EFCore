@@ -194,9 +194,9 @@ LEFT JOIN "Alphabetical list of products" AS "a" ON "o"."CustomerID" = "a"."Cate
 
         AssertSql(
             """
-@__p_0='2'
+@p='2'
 
-SELECT FIRST @__p_0 "m"."City", "m"."ContactName"
+SELECT FIRST @p "m"."City", "m"."ContactName"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region" FROM "Customers" AS "c"
 ) AS "m"
@@ -270,11 +270,11 @@ FROM (
 
         AssertSql(
             """
-@__p_0='10'
+@p='10'
 
 SELECT COUNT(*)
 FROM (
-    SELECT FIRST @__p_0 1
+    SELECT FIRST @p 1
     FROM (
         SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region" FROM "Customers" AS "c"
     ) AS "m"
@@ -289,11 +289,11 @@ FROM (
 
         AssertSql(
             """
-@__p_0='10'
+@p='10'
 
 SELECT COUNT(*)
 FROM (
-    SELECT FIRST @__p_0 1
+    SELECT FIRST @p 1
     FROM (
         SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region" FROM "Customers" AS "c"
     ) AS "m"

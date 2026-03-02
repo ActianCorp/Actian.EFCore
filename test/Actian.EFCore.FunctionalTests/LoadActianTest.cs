@@ -34,11 +34,11 @@ namespace Actian.EFCore
                 state == EntityState.Detached && queryTrackingBehavior == QueryTrackingBehavior.TrackAll
                     ? ""
                     : """
-@__p_0='707' (Nullable = true)
+@p='707' (Nullable = true)
 
 SELECT "c"."Id", "c"."ParentId"
 FROM "Child" AS "c"
-WHERE "c"."ParentId" = @__p_0
+WHERE "c"."ParentId" = @p
 """);
         }
 
@@ -54,11 +54,11 @@ WHERE "c"."ParentId" = @__p_0
                 state == EntityState.Detached && queryTrackingBehavior == QueryTrackingBehavior.TrackAll
                     ? ""
                     : """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -73,11 +73,11 @@ WHERE "p"."Id" = @__p_0
                 state == EntityState.Detached && queryTrackingBehavior == QueryTrackingBehavior.TrackAll
                     ? ""
                     : """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -92,11 +92,11 @@ WHERE "p"."Id" = @__p_0
                 state == EntityState.Detached && queryTrackingBehavior == QueryTrackingBehavior.TrackAll
                     ? ""
                     : """
-@__p_0='707' (Nullable = true)
+@p='707' (Nullable = true)
 
 SELECT FIRST 1 "s"."Id", "s"."ParentId"
 FROM "Single" AS "s"
-WHERE "s"."ParentId" = @__p_0
+WHERE "s"."ParentId" = @p
 """);
         }
 
@@ -110,11 +110,11 @@ WHERE "s"."ParentId" = @__p_0
                 state == EntityState.Detached && queryTrackingBehavior == QueryTrackingBehavior.TrackAll
                     ? ""
                     : """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -128,11 +128,11 @@ WHERE "p"."Id" = @__p_0
                 state == EntityState.Detached && queryTrackingBehavior == QueryTrackingBehavior.TrackAll
                     ? ""
                     : """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 1 "s"."Id"
 FROM "SinglePkToPk" AS "s"
-WHERE "s"."Id" = @__p_0
+WHERE "s"."Id" = @p
 """);
         }
 
@@ -164,11 +164,11 @@ WHERE "s"."Id" = @__p_0
                 state == EntityState.Detached
                     ? ""
                     : """
-@__p_0='767' (Nullable = true)
+@p='767' (Nullable = true)
 
 SELECT "c"."Id", "c"."ParentId"
 FROM "Child" AS "c"
-WHERE "c"."ParentId" = @__p_0
+WHERE "c"."ParentId" = @p
 """);
         }
 
@@ -183,11 +183,11 @@ WHERE "c"."ParentId" = @__p_0
                 state == EntityState.Detached
                     ? ""
                     : """
-@__p_0='787'
+@p='787'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -202,11 +202,11 @@ WHERE "p"."Id" = @__p_0
                 state == EntityState.Detached
                     ? ""
                     : """
-@__p_0='787'
+@p='787'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -221,11 +221,11 @@ WHERE "p"."Id" = @__p_0
                 state == EntityState.Detached
                     ? ""
                     : """
-@__p_0='767' (Nullable = true)
+@p='767' (Nullable = true)
 
 SELECT FIRST 1 "s"."Id", "s"."ParentId"
 FROM "Single" AS "s"
-WHERE "s"."ParentId" = @__p_0
+WHERE "s"."ParentId" = @p
 """);
         }
 
@@ -299,11 +299,11 @@ WHERE "s"."ParentId" = @__p_0
                 state == EntityState.Detached && queryTrackingBehavior == QueryTrackingBehavior.TrackAll
                     ? ""
                     : """
-@__p_0='Root'
+@p='Root'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."AlternateId" = @__p_0
+WHERE "p"."AlternateId" = @p
 """);
         }
 
@@ -317,11 +317,11 @@ WHERE "p"."AlternateId" = @__p_0
                 state == EntityState.Detached && queryTrackingBehavior == QueryTrackingBehavior.TrackAll
                     ? ""
                     : """
-@__p_0='Root'
+@p='Root'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."AlternateId" = @__p_0
+WHERE "p"."AlternateId" = @p
 """);
         }
 
@@ -335,11 +335,11 @@ WHERE "p"."AlternateId" = @__p_0
                 state == EntityState.Detached && queryTrackingBehavior == QueryTrackingBehavior.TrackAll
                     ? ""
                     : """
-@__p_0='Root'
+@p='Root'
 
 SELECT FIRST 1 "s"."Id", "s"."ParentId"
 FROM "SingleAk" AS "s"
-WHERE "s"."ParentId" = @__p_0
+WHERE "s"."ParentId" = @p
 """);
         }
 
@@ -369,11 +369,11 @@ WHERE "s"."ParentId" = @__p_0
                 state == EntityState.Detached && queryTrackingBehavior == QueryTrackingBehavior.TrackAll
                     ? ""
                     : """
-@__p_0='707' (Nullable = true)
+@p='707' (Nullable = true)
 
 SELECT "c"."Id", "c"."ParentId"
 FROM "ChildShadowFk" AS "c"
-WHERE "c"."ParentId" = @__p_0
+WHERE "c"."ParentId" = @p
 """);
         }
 
@@ -387,11 +387,11 @@ WHERE "c"."ParentId" = @__p_0
                 state == EntityState.Detached || queryTrackingBehavior != QueryTrackingBehavior.TrackAll
                     ? ""
                     : """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -405,11 +405,11 @@ WHERE "p"."Id" = @__p_0
                 state == EntityState.Detached || queryTrackingBehavior != QueryTrackingBehavior.TrackAll
                     ? ""
                     : """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -423,11 +423,11 @@ WHERE "p"."Id" = @__p_0
                 state == EntityState.Detached && queryTrackingBehavior == QueryTrackingBehavior.TrackAll
                     ? ""
                     : """
-@__p_0='707' (Nullable = true)
+@p='707' (Nullable = true)
 
 SELECT FIRST 1 "s"."Id", "s"."ParentId"
 FROM "SingleShadowFk" AS "s"
-WHERE "s"."ParentId" = @__p_0
+WHERE "s"."ParentId" = @p
 """);
         }
 
@@ -457,12 +457,12 @@ WHERE "s"."ParentId" = @__p_0
                 state == EntityState.Detached && queryTrackingBehavior == QueryTrackingBehavior.TrackAll
                     ? ""
                     : """
-@__p_0='Root'
-@__p_1='707' (Nullable = true)
+@p='Root'
+@p1='707' (Nullable = true)
 
 SELECT "c"."Id", "c"."ParentAlternateId", "c"."ParentId"
 FROM "ChildCompositeKey" AS "c"
-WHERE "c"."ParentAlternateId" = @__p_0 AND "c"."ParentId" = @__p_1
+WHERE "c"."ParentAlternateId" = @p AND "c"."ParentId" = @p1
 """);
         }
 
@@ -476,12 +476,12 @@ WHERE "c"."ParentAlternateId" = @__p_0 AND "c"."ParentId" = @__p_1
                 state == EntityState.Detached && queryTrackingBehavior == QueryTrackingBehavior.TrackAll
                     ? ""
                     : """
-@__p_0='Root'
-@__p_1='707'
+@p='Root'
+@p1='707'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."AlternateId" = @__p_0 AND "p"."Id" = @__p_1
+WHERE "p"."AlternateId" = @p AND "p"."Id" = @p1
 """);
         }
 
@@ -495,12 +495,12 @@ WHERE "p"."AlternateId" = @__p_0 AND "p"."Id" = @__p_1
                 state == EntityState.Detached && queryTrackingBehavior == QueryTrackingBehavior.TrackAll
                     ? ""
                     : """
-@__p_0='Root'
-@__p_1='707'
+@p='Root'
+@p1='707'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."AlternateId" = @__p_0 AND "p"."Id" = @__p_1
+WHERE "p"."AlternateId" = @p AND "p"."Id" = @p1
 """);
         }
 
@@ -514,12 +514,12 @@ WHERE "p"."AlternateId" = @__p_0 AND "p"."Id" = @__p_1
                 state == EntityState.Detached && queryTrackingBehavior == QueryTrackingBehavior.TrackAll
                     ? ""
                     : """
-@__p_0='Root'
-@__p_1='707' (Nullable = true)
+@p='Root'
+@p1='707' (Nullable = true)
 
 SELECT FIRST 1 "s"."Id", "s"."ParentAlternateId", "s"."ParentId"
 FROM "SingleCompositeKey" AS "s"
-WHERE "s"."ParentAlternateId" = @__p_0 AND "s"."ParentId" = @__p_1
+WHERE "s"."ParentAlternateId" = @p AND "s"."ParentId" = @p1
 """);
         }
 
@@ -547,11 +547,11 @@ WHERE "s"."ParentAlternateId" = @__p_0 AND "s"."ParentId" = @__p_1
 
             AssertSql(
                 """
-@__p_0='707' (Nullable = true)
+@p='707' (Nullable = true)
 
 SELECT "c"."Id", "c"."ParentId"
 FROM "Child" AS "c"
-WHERE "c"."ParentId" = @__p_0
+WHERE "c"."ParentId" = @p
 """);
         }
 
@@ -561,11 +561,11 @@ WHERE "c"."ParentId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -575,11 +575,11 @@ WHERE "p"."Id" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -589,11 +589,11 @@ WHERE "p"."Id" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707' (Nullable = true)
+@p='707' (Nullable = true)
 
 SELECT FIRST 1 "s"."Id", "s"."ParentId"
 FROM "Single" AS "s"
-WHERE "s"."ParentId" = @__p_0
+WHERE "s"."ParentId" = @p
 """);
         }
 
@@ -603,11 +603,11 @@ WHERE "s"."ParentId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -617,11 +617,11 @@ WHERE "p"."Id" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 1 "s"."Id"
 FROM "SinglePkToPk" AS "s"
-WHERE "s"."Id" = @__p_0
+WHERE "s"."Id" = @p
 """);
         }
 
@@ -631,11 +631,11 @@ WHERE "s"."Id" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707' (Nullable = true)
+@p='707' (Nullable = true)
 
 SELECT "c"."Id", "c"."ParentId"
 FROM "Child" AS "c"
-WHERE "c"."ParentId" = @__p_0
+WHERE "c"."ParentId" = @p
 """);
         }
 
@@ -645,11 +645,11 @@ WHERE "c"."ParentId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 2 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -659,11 +659,11 @@ WHERE "p"."Id" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 2 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -675,11 +675,11 @@ WHERE "p"."Id" = @__p_0
                 state == EntityState.Detached
                     ? ""
                     : """
-@__p_0='707' (Nullable = true)
+@p='707' (Nullable = true)
 
 SELECT FIRST 2 "s"."Id", "s"."ParentId"
 FROM "Single" AS "s"
-WHERE "s"."ParentId" = @__p_0
+WHERE "s"."ParentId" = @p
 """);
         }
 
@@ -689,11 +689,11 @@ WHERE "s"."ParentId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 2 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -705,11 +705,11 @@ WHERE "p"."Id" = @__p_0
                 state == EntityState.Detached
                     ? ""
                     : """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 2 "s"."Id"
 FROM "SinglePkToPk" AS "s"
-WHERE "s"."Id" = @__p_0
+WHERE "s"."Id" = @p
 """);
         }
 
@@ -735,7 +735,7 @@ WHERE "s"."Id" = @__p_0
                 """
 SELECT FIRST 2 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE 0 = 1
+WHERE CAST(0 AS boolean) = CAST(1 AS boolean)
 """);
         }
 
@@ -747,7 +747,7 @@ WHERE 0 = 1
                 """
 SELECT FIRST 2 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE 0 = 1
+WHERE CAST(0 AS boolean) = CAST(1 AS boolean)
 """);
         }
 
@@ -757,11 +757,11 @@ WHERE 0 = 1
 
             AssertSql(
                 """
-@__p_0='767' (Nullable = true)
+@p='767' (Nullable = true)
 
 SELECT "c"."Id", "c"."ParentId"
 FROM "Child" AS "c"
-WHERE "c"."ParentId" = @__p_0
+WHERE "c"."ParentId" = @p
 """);
         }
 
@@ -771,11 +771,11 @@ WHERE "c"."ParentId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='787'
+@p='787'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -785,11 +785,11 @@ WHERE "p"."Id" = @__p_0
 
             AssertSql(
                 """
-@__p_0='787'
+@p='787'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -799,11 +799,11 @@ WHERE "p"."Id" = @__p_0
 
             AssertSql(
                 """
-@__p_0='767' (Nullable = true)
+@p='767' (Nullable = true)
 
 SELECT FIRST 1 "s"."Id", "s"."ParentId"
 FROM "Single" AS "s"
-WHERE "s"."ParentId" = @__p_0
+WHERE "s"."ParentId" = @p
 """);
         }
 
@@ -813,11 +813,11 @@ WHERE "s"."ParentId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='767' (Nullable = true)
+@p='767' (Nullable = true)
 
 SELECT "c"."Id", "c"."ParentId"
 FROM "Child" AS "c"
-WHERE "c"."ParentId" = @__p_0
+WHERE "c"."ParentId" = @p
 """);
         }
 
@@ -827,11 +827,11 @@ WHERE "c"."ParentId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='787'
+@p='787'
 
 SELECT FIRST 2 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -841,11 +841,11 @@ WHERE "p"."Id" = @__p_0
 
             AssertSql(
                 """
-@__p_0='787'
+@p='787'
 
 SELECT FIRST 2 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -855,11 +855,11 @@ WHERE "p"."Id" = @__p_0
 
             AssertSql(
                 """
-@__p_0='767' (Nullable = true)
+@p='767' (Nullable = true)
 
 SELECT FIRST 2 "s"."Id", "s"."ParentId"
 FROM "Single" AS "s"
-WHERE "s"."ParentId" = @__p_0
+WHERE "s"."ParentId" = @p
 """);
         }
 
@@ -920,11 +920,11 @@ WHERE "s"."ParentId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707' (Nullable = true)
+@p='707' (Nullable = true)
 
 SELECT "c"."Id", "c"."ParentId"
 FROM "Child" AS "c"
-WHERE "c"."ParentId" = @__p_0
+WHERE "c"."ParentId" = @p
 """);
         }
 
@@ -936,11 +936,11 @@ WHERE "c"."ParentId" = @__p_0
                 state == EntityState.Deleted
                     ? ""
                     : """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 2 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -952,11 +952,11 @@ WHERE "p"."Id" = @__p_0
                 state == EntityState.Deleted
                     ? ""
                     : """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 2 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -969,11 +969,11 @@ WHERE "p"."Id" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707' (Nullable = true)
+@p='707' (Nullable = true)
 
 SELECT FIRST 2 "s"."Id", "s"."ParentId"
 FROM "Single" AS "s"
-WHERE "s"."ParentId" = @__p_0
+WHERE "s"."ParentId" = @p
 """);
         }
 
@@ -983,11 +983,11 @@ WHERE "s"."ParentId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 2 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -997,11 +997,11 @@ WHERE "p"."Id" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 2 "s"."Id"
 FROM "SinglePkToPk" AS "s"
-WHERE "s"."Id" = @__p_0
+WHERE "s"."Id" = @p
 """);
         }
 
@@ -1011,11 +1011,11 @@ WHERE "s"."Id" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707' (Nullable = true)
+@p='707' (Nullable = true)
 
 SELECT "c"."Id", "c"."ParentId"
 FROM "Child" AS "c"
-WHERE "c"."ParentId" = @__p_0
+WHERE "c"."ParentId" = @p
 """);
         }
 
@@ -1025,11 +1025,11 @@ WHERE "c"."ParentId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -1039,11 +1039,11 @@ WHERE "p"."Id" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -1053,11 +1053,11 @@ WHERE "p"."Id" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707' (Nullable = true)
+@p='707' (Nullable = true)
 
 SELECT FIRST 1 "s"."Id", "s"."ParentId"
 FROM "Single" AS "s"
-WHERE "s"."ParentId" = @__p_0
+WHERE "s"."ParentId" = @p
 """);
         }
 
@@ -1067,11 +1067,11 @@ WHERE "s"."ParentId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707' (Nullable = true)
+@p='707' (Nullable = true)
 
 SELECT "c"."Id", "c"."ParentId"
 FROM "Child" AS "c"
-WHERE "c"."ParentId" = @__p_0
+WHERE "c"."ParentId" = @p
 """);
         }
 
@@ -1081,11 +1081,11 @@ WHERE "c"."ParentId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707'
+@p='707'
 
 SELECT "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -1095,11 +1095,11 @@ WHERE "p"."Id" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707'
+@p='707'
 
 SELECT "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -1111,11 +1111,11 @@ WHERE "p"."Id" = @__p_0
                 state == EntityState.Detached
                     ? ""
                     : """
-@__p_0='707' (Nullable = true)
+@p='707' (Nullable = true)
 
 SELECT "s"."Id", "s"."ParentId"
 FROM "Single" AS "s"
-WHERE "s"."ParentId" = @__p_0
+WHERE "s"."ParentId" = @p
 """);
         }
 
@@ -1125,11 +1125,11 @@ WHERE "s"."ParentId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='767' (Nullable = true)
+@p='767' (Nullable = true)
 
 SELECT "c"."Id", "c"."ParentId"
 FROM "Child" AS "c"
-WHERE "c"."ParentId" = @__p_0
+WHERE "c"."ParentId" = @p
 """);
         }
 
@@ -1139,11 +1139,11 @@ WHERE "c"."ParentId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='787'
+@p='787'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -1153,11 +1153,11 @@ WHERE "p"."Id" = @__p_0
 
             AssertSql(
                 """
-@__p_0='787'
+@p='787'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -1167,11 +1167,11 @@ WHERE "p"."Id" = @__p_0
 
             AssertSql(
                 """
-@__p_0='767' (Nullable = true)
+@p='767' (Nullable = true)
 
 SELECT FIRST 1 "s"."Id", "s"."ParentId"
 FROM "Single" AS "s"
-WHERE "s"."ParentId" = @__p_0
+WHERE "s"."ParentId" = @p
 """);
         }
 
@@ -1181,11 +1181,11 @@ WHERE "s"."ParentId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='767' (Nullable = true)
+@p='767' (Nullable = true)
 
 SELECT "c"."Id", "c"."ParentId"
 FROM "Child" AS "c"
-WHERE "c"."ParentId" = @__p_0
+WHERE "c"."ParentId" = @p
 """);
         }
 
@@ -1195,11 +1195,11 @@ WHERE "c"."ParentId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='787'
+@p='787'
 
 SELECT "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -1209,11 +1209,11 @@ WHERE "p"."Id" = @__p_0
 
             AssertSql(
                 """
-@__p_0='787'
+@p='787'
 
 SELECT "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -1223,11 +1223,11 @@ WHERE "p"."Id" = @__p_0
 
             AssertSql(
                 """
-@__p_0='767' (Nullable = true)
+@p='767' (Nullable = true)
 
 SELECT "s"."Id", "s"."ParentId"
 FROM "Single" AS "s"
-WHERE "s"."ParentId" = @__p_0
+WHERE "s"."ParentId" = @p
 """);
         }
 
@@ -1271,11 +1271,11 @@ WHERE "s"."ParentId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707' (Nullable = true)
+@p='707' (Nullable = true)
 
 SELECT "c"."Id", "c"."ParentId"
 FROM "Child" AS "c"
-WHERE "c"."ParentId" = @__p_0
+WHERE "c"."ParentId" = @p
 """);
         }
 
@@ -1287,11 +1287,11 @@ WHERE "c"."ParentId" = @__p_0
                 state == EntityState.Deleted
                     ? ""
                     : """
-@__p_0='707'
+@p='707'
 
 SELECT "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -1303,11 +1303,11 @@ WHERE "p"."Id" = @__p_0
                 state == EntityState.Deleted
                     ? ""
                     : """
-@__p_0='707'
+@p='707'
 
 SELECT "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -1320,11 +1320,11 @@ WHERE "p"."Id" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707' (Nullable = true)
+@p='707' (Nullable = true)
 
 SELECT "s"."Id", "s"."ParentId"
 FROM "Single" AS "s"
-WHERE "s"."ParentId" = @__p_0
+WHERE "s"."ParentId" = @p
 """);
         }
 
@@ -1334,11 +1334,11 @@ WHERE "s"."ParentId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='Root'
+@p='Root'
 
 SELECT "c"."Id", "c"."ParentId"
 FROM "ChildAk" AS "c"
-WHERE "c"."ParentId" = @__p_0
+WHERE "c"."ParentId" = @p
 """);
         }
 
@@ -1348,11 +1348,11 @@ WHERE "c"."ParentId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='Root'
+@p='Root'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."AlternateId" = @__p_0
+WHERE "p"."AlternateId" = @p
 """);
         }
 
@@ -1362,11 +1362,11 @@ WHERE "p"."AlternateId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='Root'
+@p='Root'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."AlternateId" = @__p_0
+WHERE "p"."AlternateId" = @p
 """);
         }
 
@@ -1376,11 +1376,11 @@ WHERE "p"."AlternateId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='Root'
+@p='Root'
 
 SELECT FIRST 1 "s"."Id", "s"."ParentId"
 FROM "SingleAk" AS "s"
-WHERE "s"."ParentId" = @__p_0
+WHERE "s"."ParentId" = @p
 """);
         }
 
@@ -1390,11 +1390,11 @@ WHERE "s"."ParentId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='Root'
+@p='Root'
 
 SELECT "c"."Id", "c"."ParentId"
 FROM "ChildAk" AS "c"
-WHERE "c"."ParentId" = @__p_0
+WHERE "c"."ParentId" = @p
 """);
         }
 
@@ -1404,11 +1404,11 @@ WHERE "c"."ParentId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='Root'
+@p='Root'
 
 SELECT FIRST 2 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."AlternateId" = @__p_0
+WHERE "p"."AlternateId" = @p
 """);
         }
 
@@ -1418,11 +1418,11 @@ WHERE "p"."AlternateId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='Root'
+@p='Root'
 
 SELECT FIRST 2 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."AlternateId" = @__p_0
+WHERE "p"."AlternateId" = @p
 """);
         }
 
@@ -1434,11 +1434,11 @@ WHERE "p"."AlternateId" = @__p_0
                 state == EntityState.Detached
                     ? ""
                     : """
-@__p_0='Root'
+@p='Root'
 
 SELECT FIRST 2 "s"."Id", "s"."ParentId"
 FROM "SingleAk" AS "s"
-WHERE "s"."ParentId" = @__p_0
+WHERE "s"."ParentId" = @p
 """);
         }
 
@@ -1464,7 +1464,7 @@ WHERE "s"."ParentId" = @__p_0
                 """
 SELECT FIRST 2 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE 0 = 1
+WHERE CAST(0 AS boolean) = CAST(1 AS boolean)
 """);
         }
 
@@ -1476,7 +1476,7 @@ WHERE 0 = 1
                 """
 SELECT FIRST 2 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE 0 = 1
+WHERE CAST(0 AS boolean) = CAST(1 AS boolean)
 """);
         }
 
@@ -1486,11 +1486,11 @@ WHERE 0 = 1
 
             AssertSql(
                 """
-@__p_0='707' (Nullable = true)
+@p='707' (Nullable = true)
 
 SELECT "c"."Id", "c"."ParentId"
 FROM "ChildShadowFk" AS "c"
-WHERE "c"."ParentId" = @__p_0
+WHERE "c"."ParentId" = @p
 """);
         }
 
@@ -1502,11 +1502,11 @@ WHERE "c"."ParentId" = @__p_0
                 state == EntityState.Detached
                     ? ""
                     : """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -1518,11 +1518,11 @@ WHERE "p"."Id" = @__p_0
                 state == EntityState.Detached
                     ? ""
                     : """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -1532,11 +1532,11 @@ WHERE "p"."Id" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707' (Nullable = true)
+@p='707' (Nullable = true)
 
 SELECT FIRST 1 "s"."Id", "s"."ParentId"
 FROM "SingleShadowFk" AS "s"
-WHERE "s"."ParentId" = @__p_0
+WHERE "s"."ParentId" = @p
 """);
         }
 
@@ -1546,11 +1546,11 @@ WHERE "s"."ParentId" = @__p_0
 
             AssertSql(
                 """
-@__p_0='707' (Nullable = true)
+@p='707' (Nullable = true)
 
 SELECT "c"."Id", "c"."ParentId"
 FROM "ChildShadowFk" AS "c"
-WHERE "c"."ParentId" = @__p_0
+WHERE "c"."ParentId" = @p
 """);
         }
 
@@ -1562,11 +1562,11 @@ WHERE "c"."ParentId" = @__p_0
                 state == EntityState.Detached
                     ? ""
                     : """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 2 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -1578,11 +1578,11 @@ WHERE "p"."Id" = @__p_0
                 state == EntityState.Detached
                     ? ""
                     : """
-@__p_0='707'
+@p='707'
 
 SELECT FIRST 2 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."Id" = @__p_0
+WHERE "p"."Id" = @p
 """);
         }
 
@@ -1594,11 +1594,11 @@ WHERE "p"."Id" = @__p_0
                 state == EntityState.Detached
                     ? ""
                     : """
-@__p_0='707' (Nullable = true)
+@p='707' (Nullable = true)
 
 SELECT FIRST 2 "s"."Id", "s"."ParentId"
 FROM "SingleShadowFk" AS "s"
-WHERE "s"."ParentId" = @__p_0
+WHERE "s"."ParentId" = @p
 """);
         }
 
@@ -1626,7 +1626,7 @@ WHERE "s"."ParentId" = @__p_0
                     : """
 SELECT FIRST 2 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE 0 = 1
+WHERE CAST(0 AS boolean) = CAST(1 AS boolean)
 """);
         }
 
@@ -1640,7 +1640,7 @@ WHERE 0 = 1
                     : """
 SELECT FIRST 2 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE 0 = 1
+WHERE CAST(0 AS boolean) = CAST(1 AS boolean)
 """);
         }
 
@@ -1650,12 +1650,12 @@ WHERE 0 = 1
 
             AssertSql(
                 """
-@__p_0='Root'
-@__p_1='707' (Nullable = true)
+@p='Root'
+@p1='707' (Nullable = true)
 
 SELECT "c"."Id", "c"."ParentAlternateId", "c"."ParentId"
 FROM "ChildCompositeKey" AS "c"
-WHERE "c"."ParentAlternateId" = @__p_0 AND "c"."ParentId" = @__p_1
+WHERE "c"."ParentAlternateId" = @p AND "c"."ParentId" = @p1
 """);
         }
 
@@ -1665,12 +1665,12 @@ WHERE "c"."ParentAlternateId" = @__p_0 AND "c"."ParentId" = @__p_1
 
             AssertSql(
                 """
-@__p_0='Root'
-@__p_1='707'
+@p='Root'
+@p1='707'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."AlternateId" = @__p_0 AND "p"."Id" = @__p_1
+WHERE "p"."AlternateId" = @p AND "p"."Id" = @p1
 """);
         }
 
@@ -1680,12 +1680,12 @@ WHERE "p"."AlternateId" = @__p_0 AND "p"."Id" = @__p_1
 
             AssertSql(
                 """
-@__p_0='Root'
-@__p_1='707'
+@p='Root'
+@p1='707'
 
 SELECT FIRST 1 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."AlternateId" = @__p_0 AND "p"."Id" = @__p_1
+WHERE "p"."AlternateId" = @p AND "p"."Id" = @p1
 """);
         }
 
@@ -1695,12 +1695,12 @@ WHERE "p"."AlternateId" = @__p_0 AND "p"."Id" = @__p_1
 
             AssertSql(
                 """
-@__p_0='Root'
-@__p_1='707' (Nullable = true)
+@p='Root'
+@p1='707' (Nullable = true)
 
 SELECT FIRST 1 "s"."Id", "s"."ParentAlternateId", "s"."ParentId"
 FROM "SingleCompositeKey" AS "s"
-WHERE "s"."ParentAlternateId" = @__p_0 AND "s"."ParentId" = @__p_1
+WHERE "s"."ParentAlternateId" = @p AND "s"."ParentId" = @p1
 """);
         }
 
@@ -1710,12 +1710,12 @@ WHERE "s"."ParentAlternateId" = @__p_0 AND "s"."ParentId" = @__p_1
 
             AssertSql(
                 """
-@__p_0='Root'
-@__p_1='707' (Nullable = true)
+@p='Root'
+@p1='707' (Nullable = true)
 
 SELECT "c"."Id", "c"."ParentAlternateId", "c"."ParentId"
 FROM "ChildCompositeKey" AS "c"
-WHERE "c"."ParentAlternateId" = @__p_0 AND "c"."ParentId" = @__p_1
+WHERE "c"."ParentAlternateId" = @p AND "c"."ParentId" = @p1
 """);
         }
 
@@ -1725,12 +1725,12 @@ WHERE "c"."ParentAlternateId" = @__p_0 AND "c"."ParentId" = @__p_1
 
             AssertSql(
                 """
-@__p_0='Root'
-@__p_1='707'
+@p='Root'
+@p1='707'
 
 SELECT FIRST 2 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."AlternateId" = @__p_0 AND "p"."Id" = @__p_1
+WHERE "p"."AlternateId" = @p AND "p"."Id" = @p1
 """);
         }
 
@@ -1740,12 +1740,12 @@ WHERE "p"."AlternateId" = @__p_0 AND "p"."Id" = @__p_1
 
             AssertSql(
                 """
-@__p_0='Root'
-@__p_1='707'
+@p='Root'
+@p1='707'
 
 SELECT FIRST 2 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE "p"."AlternateId" = @__p_0 AND "p"."Id" = @__p_1
+WHERE "p"."AlternateId" = @p AND "p"."Id" = @p1
 """);
         }
 
@@ -1757,12 +1757,12 @@ WHERE "p"."AlternateId" = @__p_0 AND "p"."Id" = @__p_1
                 state == EntityState.Detached
                     ? ""
                     : """
-@__p_0='Root'
-@__p_1='707' (Nullable = true)
+@p='Root'
+@p1='707' (Nullable = true)
 
 SELECT FIRST 2 "s"."Id", "s"."ParentAlternateId", "s"."ParentId"
 FROM "SingleCompositeKey" AS "s"
-WHERE "s"."ParentAlternateId" = @__p_0 AND "s"."ParentId" = @__p_1
+WHERE "s"."ParentAlternateId" = @p AND "s"."ParentId" = @p1
 """);
         }
 
@@ -1788,7 +1788,7 @@ WHERE "s"."ParentAlternateId" = @__p_0 AND "s"."ParentId" = @__p_1
                 """
 SELECT FIRST 2 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE 0 = 1
+WHERE CAST(0 AS boolean) = CAST(1 AS boolean)
 """);
         }
 
@@ -1800,7 +1800,7 @@ WHERE 0 = 1
                 """
 SELECT FIRST 2 "p"."Id", "p"."AlternateId"
 FROM "Parent" AS "p"
-WHERE 0 = 1
+WHERE CAST(0 AS boolean) = CAST(1 AS boolean)
 """);
         }
 
