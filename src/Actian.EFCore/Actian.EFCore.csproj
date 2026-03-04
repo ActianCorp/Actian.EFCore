@@ -25,6 +25,7 @@
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <NoWarn>$(NoWarn);EF9100</NoWarn>  <!-- Precompiled query is experimental -->
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
 
