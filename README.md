@@ -37,7 +37,7 @@ Alternatively contact support.
 
 ### Before installing
 
-Actian.EFCore 9.0.2, released on Februrary 3, 2026, relies on Actian.Client (Actian .NET Data Provider) version 8.0.8 and above to work. Actian.Client has not been published to [NuGet.org], so it will have to be added to a local or private NuGet feed, which the project has access to.
+Actian.EFCore 10.0.0, released on March 4, 2026, relies on Actian.Client (Actian .NET Data Provider) version 10.0.0 and above to work. Actian.Client has not been published to [NuGet.org], so it will have to be added to a local or private NuGet feed, which the project has access to.
 
 Actian.Client (Actian .NET Data Provider) can be downloaded from [Customer Downloads Provider].
 
@@ -115,6 +115,8 @@ The environment variable `ACTIAN_TEST_CONNECTION_STRING` must be have a valid va
 
 ## History
 
+ * EFCore 10 - for Ingres and Vector - Authored by https://github.com/mianculovici
+ * EFCore 9 - for Ingres and Vector - Authored by https://github.com/mianculovici
  * EFCore 8 - for Ingres and Vector - Authored by https://github.com/mianculovici
  * EFCore 3 - for Actian X, Ingres and Vector. Based on https://github.com/2PS-Consulting/Actian.EFCore Authored by https://github.com/MortenHoustonLudvigsen and https://github.com/mianculovici
  * https://github.com/ActianCorp/EntityFramework6.Ingres/ Authored by https://github.com/thoda04

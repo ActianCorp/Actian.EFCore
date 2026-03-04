@@ -14,6 +14,9 @@ namespace Actian.EFCore.Storage.Internal
     {
         private readonly IngresType _ingresType;
 
+        public static ActianStringTypeMapping UnicodeDefault { get; } = new(
+            "nvarchar(max)", unicode: true, storeTypePostfix: StoreTypePostfix.None);
+
         public ActianStringTypeMapping(
             [CanBeNull] string storeType = null,
             bool unicode = false,

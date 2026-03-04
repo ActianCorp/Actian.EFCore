@@ -2,9 +2,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using FluentAssertions.Execution;
 
 namespace Actian.EFCore
 {
@@ -12,7 +13,7 @@ namespace Actian.EFCore
     {
         public static TextDiffLineAssertions Should(this IEnumerable<TextDiffLine> instance)
         {
-            return new TextDiffLineAssertions(instance);
+            return new TextDiffLineAssertions(instance, AssertionChain.GetOrCreate());
         }
 
         public static int LineNoWidth(this IEnumerable<TextDiffLine> lines)

@@ -76,7 +76,7 @@ namespace Actian.EFCore.Query
             AssertSql(@"
                 p0='ALFKI' (Size = 4000)
                 
-                ""dbo"".""CustOrderHist"" @CustomerID = @p0
+                ""dbo"".""CustOrderHist"" @CustomerID = @p1
             ");
         }
 
@@ -104,7 +104,7 @@ namespace Actian.EFCore.Query
             AssertSql(@"
                 p0='ALFKI' (Size = 4000)
                 
-                ""dbo"".""CustOrderHist"" @CustomerID = @p0
+                ""dbo"".""CustOrderHist"" @CustomerID = @p1
             ");
         }
 

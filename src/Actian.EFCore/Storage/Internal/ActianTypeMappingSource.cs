@@ -163,6 +163,25 @@ namespace Actian.EFCore.Storage.Internal
             }
         }
 
+        public override RelationalTypeMapping FindMapping(Type type, IModel model, CoreTypeMapping elementMapping = null)
+        {
+            // We ONLY trigger if:
+            // 1. EF Core provides an elementMapping (this happens during collection translation)
+            // 2. The type is an actual collection (List<T>, Array, etc.)
+            // 3. We ignore strings and byte arrays which are already handled as scalars
+            if (elementMapping != null
+                && type != typeof(string)
+                && type != typeof(byte[])
+                && (type.IsArray || (type.IsGenericType && typeof(System.Collections.IEnumerable).IsAssignableFrom(type))))
+            {
+                return new ActianCollectionTypeMapping(type, elementMapping);
+            }
+
+            // By calling the base method first, we ensure scalar types like 'int' (used in Average/Sum) 
+            // follow the standard Actian logic defined in your _clrTypeMappings dictionary.
+            return base.FindMapping(type, model, elementMapping);
+        }
+
         protected override RelationalTypeMapping FindMapping(in RelationalTypeMappingInfo mappingInfo)
             => FindRawMapping(mappingInfo)?.Clone(mappingInfo) ?? base.FindMapping(mappingInfo);
 

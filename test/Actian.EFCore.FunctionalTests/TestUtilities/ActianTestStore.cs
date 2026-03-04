@@ -725,10 +725,9 @@ namespace Actian.EFCore.TestUtilities
             return sql;
         }
 
-        public override void Dispose()
+        public override async ValueTask DisposeAsync()
         {
-            Connection?.Dispose();
-            base.Dispose();
+            await base.DisposeAsync();
         }
 
         public static string CreateConnectionString(string name, string fileName = null!, bool? multipleActiveResultSets = null)

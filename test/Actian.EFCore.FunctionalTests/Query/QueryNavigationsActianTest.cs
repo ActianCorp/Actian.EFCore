@@ -59,9 +59,9 @@ WHERE "c"."City" LIKE N'%Sea%'
 
             AssertSql(
                 """
-@__p_0='1'
+@p='1'
 
-SELECT FIRST @__p_0 "o"."OrderID", "o"."ProductID", "o"."Discount", "o"."Quantity", "o"."UnitPrice"
+SELECT FIRST @p "o"."OrderID", "o"."ProductID", "o"."Discount", "o"."Quantity", "o"."UnitPrice"
 FROM "Order Details" AS "o"
 INNER JOIN "Orders" AS "o0" ON "o"."OrderID" = "o0"."OrderID"
 LEFT JOIN "Customers" AS "c" ON "o0"."CustomerID" = "c"."CustomerID"
@@ -76,11 +76,11 @@ ORDER BY "o"."OrderID", "o"."ProductID"
 
             AssertSql(
                 """
-@__p_0='2'
+@p='2'
 
 SELECT "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
 FROM (
-    SELECT FIRST @__p_0 "c"."CustomerID"
+    SELECT FIRST @p "c"."CustomerID"
     FROM "Customers" AS "c"
     ORDER BY "c"."CustomerID"
 ) AS "c0"
@@ -103,9 +103,9 @@ ORDER BY "c0"."CustomerID"
 
             AssertSql(
                 """
-@__p_0='2'
+@p='2'
 
-SELECT TOP(@__p_0) (
+SELECT TOP(@p) (
     SELECT TOP(1) "o"."CustomerID"
     FROM "Orders" AS "o"
     WHERE "c"."CustomerID" = "o"."CustomerID"
@@ -122,9 +122,9 @@ ORDER BY "c"."CustomerID"
 
             AssertSql(
                 """
-@__p_0='2'
+@p='2'
 
-SELECT TOP(@__p_0) (
+SELECT TOP(@p) (
     SELECT TOP(1) "o"."CustomerID"
     FROM "Orders" AS "o"
     WHERE "c"."CustomerID" = "o"."CustomerID"
@@ -140,11 +140,11 @@ ORDER BY "c"."CustomerID"
 
             AssertSql(
                 """
-@__p_0='2'
+@p='2'
 
 SELECT "o1"."CustomerID", "o1"."OrderID", "o1"."c"
 FROM (
-    SELECT FIRST @__p_0 "c"."CustomerID"
+    SELECT FIRST @p "c"."CustomerID"
     FROM "Customers" AS "c"
     WHERE "c"."CustomerID" LIKE N'F%'
     ORDER BY "c"."CustomerID"
@@ -168,11 +168,11 @@ ORDER BY "c0"."CustomerID"
 
             AssertSql(
                 """
-@__p_0='2'
+@p='2'
 
 SELECT "t0"."CustomerID", "t0"."OrderID", "t0"."c"
 FROM (
-    SELECT TOP(@__p_0) "c"."CustomerID"
+    SELECT TOP(@p) "c"."CustomerID"
     FROM "Customers" AS "c"
     WHERE "c"."CustomerID" LIKE N'F%'
     ORDER BY "c"."CustomerID"
@@ -195,11 +195,11 @@ ORDER BY "t"."CustomerID"
 
             AssertSql(
                 """
-@__p_0='2'
+@p='2'
 
 SELECT "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
 FROM (
-    SELECT FIRST @__p_0 "c"."CustomerID"
+    SELECT FIRST @p "c"."CustomerID"
     FROM "Customers" AS "c"
     ORDER BY "c"."CustomerID"
 ) AS "c0"
@@ -221,14 +221,14 @@ ORDER BY "c0"."CustomerID"
 
             AssertSql(
                 """
-@__p_0='20'
+@p='20'
 
 SELECT "o1"."OrderID", "o1"."CustomerID", "o1"."EmployeeID", "o1"."OrderDate"
 FROM (
     SELECT "c"."CustomerID"
     FROM "Customers" AS "c"
     ORDER BY "c"."CustomerID"
-    OFFSET @__p_0
+    OFFSET @p
 ) AS "c0"
 LEFT JOIN (
     SELECT "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
@@ -786,6 +786,17 @@ ORDER BY "c"."CustomerID"
 
             AssertSql(
                 """
+@orderIds1='10643'
+@orderIds2='10692'
+@orderIds3='10702'
+@orderIds4='10835'
+@orderIds5='10952'
+@orderIds6='11011'
+@orderIds7='11011'
+@orderIds8='11011'
+@orderIds9='11011'
+@orderIds10='11011'
+
 SELECT "s0"."CustomerID", "s0"."Address", "s0"."City", "s0"."CompanyName", "s0"."ContactName", "s0"."ContactTitle", "s0"."Country", "s0"."Fax", "s0"."Phone", "s0"."PostalCode", "s0"."Region"
 FROM "Customers" AS "c"
 LEFT JOIN (
@@ -794,7 +805,7 @@ LEFT JOIN (
         SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region", "o"."CustomerID" AS "CustomerID0", ROW_NUMBER() OVER(PARTITION BY "o"."CustomerID" ORDER BY "o"."OrderID", "c0"."CustomerID") AS "row"
         FROM "Orders" AS "o"
         LEFT JOIN "Customers" AS "c0" ON "o"."CustomerID" = "c0"."CustomerID"
-        WHERE "o"."OrderID" IN (10643, 10692, 10702, 10835, 10952, 11011)
+        WHERE "o"."OrderID" IN (@orderIds1, @orderIds2, @orderIds3, @orderIds4, @orderIds5, @orderIds6, @orderIds7, @orderIds8, @orderIds9, @orderIds10)
     ) AS "s"
     WHERE "s"."row" <= 1
 ) AS "s0" ON "c"."CustomerID" = "s0"."CustomerID0"
@@ -998,7 +1009,7 @@ ORDER BY "c"."CustomerID"
 
             AssertSql(
                 """
-@__p_0='3'
+@p='3'
 
 SELECT "t"."OrderID", COALESCE((
     SELECT TOP(1) "o0"."OrderID"
@@ -1006,7 +1017,7 @@ SELECT "t"."OrderID", COALESCE((
     WHERE "t"."OrderID" = "o0"."OrderID"
     ORDER BY "o0"."OrderID", "o0"."ProductID"), 0) AS "OrderDetail", "c"."City"
 FROM (
-    SELECT TOP(@__p_0) "o"."OrderID", "o"."CustomerID"
+    SELECT TOP(@p) "o"."OrderID", "o"."CustomerID"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderID"
 ) AS "t"

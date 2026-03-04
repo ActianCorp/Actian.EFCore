@@ -11,12 +11,9 @@ using Xunit.Abstractions;
 
 namespace Actian.EFCore
 {
-    public class TableSplittingActianTest : TableSplittingTestBase
+    public class TableSplittingActianServerTest(NonSharedFixture fixture, ITestOutputHelper testOutputHelper)
+        : TableSplittingTestBase(fixture, testOutputHelper)
     {
-        public TableSplittingActianTest(ITestOutputHelper testOutputHelper)
-            : base(testOutputHelper)
-        {
-        }
 
         protected override ITestStoreFactory TestStoreFactory
             => ActianTestStoreFactory.Instance;
@@ -166,13 +163,13 @@ WHERE "v"."Capacity" IS NOT NULL AND "v"."FuelType" IS NOT NULL
             AssertSql(
                 """
 @p3='Trek Pro Fit Madone 6 Series' (Nullable = false) (Size = 450)
-@p0='LicensedOperator' (Nullable = false) (Size = 21)
+@p1='LicensedOperator' (Nullable = false) (Size = 21)
 @p1='Repair' (Size = 4000)
 @p2='repairman' (Size = 4000)
 
 SET IMPLICIT_TRANSACTIONS OFF;
 SET NOCOUNT ON;
-UPDATE "Vehicles" SET "Operator_Discriminator" = @p0, "LicenseType" = @p1, "Operator_Name" = @p2
+UPDATE "Vehicles" SET "Operator_Discriminator" = @p1, "LicenseType" = @p1, "Operator_Name" = @p2
 OUTPUT 1
 WHERE "Name" = @p3;
 """,
@@ -199,11 +196,11 @@ WHERE "v"."Name" = N'Trek Pro Fit Madone 6 Series'
             AssertSql(
                 """
 @p1='Trek Pro Fit Madone 6 Series' (Nullable = false) (Size = 450)
-@p0='2'
+@p1='2'
 
 SET IMPLICIT_TRANSACTIONS OFF;
 SET NOCOUNT ON;
-UPDATE "Vehicles" SET "SeatingCapacity" = @p0
+UPDATE "Vehicles" SET "SeatingCapacity" = @p1
 OUTPUT 1
 WHERE "Name" = @p1;
 """,

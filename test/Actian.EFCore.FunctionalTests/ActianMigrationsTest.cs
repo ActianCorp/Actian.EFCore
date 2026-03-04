@@ -114,6 +114,121 @@ CREATE TABLE "Anonymous" (
     }
 
     [ActianTodo]
+    [ConditionalFact]
+    public override async Task Create_table_with_complex_properties_mapped_to_json()
+    => await Test(
+        builder => { },
+        builder =>
+        {
+            builder.Entity(
+                "Entity", e =>
+                {
+                    e.Property<int>("Id").ValueGeneratedOnAdd();
+                    e.HasKey("Id");
+                    e.Property<string>("Name");
+
+                    e.ComplexProperty<MyJsonComplex>(
+                        "ComplexReference", cp =>
+                        {
+                            cp.ToJson("ComplexReferenceJSON");
+                            cp.Property(x => x.Value).HasJsonPropertyName("custom_value");
+                            cp.Property(x => x.Date).HasJsonPropertyName("custom_date");
+                            cp.Ignore(x => x.NestedCollection);
+                            cp.ComplexProperty(
+                                x => x.Nested, np =>
+                                {
+                                    np.Property("Foo").HasJsonPropertyName("nested_foo");
+                                    np.Property("Bar").HasJsonPropertyName("nested_bar");
+                                    np.HasJsonPropertyName("nested_complex");
+                                });
+                        });
+
+                    e.ComplexCollection<List<MyJsonComplex>, MyJsonComplex>(
+                        "ComplexCollection", cp =>
+                        {
+                            cp.ToJson("ComplexCollectionJSON");
+                            cp.Property(x => x.Value).HasJsonPropertyName("custom_value2");
+                            cp.Property(x => x.Date).HasJsonPropertyName("custom_date2");
+                            cp.Ignore(x => x.NestedCollection);
+                            cp.ComplexProperty(
+                                x => x.Nested, np =>
+                                {
+                                    np.Property("Foo").HasJsonPropertyName("nested_foo2");
+                                    np.Property("Bar").HasJsonPropertyName("nested_bar2");
+                                    np.HasJsonPropertyName("nested_complex2");
+                                });
+                        });
+                });
+        },
+        model =>
+        {
+            var table = Assert.Single(model.Tables);
+            Assert.Equal("entity", table.Name);
+
+            Assert.Collection(
+                table.Columns,
+                c => Assert.Equal("complexreferencejson", c.Name),
+                c => Assert.Equal("complexcollectionjson", c.Name),
+                c => Assert.Equal("name", c.Name),
+                c => Assert.Equal("id", c.Name));
+            Assert.Same(
+                table.Columns.Single(c => c.Name == "id"),
+                Assert.Single(table.PrimaryKey!.Columns));
+        });
+
+    [ActianTodo]
+    [ConditionalFact]
+    public override async Task Create_table_with_complex_properties_with_nested_collection_mapped_to_json()
+        => await Test(
+            builder => { },
+            builder =>
+            {
+                builder.Entity(
+                    "Entity", e =>
+                    {
+                        e.Property<int>("Id").ValueGeneratedOnAdd();
+                        e.HasKey("Id");
+                        e.Property<string>("Name");
+
+                        e.ComplexProperty<MyJsonComplex>(
+                            "ComplexReference", cp =>
+                            {
+                                cp.ComplexProperty(
+                                    x => x.Nested, np =>
+                                    {
+                                        np.ToJson("ComplexReferenceJSON");
+                                        np.Property("Foo").HasJsonPropertyName("nested_foo");
+                                        np.Property("Bar").HasJsonPropertyName("nested_bar");
+                                    });
+                                cp.ComplexCollection(
+                                    x => x.NestedCollection, ncp =>
+                                    {
+                                        ncp.ToJson("ComplexCollectionJSON");
+                                        ncp.Property("Foo").HasJsonPropertyName("nested_collection_foo");
+                                        ncp.Property("Bar").HasJsonPropertyName("nested_collection_bar");
+                                    });
+                            });
+                    });
+            },
+            model =>
+            {
+                var table = Assert.Single(model.Tables);
+                Assert.Equal("entity", table.Name);
+
+                Assert.Collection(
+                    table.Columns,
+                    c => Assert.Equal("complexreferencejson", c.Name),
+                    c => Assert.Equal("complexreference_value", c.Name),
+                    c => Assert.Equal("complexreference_date", c.Name),
+                    c => Assert.Equal("complexcollectionjson", c.Name),
+                    c => Assert.Equal("name", c.Name),
+                    c => Assert.Equal("id", c.Name));
+                Assert.Same(
+                    table.Columns.Single(c => c.Name == "id"),
+                    Assert.Single(table.PrimaryKey!.Columns));
+            });
+
+    [ActianTodo]
     public override async Task Create_table_with_comments()
     {
         await base.Create_table_with_comments();
@@ -176,29 +291,7 @@ CREATE TABLE "People" (
 """);
     }
 
-    //[ConditionalFact]
-    //public virtual async Task Create_table_with_sparse_column()
-    //{
-    //            await Test(
-    //                _ => { },
-    //                builder => builder.Entity("People", e => e.Property<string>("SomeProperty").IsSparse()),
-    //                model =>
-    //                {
-    //                    var table = Assert.Single(model.Tables);
-    //                    var column = Assert.Single(table.Columns, c => c.Name == "SomeProperty");
-    //                    Assert.True((bool?)column"ActianAnnotationNames.Sparse");
-    //                });
-
-    //            AssertSql(
-    //                """
-    //CREATE TABLE "People" (
-    //    "SomeProperty" nvarchar(max) SPARSE NULL
-    //);
-    //""");
-    //}
-
-    //Microsoft.EntityFrameworkCore.Scaffolding.Metadata.DatabaseModel
-    [ConditionalFact]
+     [ConditionalFact]
     public virtual async Task Create_table_with_identity_column_value_converter()
     {
         await Test(
@@ -212,163 +305,9 @@ CREATE TABLE "People" (
                 Assert.Equal(ValueGenerated.OnAdd, column.ValueGenerated);
             });
 
-//            AssertSql(
-//                """
-//CREATE TABLE "People" (
-//    "IdentityColumn" smallint NOT NULL IDENTITY
-//);
-//""");
     }
 
-    //        [ConditionalFact]
-    //        "ActianCondition(ActianCondition.SupportsMemoryOptimized)"
-    //        public virtual async Task Create_memory_optimized_table()
-    //        {
-    //            await Test(
-    //                _ => { },
-    //                builder => builder.UseIdentityColumns().Entity(
-    //                    "People", b =>
-    //                    {
-    //                        b.ToTable(tb => tb.IsMemoryOptimized());
-    //                        b.Property<int>("Id");
-    //                    }),
-    //                model =>
-    //                {
-    //                    var table = Assert.Single(model.Tables);
-    //                    Assert.True((bool)table"ActianAnnotationNames.MemoryOptimized"!);
-    //                });
-
-    //            AssertSql(
-    //                """
-    //IF SERVERPROPERTY('IsXTPSupported') = 1 AND SERVERPROPERTY('EngineEdition') <> 5
-    //    BEGIN
-    //    IF NOT EXISTS (
-    //        SELECT 1 FROM "sys"."filegroups" "FG" JOIN "sys"."database_files" "F" ON "FG"."data_space_id" = "F"."data_space_id" WHERE "FG"."type" = N'FX' AND "F"."type" = 2)
-    //        BEGIN
-    //        ALTER DATABASE CURRENT SET AUTO_CLOSE OFF;
-    //        DECLARE @db_name nvarchar(max) = DB_NAME();
-    //        DECLARE @fg_name nvarchar(max);
-    //        SELECT TOP(1) @fg_name = "name" FROM "sys"."filegroups" WHERE "type" = N'FX';
-
-    //        IF @fg_name IS NULL
-    //            BEGIN
-    //            SET @fg_name = @db_name + N'_MODFG';
-    //            EXEC(N'ALTER DATABASE CURRENT ADD FILEGROUP "' + @fg_name + '" CONTAINS MEMORY_OPTIMIZED_DATA;');
-    //            END
-
-    //        DECLARE @path nvarchar(max);
-    //        SELECT TOP(1) @path = "physical_name" FROM "sys"."database_files" WHERE charindex('\', "physical_name") > 0 ORDER BY "file_id";
-    //        IF (@path IS NULL)
-    //            SET @path = '\' + @db_name;
-
-    //        DECLARE @filename nvarchar(max) = right(@path, charindex('\', reverse(@path)) - 1);
-    //        SET @filename = REPLACE(left(@filename, len(@filename) - charindex('.', reverse(@filename))), '''', '''''') + N'_MOD';
-    //        DECLARE @new_path nvarchar(max) = REPLACE(CAST(SERVERPROPERTY('InstanceDefaultDataPath') AS nvarchar(max)), '''', '''''') + @filename;
-
-    //        EXEC(N'
-    //            ALTER DATABASE CURRENT
-    //            ADD FILE (NAME=''' + @filename + ''', filename=''' + @new_path + ''')
-    //            TO FILEGROUP "' + @fg_name + '";')
-    //        END
-    //    END
-
-    //IF SERVERPROPERTY('IsXTPSupported') = 1
-    //EXEC(N'
-    //    ALTER DATABASE CURRENT
-    //    SET MEMORY_OPTIMIZED_ELEVATE_TO_SNAPSHOT ON;')
-    //""",
-    //                //
-    //                """
-    //CREATE TABLE "People" (
-    //    "Id" int NOT NULL IDENTITY,
-    //    CONSTRAINT "PK_People" PRIMARY KEY NONCLUSTERED ("Id")
-    //) WITH (MEMORY_OPTIMIZED = ON);
-    //""");
-    //        }
-
-    //        [ConditionalFact]
-    //        "ActianCondition(ActianCondition.SupportsMemoryOptimized)"
-    //        public virtual async Task Create_memory_optimized_temporal_table()
-    //        {
-    //            await Test(
-    //                _ => { },
-    //                builder => builder.UseIdentityColumns().Entity(
-    //                    "People", b =>
-    //                    {
-    //                        b.ToTable("Customers", tb => tb.IsMemoryOptimized().IsTemporal());
-    //                        b.Property<int>("Id");
-    //                    }),
-    //                model =>
-    //                {
-    //                    var table = Assert.Single(model.Tables);
-    //                    Assert.True((bool)table"ActianAnnotationNames.MemoryOptimized"!);
-    //                });
-
-    //            AssertSql(
-    //                """
-    //IF SERVERPROPERTY('IsXTPSupported') = 1 AND SERVERPROPERTY('EngineEdition') <> 5
-    //    BEGIN
-    //    IF NOT EXISTS (
-    //        SELECT 1 FROM "sys"."filegroups" "FG" JOIN "sys"."database_files" "F" ON "FG"."data_space_id" = "F"."data_space_id" WHERE "FG"."type" = N'FX' AND "F"."type" = 2)
-    //        BEGIN
-    //        ALTER DATABASE CURRENT SET AUTO_CLOSE OFF;
-    //        DECLARE @db_name nvarchar(max) = DB_NAME();
-    //        DECLARE @fg_name nvarchar(max);
-    //        SELECT TOP(1) @fg_name = "name" FROM "sys"."filegroups" WHERE "type" = N'FX';
-
-    //        IF @fg_name IS NULL
-    //            BEGIN
-    //            SET @fg_name = @db_name + N'_MODFG';
-    //            EXEC(N'ALTER DATABASE CURRENT ADD FILEGROUP "' + @fg_name + '" CONTAINS MEMORY_OPTIMIZED_DATA;');
-    //            END
-
-    //        DECLARE @path nvarchar(max);
-    //        SELECT TOP(1) @path = "physical_name" FROM "sys"."database_files" WHERE charindex('\', "physical_name") > 0 ORDER BY "file_id";
-    //        IF (@path IS NULL)
-    //            SET @path = '\' + @db_name;
-
-    //        DECLARE @filename nvarchar(max) = right(@path, charindex('\', reverse(@path)) - 1);
-    //        SET @filename = REPLACE(left(@filename, len(@filename) - charindex('.', reverse(@filename))), '''', '''''') + N'_MOD';
-    //        DECLARE @new_path nvarchar(max) = REPLACE(CAST(SERVERPROPERTY('InstanceDefaultDataPath') AS nvarchar(max)), '''', '''''') + @filename;
-
-    //        EXEC(N'
-    //            ALTER DATABASE CURRENT
-    //            ADD FILE (NAME=''' + @filename + ''', filename=''' + @new_path + ''')
-    //            TO FILEGROUP "' + @fg_name + '";')
-    //        END
-    //    END
-
-    //IF SERVERPROPERTY('IsXTPSupported') = 1
-    //EXEC(N'
-    //    ALTER DATABASE CURRENT
-    //    SET MEMORY_OPTIMIZED_ELEVATE_TO_SNAPSHOT ON;')
-    //""",
-    //                //
-    //                """
-    //DECLARE @historyTableSchema sysname = SCHEMA_NAME()
-    //EXEC(N'CREATE TABLE "Customers" (
-    //    "Id" int NOT NULL IDENTITY,
-    //    "PeriodEnd" datetime2 GENERATED ALWAYS AS ROW END HIDDEN NOT NULL,
-    //    "PeriodStart" datetime2 GENERATED ALWAYS AS ROW START HIDDEN NOT NULL,
-    //    CONSTRAINT "PK_Customers" PRIMARY KEY NONCLUSTERED ("Id"),
-    //    PERIOD FOR SYSTEM_TIME("PeriodStart", "PeriodEnd")
-    //) WITH (
-    //    SYSTEM_VERSIONING = ON (HISTORY_TABLE = "' + @historyTableSchema + N'"."CustomersHistory"),
-    //    MEMORY_OPTIMIZED = ON
-    //)');
-    //""");
-    //        }
-
-    //        public override async Task Drop_table()
-    //        {
-    //            await base.Drop_table();
-
-    //            AssertSql(
-    //                """
-    //DROP TABLE "People";
-    //""");
-    //        }
-
+ 
     [ActianTodo]
     public override async Task Alter_table_add_comment()
     {
@@ -1091,7 +1030,14 @@ ALTER TABLE "People" ADD "Name" nvarchar(max) COLLATE German_PhoneBook_CI_AS NUL
             var column = Assert.Single(table.Columns, c => c.Name == "foo");
         });
 
-        AssertSql();
+        AssertSql(
+"""
+ALTER TABLE "Base" DROP COLUMN "Derived2_Foo" RESTRICT;
+""",
+            //
+            """
+MODIFY "Base" TO RECONSTRUCT;
+""");
     }
 
     public override async Task Add_column_with_check_constraint()
@@ -4305,6 +4251,68 @@ CREATE TABLE "Customers" (
 );
 """);
     }
+
+    [ActianTodo]
+    [ConditionalFact]
+    public override Task Create_table_with_optional_complex_type_with_required_properties()
+    => Test(
+        builder => { },
+        builder =>
+        {
+            builder.Entity(
+                "Supplier", e =>
+                {
+                    e.ToTable("Suppliers");
+                    e.Property<int>("Id").ValueGeneratedOnAdd();
+                    e.HasKey("Id");
+                    e.Property<int>("Number");
+                    e.ComplexProperty<MyComplex>(
+                        "MyComplex", ct =>
+                        {
+                            ct.ComplexProperty<MyNestedComplex>("MyNestedComplex");
+                            ct.ComplexCollection(c => c.NestedCollection).ToJson();
+                        });
+                });
+        },
+        model =>
+        {
+            var contactsTable = Assert.Single(model.Tables, t => t.Name == "suppliers");
+            Assert.Collection(
+                contactsTable.Columns,
+                c => Assert.Equal("nestedcollection", c.Name),
+                c => Assert.Equal("mycomplex_nested_foo", c.Name),
+                c =>
+                {
+                    Assert.Equal("mycomplex_mynestedcomplex_bar", c.Name);
+                    Assert.True(c.IsNullable);
+                },
+                c =>
+                {
+                    Assert.Equal("mycomplex_prop", c.Name);
+                    Assert.True(c.IsNullable);
+                },
+                c =>
+                {
+                    Assert.Equal("mycomplex_nested_bar", c.Name);
+                    Assert.True(c.IsNullable);
+                },
+                c =>
+                {
+                    Assert.Equal("mycomplex_mynestedcomplex_foo", c.Name);
+                    Assert.True(c.IsNullable);
+                },
+                c =>
+                {
+                    Assert.Equal("number", c.Name);
+                    Assert.False(c.IsNullable);
+                },
+                c =>
+                {
+                    Assert.Equal("id", c.Name);
+                    Assert.False(c.IsNullable);
+                });
+        });
+
 
     [ConditionalFact]
     public override async Task Create_table_with_optional_primitive_collection()

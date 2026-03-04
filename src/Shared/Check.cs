@@ -38,7 +38,20 @@ namespace Actian.EFCore.Utilities
             {
                 NotEmpty(parameterName, nameof(parameterName));
 
+#if NET10_0_OR_GREATER
+                // Code for .NET 10 and newer versions
+                // Use string.Format to avoid "Non-invocable member 'AbstractionsStrings.ArgumentIsEmpty' cannot be used like a method." exception.            
+                throw new ArgumentException(
+                string.Format(
+                    AbstractionsStrings.CollectionArgumentIsEmpty, 
+                    parameterName),
+                parameterName);
+#else
+                // Code for older versions (.NET 6, .NET 7, etc.)
+                // The old code where AbstractionsStrings.CollectionArgumentIsEmpty 
+                // was used like a method.
                 throw new ArgumentException(AbstractionsStrings.CollectionArgumentIsEmpty(parameterName));
+#endif
             }
 
             return value;
@@ -54,7 +67,20 @@ namespace Actian.EFCore.Utilities
             }
             else if (value.Trim().Length == 0)
             {
+#if NET10_0_OR_GREATER
+                // Code for .NET 10 and newer versions
+                // Use string.Format to avoid "Non-invocable member 'AbstractionsStrings.ArgumentIsEmpty' cannot be used like a method." exception.            
+                throw new ArgumentException(
+                    string.Format(
+                                AbstractionsStrings.ArgumentIsEmpty, // Now a string property/field
+                                parameterName),
+                            parameterName);
+#else
+                // Code for older versions (.NET 6, .NET 7, etc.)
+                // The old code where AbstractionsStrings.CollectionArgumentIsEmpty 
+                // was used like a method.
                 e = new ArgumentException(AbstractionsStrings.ArgumentIsEmpty(parameterName));
+#endif
             }
 
             if (e != null)
@@ -74,7 +100,20 @@ namespace Actian.EFCore.Utilities
             {
                 NotEmpty(parameterName, nameof(parameterName));
 
+#if NET10_0_OR_GREATER
+                // Code for .NET 10 and newer versions
+                // Use string.Format to avoid "Non-invocable member 'AbstractionsStrings.ArgumentIsEmpty' cannot be used like a method." exception.            
+                throw new ArgumentException(
+                string.Format(
+                    AbstractionsStrings.CollectionArgumentIsEmpty, 
+                    parameterName),
+                parameterName);
+#else
+                // Code for older versions (.NET 6, .NET 7, etc.)
+                // The old code where AbstractionsStrings.CollectionArgumentIsEmpty 
+                // was used like a method.
                 throw new ArgumentException(AbstractionsStrings.ArgumentIsEmpty(parameterName));
+#endif
             }
 
             return value;

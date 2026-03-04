@@ -49,9 +49,9 @@ namespace Actian.EFCore.Query
 
             AssertSql(
                 """
-@p0='ALFKI'
+@p1='ALFKI'
 
-[CustOrderHist] @CustomerID = @p0
+[CustOrderHist] @CustomerID = @p1
 """);
         }
 
@@ -62,10 +62,10 @@ namespace Actian.EFCore.Query
 
             AssertSql(
                 """
-@p0='London'
+@p1='London'
 @p1='Sales Representative'
 
-SELECT COUNT(*) FROM "Customers" WHERE "City" = @p0 AND "ContactTitle" = @p1
+SELECT COUNT(*) FROM "Customers" WHERE "City" = @p1 AND "ContactTitle" = @p1
 """);
         }
 

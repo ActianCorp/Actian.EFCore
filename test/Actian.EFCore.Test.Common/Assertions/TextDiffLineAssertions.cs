@@ -2,7 +2,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-﻿using System;
+using System;
 using System.Collections.Generic;
 using FluentAssertions;
 using FluentAssertions.Execution;
@@ -12,15 +12,19 @@ namespace Actian.EFCore
 {
     public class TextDiffLineAssertions : ReferenceTypeAssertions<IEnumerable<TextDiffLine>, TextDiffLineAssertions>
     {
-        public TextDiffLineAssertions(IEnumerable<TextDiffLine> subject) : base(subject)
+        private readonly AssertionChain _assertionChain;
+
+        public TextDiffLineAssertions(IEnumerable<TextDiffLine> subject, AssertionChain assertionChain)
+            : base(subject, assertionChain)
         {
+            _assertionChain = assertionChain;
         }
 
         protected override string Identifier => "TextDiff";
 
         public AndConstraint<TextDiffLineAssertions> HaveChanges(int? context = 3, int maxLines = int.MaxValue, int maxChanges = int.MaxValue, Func<string, string> formatLineNumbers = null, string because = "", params object[] becauseArgs)
         {
-            Execute.Assertion
+            _assertionChain
                 .BecauseOf(because, becauseArgs)
                 .ForCondition(Subject.HasDifferences())
                 .FailWith($"Texts do not differ:{Environment.NewLine}{Subject.Format(context, formatLineNumbers, maxLines: maxLines, maxChanges: maxChanges)}");
@@ -30,7 +34,7 @@ namespace Actian.EFCore
 
         public AndConstraint<TextDiffLineAssertions> HaveNoChanges(int? context = 3, int maxLines = int.MaxValue, int maxChanges = int.MaxValue, Func<string, string> formatLineNumbers = null, string because = "", params object[] becauseArgs)
         {
-            Execute.Assertion
+            _assertionChain
                 .BecauseOf(because, becauseArgs)
                 .ForCondition(Subject.HasNoDifferences())
                 .FailWith($"Texts differ:{Environment.NewLine}{Subject.Format(context, formatLineNumbers, maxLines: maxLines, maxChanges: maxChanges)}");
@@ -43,9 +47,10 @@ namespace Actian.EFCore
     {
         public static AndConstraint<StringAssertions> NotDifferFrom(this StringAssertions assertions, string expected, int? context = 3, int maxLines = int.MaxValue, int maxChanges = int.MaxValue, Func<string, string> formatLineNumbers = null, bool normalize = true, string because = "", params object[] becauseArgs)
         {
-            Text.Diff(expected, assertions.Subject, normalize)
-                .Should()
-                .HaveNoChanges(context, maxLines, maxChanges, formatLineNumbers, because, becauseArgs);
+            var diff = Text.Diff(expected, assertions.Subject, normalize);
+            var diffAssertions = new TextDiffLineAssertions(diff, AssertionChain.GetOrCreate());
+            
+            diffAssertions.HaveNoChanges(context, maxLines, maxChanges, formatLineNumbers, because, becauseArgs);
 
             return new AndConstraint<StringAssertions>(assertions);
         }

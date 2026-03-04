@@ -3,9 +3,10 @@
   <PropertyGroup>
     <AssemblyName>Actian.EFCore.Tests</AssemblyName>
     <RootNamespace>Actian.EFCore</RootNamespace>
-    <VersionPrefix>9.0.2</VersionPrefix>
+    <VersionPrefix>10.0.0</VersionPrefix>
     <IsTestProject>true</IsTestProject>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +17,10 @@
 
   <ItemGroup>
     <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.NET.Test.Sdk" Version="18.3.0" />
   </ItemGroup>
 
 </Project>

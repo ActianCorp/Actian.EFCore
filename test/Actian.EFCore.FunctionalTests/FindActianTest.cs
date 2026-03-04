@@ -68,13 +68,13 @@ namespace Actian.EFCore
             base.Find_int_key_from_store();
             AssertSql(
                 """
-@__p_0='77'
+@p='77'
 
 SELECT "i3"."Id", "i3"."Foo", "s"."IntKeyId", "s"."Id", "s"."Prop", "s"."NestedOwned_Prop", "s"."Owned1IntKeyId", "s"."Owned1Id", "s"."Id0", "s"."Prop0", "i3"."OwnedReference_Prop", "i3"."OwnedReference_NestedOwned_Prop", "i2"."Owned1IntKeyId", "i2"."Id", "i2"."Prop"
 FROM (
     SELECT FIRST 1 "i"."Id", "i"."Foo", "i"."OwnedReference_Prop", "i"."OwnedReference_NestedOwned_Prop"
     FROM "IntKey" AS "i"
-    WHERE "i"."Id" = @__p_0
+    WHERE "i"."Id" = @p
 ) AS "i3"
 LEFT JOIN (
     SELECT "i0"."IntKeyId", "i0"."Id", "i0"."Prop", "i0"."NestedOwned_Prop", "i1"."Owned1IntKeyId", "i1"."Owned1Id", "i1"."Id" AS "Id0", "i1"."Prop" AS "Prop0"
@@ -94,13 +94,13 @@ ORDER BY "i3"."Id", "s"."IntKeyId", "s"."Id", "s"."Owned1IntKeyId", "s"."Owned1I
             base.Returns_null_for_int_key_not_in_store();
             AssertSql(
                 """
-@__p_0='99'
+@p='99'
 
 SELECT "i3"."Id", "i3"."Foo", "s"."IntKeyId", "s"."Id", "s"."Prop", "s"."NestedOwned_Prop", "s"."Owned1IntKeyId", "s"."Owned1Id", "s"."Id0", "s"."Prop0", "i3"."OwnedReference_Prop", "i3"."OwnedReference_NestedOwned_Prop", "i2"."Owned1IntKeyId", "i2"."Id", "i2"."Prop"
 FROM (
     SELECT FIRST 1 "i"."Id", "i"."Foo", "i"."OwnedReference_Prop", "i"."OwnedReference_NestedOwned_Prop"
     FROM "IntKey" AS "i"
-    WHERE "i"."Id" = @__p_0
+    WHERE "i"."Id" = @p
 ) AS "i3"
 LEFT JOIN (
     SELECT "i0"."IntKeyId", "i0"."Id", "i0"."Prop", "i0"."NestedOwned_Prop", "i1"."Owned1IntKeyId", "i1"."Owned1Id", "i1"."Id" AS "Id0", "i1"."Prop" AS "Prop0"
@@ -125,13 +125,13 @@ ORDER BY "i3"."Id", "s"."IntKeyId", "s"."Id", "s"."Owned1IntKeyId", "s"."Owned1I
         public override void Find_nullable_int_key_from_store()
         {
             base.Find_int_key_from_store();
-            AssertSql(@"@__p_0='77'
+            AssertSql(@"@p='77'
 
 SELECT ""i3"".""Id"", ""i3"".""Foo"", ""s"".""IntKeyId"", ""s"".""Id"", ""s"".""Prop"", ""s"".""NestedOwned_Prop"", ""s"".""Owned1IntKeyId"", ""s"".""Owned1Id"", ""s"".""Id0"", ""s"".""Prop0"", ""i3"".""OwnedReference_Prop"", ""i3"".""OwnedReference_NestedOwned_Prop"", ""i2"".""Owned1IntKeyId"", ""i2"".""Id"", ""i2"".""Prop""
 FROM (
     SELECT FIRST 1 ""i"".""Id"", ""i"".""Foo"", ""i"".""OwnedReference_Prop"", ""i"".""OwnedReference_NestedOwned_Prop""
     FROM ""IntKey"" AS ""i""
-    WHERE ""i"".""Id"" = @__p_0
+    WHERE ""i"".""Id"" = @p
 ) AS ""i3""
 LEFT JOIN (
     SELECT ""i0"".""IntKeyId"", ""i0"".""Id"", ""i0"".""Prop"", ""i0"".""NestedOwned_Prop"", ""i1"".""Owned1IntKeyId"", ""i1"".""Owned1Id"", ""i1"".""Id"" AS ""Id0"", ""i1"".""Prop"" AS ""Prop0""
@@ -150,13 +150,13 @@ ORDER BY ""i3"".""Id"", ""s"".""IntKeyId"", ""s"".""Id"", ""s"".""Owned1IntKeyId
             base.Returns_null_for_int_key_not_in_store();
             AssertSql(
                 """
-@__p_0='99'
+@p='99'
 
 SELECT "i3"."Id", "i3"."Foo", "s"."IntKeyId", "s"."Id", "s"."Prop", "s"."NestedOwned_Prop", "s"."Owned1IntKeyId", "s"."Owned1Id", "s"."Id0", "s"."Prop0", "i3"."OwnedReference_Prop", "i3"."OwnedReference_NestedOwned_Prop", "i2"."Owned1IntKeyId", "i2"."Id", "i2"."Prop"
 FROM (
     SELECT FIRST 1 "i"."Id", "i"."Foo", "i"."OwnedReference_Prop", "i"."OwnedReference_NestedOwned_Prop"
     FROM "IntKey" AS "i"
-    WHERE "i"."Id" = @__p_0
+    WHERE "i"."Id" = @p
 ) AS "i3"
 LEFT JOIN (
     SELECT "i0"."IntKeyId", "i0"."Id", "i0"."Prop", "i0"."NestedOwned_Prop", "i1"."Owned1IntKeyId", "i1"."Owned1Id", "i1"."Id" AS "Id0", "i1"."Prop" AS "Prop0"
@@ -181,22 +181,22 @@ ORDER BY "i3"."Id", "s"."IntKeyId", "s"."Id", "s"."Owned1IntKeyId", "s"."Owned1I
         public override void Find_string_key_from_store()
         {
             base.Find_string_key_from_store();
-            AssertSql(@"@__p_0='Cat'
+            AssertSql(@"@p='Cat'
 
 SELECT FIRST 1 ""s"".""Id"", ""s"".""Foo""
 FROM ""StringKey"" AS ""s""
-WHERE ""s"".""Id"" = @__p_0");
+WHERE ""s"".""Id"" = @p");
         }
 
 
         public override void Returns_null_for_string_key_not_in_store()
         {
             base.Returns_null_for_string_key_not_in_store();
-            AssertSql(@"@__p_0='Fox'
+            AssertSql(@"@p='Fox'
 
 SELECT FIRST 1 ""s"".""Id"", ""s"".""Foo""
 FROM ""StringKey"" AS ""s""
-WHERE ""s"".""Id"" = @__p_0");
+WHERE ""s"".""Id"" = @p");
         }
 
 
@@ -210,24 +210,24 @@ WHERE ""s"".""Id"" = @__p_0");
         public override void Find_composite_key_from_store()
         {
             base.Find_composite_key_from_store();
-            AssertSql(@"@__p_0='77'
-@__p_1='Dog'
+            AssertSql(@"@p='77'
+@p1='Dog'
 
 SELECT FIRST 1 ""c"".""Id1"", ""c"".""Id2"", ""c"".""Foo""
 FROM ""CompositeKey"" AS ""c""
-WHERE ""c"".""Id1"" = @__p_0 AND ""c"".""Id2"" = @__p_1");
+WHERE ""c"".""Id1"" = @p AND ""c"".""Id2"" = @p1");
         }
 
 
         public override void Returns_null_for_composite_key_not_in_store()
         {
             base.Returns_null_for_composite_key_not_in_store();
-            AssertSql(@"@__p_0='77'
-@__p_1='Fox'
+            AssertSql(@"@p='77'
+@p1='Fox'
 
 SELECT FIRST 1 ""c"".""Id1"", ""c"".""Id2"", ""c"".""Foo""
 FROM ""CompositeKey"" AS ""c""
-WHERE ""c"".""Id1"" = @__p_0 AND ""c"".""Id2"" = @__p_1");
+WHERE ""c"".""Id1"" = @p AND ""c"".""Id2"" = @p1");
         }
 
 
@@ -241,22 +241,22 @@ WHERE ""c"".""Id1"" = @__p_0 AND ""c"".""Id2"" = @__p_1");
         public override void Find_base_type_from_store()
         {
             base.Find_base_type_from_store();
-            AssertSql(@"@__p_0='77'
+            AssertSql(@"@p='77'
 
 SELECT FIRST 1 ""b"".""Id"", ""b"".""Discriminator"", ""b"".""Foo"", ""b"".""Boo""
 FROM ""BaseType"" AS ""b""
-WHERE ""b"".""Id"" = @__p_0");
+WHERE ""b"".""Id"" = @p");
         }
 
 
         public override void Returns_null_for_base_type_not_in_store()
         {
             base.Returns_null_for_base_type_not_in_store();
-            AssertSql(@"@__p_0='99'
+            AssertSql(@"@p='99'
 
 SELECT FIRST 1 ""b"".""Id"", ""b"".""Discriminator"", ""b"".""Foo"", ""b"".""Boo""
 FROM ""BaseType"" AS ""b""
-WHERE ""b"".""Id"" = @__p_0");
+WHERE ""b"".""Id"" = @p");
         }
 
 
@@ -270,44 +270,44 @@ WHERE ""b"".""Id"" = @__p_0");
         public override void Find_derived_type_from_store()
         {
             base.Find_derived_type_from_store();
-            AssertSql(@"@__p_0='78'
+            AssertSql(@"@p='78'
 
 SELECT FIRST 1 ""b"".""Id"", ""b"".""Discriminator"", ""b"".""Foo"", ""b"".""Boo""
 FROM ""BaseType"" AS ""b""
-WHERE ""b"".""Discriminator"" = N'DerivedType' AND ""b"".""Id"" = @__p_0");
+WHERE ""b"".""Discriminator"" = N'DerivedType' AND ""b"".""Id"" = @p");
         }
 
 
         public override void Returns_null_for_derived_type_not_in_store()
         {
             base.Returns_null_for_derived_type_not_in_store();
-            AssertSql(@"@__p_0='99'
+            AssertSql(@"@p='99'
 
 SELECT FIRST 1 ""b"".""Id"", ""b"".""Discriminator"", ""b"".""Foo"", ""b"".""Boo""
 FROM ""BaseType"" AS ""b""
-WHERE ""b"".""Discriminator"" = N'DerivedType' AND ""b"".""Id"" = @__p_0");
+WHERE ""b"".""Discriminator"" = N'DerivedType' AND ""b"".""Id"" = @p");
         }
 
 
         public override void Find_base_type_using_derived_set_tracked()
         {
             base.Find_base_type_using_derived_set_tracked();
-            AssertSql(@"@__p_0='88'
+            AssertSql(@"@p='88'
 
 SELECT FIRST 1 ""b"".""Id"", ""b"".""Discriminator"", ""b"".""Foo"", ""b"".""Boo""
 FROM ""BaseType"" AS ""b""
-WHERE ""b"".""Discriminator"" = N'DerivedType' AND ""b"".""Id"" = @__p_0");
+WHERE ""b"".""Discriminator"" = N'DerivedType' AND ""b"".""Id"" = @p");
         }
 
 
         public override void Find_base_type_using_derived_set_from_store()
         {
             base.Find_base_type_using_derived_set_from_store();
-            AssertSql(@"@__p_0='77'
+            AssertSql(@"@p='77'
 
 SELECT FIRST 1 ""b"".""Id"", ""b"".""Discriminator"", ""b"".""Foo"", ""b"".""Boo""
 FROM ""BaseType"" AS ""b""
-WHERE ""b"".""Discriminator"" = N'DerivedType' AND ""b"".""Id"" = @__p_0");
+WHERE ""b"".""Discriminator"" = N'DerivedType' AND ""b"".""Id"" = @p");
         }
 
 
@@ -321,11 +321,11 @@ WHERE ""b"".""Discriminator"" = N'DerivedType' AND ""b"".""Id"" = @__p_0");
         public override void Find_derived_using_base_set_type_from_store()
         {
             base.Find_derived_using_base_set_type_from_store();
-            AssertSql(@"@__p_0='78'
+            AssertSql(@"@p='78'
 
 SELECT FIRST 1 ""b"".""Id"", ""b"".""Discriminator"", ""b"".""Foo"", ""b"".""Boo""
 FROM ""BaseType"" AS ""b""
-WHERE ""b"".""Id"" = @__p_0");
+WHERE ""b"".""Id"" = @p");
         }
 
 
@@ -339,22 +339,22 @@ WHERE ""b"".""Id"" = @__p_0");
         public override void Find_shadow_key_from_store()
         {
             base.Find_shadow_key_from_store();
-            AssertSql(@"@__p_0='77'
+            AssertSql(@"@p='77'
 
 SELECT FIRST 1 ""s"".""Id"", ""s"".""Foo""
 FROM ""ShadowKey"" AS ""s""
-WHERE ""s"".""Id"" = @__p_0");
+WHERE ""s"".""Id"" = @p");
         }
 
 
         public override void Returns_null_for_shadow_key_not_in_store()
         {
             base.Returns_null_for_shadow_key_not_in_store();
-            AssertSql(@"@__p_0='99'
+            AssertSql(@"@p='99'
 
 SELECT FIRST 1 ""s"".""Id"", ""s"".""Foo""
 FROM ""ShadowKey"" AS ""s""
-WHERE ""s"".""Id"" = @__p_0");
+WHERE ""s"".""Id"" = @p");
         }
 
 

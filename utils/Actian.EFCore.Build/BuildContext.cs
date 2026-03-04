@@ -5,7 +5,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.Linq;
 using System.Threading.Tasks;
 using Actian.EFCore.Build.Commands;
@@ -19,7 +18,7 @@ namespace Actian.EFCore.Build
 
         public BuildContext()
         {
-            RootCommand.Handler = CommandHandler.Create(HandleRootCommand);
+            RootCommand.SetHandler(HandleRootCommand);
             AddCommand(new CreateDatabaseUsers(this));
             AddCommand(new CreateMissingTestDatabases(this));
             AddCommand(new CreateNorthwind(this));
@@ -230,7 +229,7 @@ namespace Actian.EFCore.Build
         private void AddCommand(BuildCommand command)
         {
             _commands.Add(command);
-            RootCommand.AddCommand(command);
+            RootCommand.Add(command);
         }
     }
 }

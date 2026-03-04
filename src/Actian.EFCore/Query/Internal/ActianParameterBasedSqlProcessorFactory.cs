@@ -4,39 +4,28 @@
 
 #nullable enable
 
+using Actian.EFCore.Infrastructure.Internal;
 using Microsoft.EntityFrameworkCore.Query;
 
 namespace Actian.EFCore.Query.Internal;
 
-/// <summary>
-///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-///     any release. You should only use it directly in your code with extreme caution and knowing that
-///     doing so can result in application failures when updating to a new Entity Framework Core release.
-/// </summary>
 public class ActianParameterBasedSqlProcessorFactory : IRelationalParameterBasedSqlProcessorFactory
 {
-    /// <summary>
-    ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-    ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-    ///     any release. You should only use it directly in your code with extreme caution and knowing that
-    ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-    /// </summary>
+    private readonly IActianSingletonOptions _actianSingletonOptions;
+
     public ActianParameterBasedSqlProcessorFactory(
-        RelationalParameterBasedSqlProcessorDependencies dependencies)
-        => Dependencies = dependencies;
+        RelationalParameterBasedSqlProcessorDependencies dependencies,
+        IActianSingletonOptions actianSingletonOptions)
+    {
+        Dependencies = dependencies;
+        _actianSingletonOptions = actianSingletonOptions;
+    }
 
     /// <summary>
     ///     Relational provider-specific dependencies for this service.
     /// </summary>
     protected virtual RelationalParameterBasedSqlProcessorDependencies Dependencies { get; }
 
-    /// <summary>
-    ///     This is an internal API that supports the Entity Framework Core infrastructure and not subject to
-    ///     the same compatibility standards as public APIs. It may be changed or removed without notice in
-    ///     any release. You should only use it directly in your code with extreme caution and knowing that
-    ///     doing so can result in application failures when updating to a new Entity Framework Core release.
-    /// </summary>
     public virtual RelationalParameterBasedSqlProcessor Create(RelationalParameterBasedSqlProcessorParameters parameters)
-        => new ActianParameterBasedSqlProcessor(Dependencies, parameters);
+        => new ActianParameterBasedSqlProcessor(Dependencies, parameters, _actianSingletonOptions);
 }

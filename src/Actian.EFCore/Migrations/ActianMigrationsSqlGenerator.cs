@@ -601,7 +601,7 @@ namespace Actian.EFCore.Migrations
         /// <param name="operation">The column metadata.</param>
         /// <param name="model">The target model which may be <see langword="null" /> if the operations exist without a model.</param>
         /// <returns>The database/store type for the column.</returns>
-        protected override string? GetColumnType(
+        protected override string GetColumnType(
             string? schema,
             string tableName,
             string name,
@@ -638,8 +638,8 @@ namespace Actian.EFCore.Migrations
                     operation.IsRowVersion,
                     operation.IsFixedLength,
                     operation.Precision,
-                    operation.Scale)
-                ?.StoreType;
+                    operation.Scale)!
+                .StoreType;
         }
 
         protected override void DefaultValue(

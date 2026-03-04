@@ -3,8 +3,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Actian.EFCore.TestUtilities;
+using Microsoft.EntityFrameworkCore.TestModels.Northwind;
 using Microsoft.EntityFrameworkCore.TestUtilities;
 using Xunit;
 using Xunit.Abstractions;
@@ -149,60 +151,6 @@ WHERE "o"."OrderID" = 10248
 SELECT MIN("o"."OrderID" - 10248)
 FROM "Orders" AS "o"
 WHERE "o"."OrderID" = 10248
-""");
-    }
-
-    public override async Task Average_after_default_if_empty_does_not_throw(bool async)
-    {
-        await base.Average_after_default_if_empty_does_not_throw(async);
-
-        AssertSql(
-            """
-SELECT AVG(CAST(COALESCE("o0"."OrderID", 0) AS float))
-FROM (
-    SELECT 1
-) AS "e"
-LEFT JOIN (
-    SELECT "o"."OrderID"
-    FROM "Orders" AS "o"
-    WHERE "o"."OrderID" = 10243
-) AS "o0" ON 1 = 1
-""");
-    }
-
-    public override async Task Max_after_default_if_empty_does_not_throw(bool async)
-    {
-        await base.Max_after_default_if_empty_does_not_throw(async);
-
-        AssertSql(
-            """
-SELECT MAX(COALESCE("o0"."OrderID", 0))
-FROM (
-    SELECT 1
-) AS "e"
-LEFT JOIN (
-    SELECT "o"."OrderID"
-    FROM "Orders" AS "o"
-    WHERE "o"."OrderID" = 10243
-) AS "o0" ON 1 = 1
-""");
-    }
-
-    public override async Task Min_after_default_if_empty_does_not_throw(bool async)
-    {
-        await base.Min_after_default_if_empty_does_not_throw(async);
-
-        AssertSql(
-            """
-SELECT MIN(COALESCE("o0"."OrderID", 0))
-FROM (
-    SELECT 1
-) AS "e"
-LEFT JOIN (
-    SELECT "o"."OrderID"
-    FROM "Orders" AS "o"
-    WHERE "o"."OrderID" = 10243
-) AS "o0" ON 1 = 1
 """);
     }
 
@@ -468,9 +416,9 @@ FROM "Orders" AS "o"
 
         AssertSql(
             """
-@__p_0='10'
+@p='10'
 
-SELECT FIRST @__p_0 "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
+SELECT FIRST @p "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
 ORDER BY (SELECT 1)
 """);
@@ -1114,206 +1062,32 @@ WHERE "c"."CustomerID" = N'ALFKI' AND (
 """);
     }
 
-    [ActianTodo]
-    public override async Task Multiple_collection_navigation_with_FirstOrDefault_chained(bool async)
-    {
-        await base.Multiple_collection_navigation_with_FirstOrDefault_chained(async);
-
-        AssertSql(
-            """
-SELECT "t"."OrderID", "t"."ProductID", "t"."Discount", "t"."Quantity", "t"."UnitPrice"
-FROM "Customers" AS "c"
-OUTER APPLY (
-    SELECT TOP(1) "o"."OrderID", "o"."ProductID", "o"."Discount", "o"."Quantity", "o"."UnitPrice"
-    FROM "Order Details" AS "o"
-    WHERE (
-        SELECT TOP(1) "o0"."OrderID"
-        FROM "Orders" AS "o0"
-        WHERE "c"."CustomerID" = "o0"."CustomerID"
-        ORDER BY "o0"."OrderID") IS NOT NULL AND (
-        SELECT TOP(1) "o1"."OrderID"
-        FROM "Orders" AS "o1"
-        WHERE "c"."CustomerID" = "o1"."CustomerID"
-        ORDER BY "o1"."OrderID") = "o"."OrderID"
-    ORDER BY "o"."ProductID"
-) AS "t"
-WHERE "c"."CustomerID" LIKE N'F%'
-ORDER BY "c"."CustomerID"
-""");
-    }
-
-    [ActianTodo]
-    public override async Task Multiple_collection_navigation_with_FirstOrDefault_chained_projecting_scalar(bool async)
-    {
-        await base.Multiple_collection_navigation_with_FirstOrDefault_chained_projecting_scalar(async);
-
-        AssertSql(
-            """
-SELECT (
-    SELECT TOP(1) "o"."ProductID"
-    FROM "Order Details" AS "o"
-    WHERE (
-        SELECT TOP(1) "o0"."OrderID"
-        FROM "Orders" AS "o0"
-        WHERE "c"."CustomerID" = "o0"."CustomerID"
-        ORDER BY "o0"."OrderID") IS NOT NULL AND (
-        SELECT TOP(1) "o1"."OrderID"
-        FROM "Orders" AS "o1"
-        WHERE "c"."CustomerID" = "o1"."CustomerID"
-        ORDER BY "o1"."OrderID") = "o"."OrderID"
-    ORDER BY "o"."ProductID")
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" LIKE N'A%'
-ORDER BY "c"."CustomerID"
-""");
-    }
-
-    [ActianTodo]
-    public override async Task First_inside_subquery_gets_client_evaluated(bool async)
-    {
-        await base.First_inside_subquery_gets_client_evaluated(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = N'ALFKI' AND (
-    SELECT FIRST 1 "o"."CustomerID"
-    FROM "Orders" AS "o"
-    WHERE "c"."CustomerID" = "o"."CustomerID" AND "o"."CustomerID" = N'ALFKI') = N'ALFKI'
-""");
-    }
-
-    public override async Task Last(bool async)
-    {
-        await base.Last(async);
-
-        AssertSql(
-            """
-SELECT FIRST 1 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-ORDER BY "c"."ContactName" DESC
-""");
-    }
-
-    public override async Task Last_Predicate(bool async)
-    {
-        await base.Last_Predicate(async);
-
-        AssertSql(
-            """
-SELECT FIRST 1 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."City" = N'London'
-ORDER BY "c"."ContactName" DESC
-""");
-    }
-
-    public override async Task Where_Last(bool async)
-    {
-        await base.Where_Last(async);
-
-        AssertSql(
-            """
-SELECT FIRST 1 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."City" = N'London'
-ORDER BY "c"."ContactName" DESC
-""");
-    }
-
-    public override async Task LastOrDefault(bool async)
-    {
-        await base.LastOrDefault(async);
-
-        AssertSql(
-            """
-SELECT FIRST 1 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-ORDER BY "c"."ContactName" DESC
-""");
-    }
-
-    public override async Task LastOrDefault_Predicate(bool async)
-    {
-        await base.LastOrDefault_Predicate(async);
-
-        AssertSql(
-            """
-SELECT FIRST 1 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."City" = N'London'
-ORDER BY "c"."ContactName" DESC
-""");
-    }
-
-    public override async Task Where_LastOrDefault(bool async)
-    {
-        await base.Where_LastOrDefault(async);
-
-        AssertSql(
-            """
-SELECT FIRST 1 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."City" = N'London'
-ORDER BY "c"."ContactName" DESC
-""");
-    }
-
-    public override async Task Contains_with_subquery(bool async)
-    {
-        await base.Contains_with_subquery(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (
-    SELECT "o"."CustomerID"
-    FROM "Orders" AS "o"
-)
-""");
-    }
-
-    public override async Task Contains_with_local_array_closure(bool async)
-    {
-        await base.Contains_with_local_array_closure(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
-""",
-                //
-                """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = N'ABCDE'
-""");
-    }
-
     public override async Task Contains_with_subquery_and_local_array_closure(bool async)
     {
         await base.Contains_with_subquery_and_local_array_closure(async);
 
         AssertSql(
             """
+@ids1='London'
+@ids2='Buenos Aires'
+
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 WHERE EXISTS (
     SELECT 1
     FROM "Customers" AS "c0"
-    WHERE "c0"."City" IN (N'London', N'Buenos Aires') AND "c0"."CustomerID" = "c"."CustomerID")
+    WHERE "c0"."City" IN (@ids1, @ids2) AND "c0"."CustomerID" = "c"."CustomerID")
 """,
                 //
                 """
+@ids1='London'
+
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
 WHERE EXISTS (
     SELECT 1
     FROM "Customers" AS "c0"
-    WHERE "c0"."City" = N'London' AND "c0"."CustomerID" = "c"."CustomerID")
+    WHERE "c0"."City" = @ids1 AND "c0"."CustomerID" = "c"."CustomerID")
 """);
     }
 
@@ -1323,15 +1097,20 @@ WHERE EXISTS (
 
         AssertSql(
             """
+@ids1='0'
+@ids2='1'
+
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
-WHERE "e"."EmployeeID" IN (0, 1)
+WHERE "e"."EmployeeID" IN (@ids1, @ids2)
 """,
                 //
                 """
+@ids1='0'
+
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
-WHERE "e"."EmployeeID" = 0
+WHERE "e"."EmployeeID" = @ids1
 """);
     }
 
@@ -1341,15 +1120,20 @@ WHERE "e"."EmployeeID" = 0
 
         AssertSql(
             """
+@ids1='0'
+@ids2='1'
+
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
-WHERE "e"."EmployeeID" IN (0, 1)
+WHERE "e"."EmployeeID" IN (@ids1, @ids2)
 """,
                 //
                 """
+@ids1='0'
+
 SELECT "e"."EmployeeID", "e"."City", "e"."Country", "e"."FirstName", "e"."ReportsTo", "e"."Title"
 FROM "Employees" AS "e"
-WHERE "e"."EmployeeID" = 0
+WHERE "e"."EmployeeID" = @ids1
 """);
     }
 
@@ -1371,9 +1155,12 @@ WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
 
         AssertSql(
             """
+@ids1='ABCDE'
+@ids2='ALFKI'
+
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
+WHERE "c"."CustomerID" IN (@ids1, @ids2)
 """);
     }
 
@@ -1382,10 +1169,13 @@ WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
         await base.Contains_with_local_object_list_closure(async);
 
         AssertSql(
-            """
+        """
+@ids1='ABCDE'
+@ids2='ALFKI'
+
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
+WHERE "c"."CustomerID" IN (@ids1, @ids2)
 """);
     }
 
@@ -1397,7 +1187,7 @@ WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
             """
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE 0 = 1
+WHERE CAST(0 AS boolean) = CAST(1 AS boolean)
 """);
     }
 
@@ -1419,15 +1209,21 @@ WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
 
         AssertSql(
             """
+@p1='ABCDE'
+@p2='ALFKI'
+
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
+WHERE "c"."CustomerID" IN (@p1, @p2)
 """,
                 //
                 """
+@p1='ABCDE'
+@p2='ANATR'
+
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ANATR')
+WHERE "c"."CustomerID" IN (@p1, @p2)
 """);
     }
 
@@ -1437,233 +1233,21 @@ WHERE "c"."CustomerID" IN (N'ABCDE', N'ANATR')
 
         AssertSql(
             """
+@Select1='ABCDE'
+@Select2='ALFKI'
+
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
+WHERE "c"."CustomerID" IN (@Select1, @Select2)
 """,
                 //
                 """
+@Select1='ABCDE'
+@Select2='ANATR'
+
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ANATR')
-""");
-    }
-
-    public override async Task Contains_with_local_enumerable_closure(bool async)
-    {
-        await base.Contains_with_local_enumerable_closure(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
-""",
-                //
-                """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = N'ABCDE'
-""");
-    }
-
-    public override async Task Contains_with_local_object_enumerable_closure(bool async)
-    {
-        await base.Contains_with_local_object_enumerable_closure(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
-""");
-    }
-
-    public override async Task Contains_with_local_enumerable_closure_all_null(bool async)
-    {
-        await base.Contains_with_local_enumerable_closure_all_null(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE 0 = 1
-""");
-    }
-
-    public override async Task Contains_with_local_enumerable_inline(bool async)
-    {
-        // Issue #31776
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            async () =>
-                await base.Contains_with_local_enumerable_inline(async));
-
-        AssertSql();
-    }
-
-    public override async Task Contains_with_local_enumerable_inline_closure_mix(bool async)
-    {
-        // Issue #31776
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            async () =>
-                await base.Contains_with_local_enumerable_inline_closure_mix(async));
-
-        AssertSql();
-    }
-
-    public override async Task Contains_with_local_ordered_enumerable_closure(bool async)
-    {
-        await base.Contains_with_local_ordered_enumerable_closure(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
-""",
-                //
-                """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = N'ABCDE'
-""");
-    }
-
-    public override async Task Contains_with_local_object_ordered_enumerable_closure(bool async)
-    {
-        await base.Contains_with_local_object_ordered_enumerable_closure(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
-""");
-    }
-
-    public override async Task Contains_with_local_ordered_enumerable_closure_all_null(bool async)
-    {
-        await base.Contains_with_local_ordered_enumerable_closure_all_null(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE 0 = 1
-""");
-    }
-
-    public override async Task Contains_with_local_ordered_enumerable_inline(bool async)
-    {
-        await base.Contains_with_local_ordered_enumerable_inline(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
-""");
-    }
-
-    public override async Task Contains_with_local_ordered_enumerable_inline_closure_mix(bool async)
-    {
-        await base.Contains_with_local_ordered_enumerable_inline_closure_mix(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
-""",
-                //
-                """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ANATR')
-""");
-    }
-
-    public override async Task Contains_with_local_read_only_collection_closure(bool async)
-    {
-        await base.Contains_with_local_read_only_collection_closure(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
-""",
-//
-"""
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = N'ABCDE'
-""");
-    }
-
-    public override async Task Contains_with_local_object_read_only_collection_closure(bool async)
-    {
-        await base.Contains_with_local_object_read_only_collection_closure(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
-""");
-    }
-
-    public override async Task Contains_with_local_ordered_read_only_collection_all_null(bool async)
-    {
-        await base.Contains_with_local_ordered_read_only_collection_all_null(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE 0 = 1
-""");
-    }
-
-    public override async Task Contains_with_local_read_only_collection_inline(bool async)
-    {
-        await base.Contains_with_local_read_only_collection_inline(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
-""");
-    }
-
-    public override async Task Contains_with_local_read_only_collection_inline_closure_mix(bool async)
-    {
-        await base.Contains_with_local_read_only_collection_inline_closure_mix(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
-""",
-//
-"""
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ANATR')
-""");
-    }
-
-    public override async Task Contains_with_local_non_primitive_list_closure_mix(bool async)
-    {
-        await base.Contains_with_local_non_primitive_list_closure_mix(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
+WHERE "c"."CustomerID" IN (@Select1, @Select2)
 """);
     }
 
@@ -1673,9 +1257,12 @@ WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
 
         AssertSql(
             """
+@ids1='ABCDE'
+@ids2='ALFKI'
+
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" NOT IN (N'ABCDE', N'ALFKI')
+WHERE "c"."CustomerID" NOT IN (@ids1, @ids2)
 """);
     }
 
@@ -1684,37 +1271,24 @@ WHERE "c"."CustomerID" NOT IN (N'ABCDE', N'ALFKI')
         await base.Contains_with_local_collection_complex_predicate_and(async);
 
         AssertSql(
-            """
+        """
+@ids1='ABCDE'
+@ids2='ALFKI'
+
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ALFKI', N'ABCDE') AND "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
+WHERE "c"."CustomerID" IN (N'ALFKI', N'ABCDE') AND "c"."CustomerID" IN (@ids1, @ids2)
 """);
     }
 
     public override async Task Contains_with_local_collection_complex_predicate_or(bool async)
         => await base.Contains_with_local_collection_complex_predicate_or(async);
 
-    // issue #18791
-    //            AssertSql(
-    //                @"SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-    //FROM "Customers" AS "c"
-    //WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI', N'ALFKI', N'ABCDE')");
     public override async Task Contains_with_local_collection_complex_predicate_not_matching_ins1(bool async)
         => await base.Contains_with_local_collection_complex_predicate_not_matching_ins1(async);
 
-    // issue #18791
-    //            AssertSql(
-    //                @"SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-    //FROM "Customers" AS "c"
-    //WHERE "c"."CustomerID" IN (N'ALFKI', N'ABCDE') OR "c"."CustomerID" NOT IN (N'ABCDE', N'ALFKI')");
     public override async Task Contains_with_local_collection_complex_predicate_not_matching_ins2(bool async)
         => await base.Contains_with_local_collection_complex_predicate_not_matching_ins2(async);
-
-    // issue #18791
-    //            AssertSql(
-    //                @"SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-    //FROM "Customers" AS "c"
-    //WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI') AND "c"."CustomerID" NOT IN (N'ALFKI', N'ABCDE')");
 
     public override async Task Contains_with_local_collection_sql_injection(bool async)
     {
@@ -1722,9 +1296,12 @@ WHERE "c"."CustomerID" IN (N'ALFKI', N'ABCDE') AND "c"."CustomerID" IN (N'ABCDE'
 
         AssertSql(
             """
+@ids1='ALFKI'
+@ids2='ABC')); GO; DROP TABLE Orders; GO; --'
+
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ALFKI', N'ABC'')); GO; DROP TABLE Orders; GO; --') OR "c"."CustomerID" IN (N'ALFKI', N'ABCDE')
+WHERE "c"."CustomerID" IN (@ids1, @ids2) OR "c"."CustomerID" IN (N'ALFKI', N'ABCDE')
 """);
     }
 
@@ -1736,7 +1313,7 @@ WHERE "c"."CustomerID" IN (N'ALFKI', N'ABC'')); GO; DROP TABLE Orders; GO; --') 
             """
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE 0 = 1
+WHERE CAST(0 AS boolean) = CAST(1 AS boolean)
 """);
     }
 
@@ -1757,10 +1334,10 @@ FROM "Customers" AS "c"
 
         AssertSql(
             """
-@__p_0='ALFKI'
+@p='ALFKI'
 
 SELECT CASE
-    WHEN @__p_0 IN (
+    WHEN @p IN (
         SELECT "c"."CustomerID"
         FROM "Customers" AS "c"
     ) THEN CAST(1 AS boolean)
@@ -1845,11 +1422,11 @@ WHERE "o"."CustomerID" LIKE N'A%'
 
         AssertSql(
             """
-@__p_0='20'
+@p='20'
 
 SELECT FIRST 1 "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
-    SELECT FIRST @__p_0 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+    SELECT FIRST @p "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
     ORDER BY "c"."CustomerID"
 ) AS "c0"
@@ -1863,14 +1440,14 @@ ORDER BY "c0"."CustomerID" DESC
 
         AssertSql(
             """
-@__p_0='20'
+@p='20'
 
 SELECT FIRST 1 "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
 FROM (
     SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
     FROM "Customers" AS "c"
     ORDER BY "c"."CustomerID"
-    OFFSET @__p_0
+    OFFSET @p
 ) AS "c0"
 ORDER BY "c0"."CustomerID" DESC
 """);
@@ -1886,15 +1463,15 @@ SELECT FIRST 2 "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate
 FROM "Orders" AS "o"
 WHERE "o"."OrderID" = 10248
 """,
-            //
-            """
-@__entity_equality_p_0_OrderID='10248' (Nullable = true)
+                //
+                """
+@entity_equality_p_OrderID='10248' (Nullable = true)
 
 SELECT CASE
     WHEN EXISTS (
         SELECT 1
         FROM "Orders" AS "o"
-        WHERE "o"."CustomerID" = N'VINET' AND "o"."OrderID" = @__entity_equality_p_0_OrderID) THEN CAST(1 AS boolean)
+        WHERE "o"."CustomerID" = N'VINET' AND "o"."OrderID" = @entity_equality_p_OrderID) THEN CAST(1 AS boolean)
     ELSE CAST(0 AS boolean)
 END
 """);
@@ -1918,39 +1495,18 @@ WHERE EXISTS (
 """);
     }
 
-    public override async Task List_Contains_with_constant_list(bool async)
-    {
-        await base.List_Contains_with_constant_list(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ALFKI', N'ANATR')
-""");
-    }
-
-    public override async Task List_Contains_with_parameter_list(bool async)
-    {
-        await base.List_Contains_with_parameter_list(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ALFKI', N'ANATR')
-""");
-    }
-
     public override async Task Contains_with_parameter_list_value_type_id(bool async)
     {
         await base.Contains_with_parameter_list_value_type_id(async);
 
         AssertSql(
             """
+@entity_equality_orders_OrderID1='10248'
+@entity_equality_orders_OrderID2='10249'
+
 SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM "Orders" AS "o"
-WHERE "o"."OrderID" IN (10248, 10249)
+WHERE "o"."OrderID" IN (@entity_equality_orders_OrderID1, @entity_equality_orders_OrderID2)
 """);
     }
 
@@ -1972,9 +1528,11 @@ WHERE "o"."OrderID" IN (10248, 10249)
 
         AssertSql(
             """
+@ids1='ALFKI'
+
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = N'ALFKI'
+WHERE "c"."CustomerID" = @ids1
 """);
     }
 
@@ -1984,9 +1542,11 @@ WHERE "c"."CustomerID" = N'ALFKI'
 
         AssertSql(
             """
+@ids1='ALFKI'
+
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = N'ALFKI'
+WHERE "c"."CustomerID" = @ids1
 """);
     }
 
@@ -1996,9 +1556,11 @@ WHERE "c"."CustomerID" = N'ALFKI'
 
         AssertSql(
             """
+@ids1='ALFKI'
+
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = N'ALFKI'
+WHERE "c"."CustomerID" = @ids1
 """);
     }
 
@@ -2008,9 +1570,11 @@ WHERE "c"."CustomerID" = N'ALFKI'
 
         AssertSql(
             """
+@ids1='ALFKI'
+
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = N'ALFKI'
+WHERE "c"."CustomerID" = @ids1
 """);
     }
 
@@ -2032,34 +1596,7 @@ SELECT CAST(0 AS boolean)
             """
 SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM "Orders" AS "o"
-WHERE 0 = 1
-""");
-    }
-
-    public override async Task Contains_over_entityType_with_null_in_projection(bool async)
-    {
-        await base.Contains_over_entityType_with_null_in_projection(async);
-
-        AssertSql(
-            """
-SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
-FROM "Orders" AS "o"
-WHERE 0 = 1
-""");
-    }
-
-    public override async Task Contains_over_scalar_with_null_should_rewrite_to_identity_equality_subquery(bool async)
-    {
-        await base.Contains_over_scalar_with_null_should_rewrite_to_identity_equality_subquery(async);
-
-        AssertSql(
-            """
-SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
-FROM "Orders" AS "o"
-WHERE EXISTS (
-    SELECT 1
-    FROM "Orders" AS "o0"
-    WHERE "o0"."CustomerID" = N'VINET' AND "o0"."EmployeeID" IS NULL)
+WHERE CAST(0 AS boolean) = CAST(1 AS boolean)
 """);
     }
 
@@ -2183,279 +1720,17 @@ FROM "Employees" AS "e"
 """);
     }
 
-    public override async Task Where_subquery_any_equals_operator(bool async)
-    {
-        await base.Where_subquery_any_equals_operator(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI', N'ANATR')
-""");
-    }
-
-    public override async Task Where_subquery_any_equals(bool async)
-    {
-        await base.Where_subquery_any_equals(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI', N'ANATR')
-""");
-    }
-
-    public override async Task Where_subquery_any_equals_static(bool async)
-    {
-        await base.Where_subquery_any_equals_static(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI', N'ANATR')
-""");
-    }
-
-    public override async Task Where_subquery_where_any(bool async)
-    {
-        await base.Where_subquery_where_any(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."City" = N'México D.F.' AND "c"."CustomerID" IN (N'ABCDE', N'ALFKI', N'ANATR')
-""",
-                //
-                """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."City" = N'México D.F.' AND "c"."CustomerID" IN (N'ABCDE', N'ALFKI', N'ANATR')
-""");
-    }
-
-    public override async Task Where_subquery_all_not_equals_operator(bool async)
-    {
-        await base.Where_subquery_all_not_equals_operator(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" NOT IN (N'ABCDE', N'ALFKI', N'ANATR')
-""");
-    }
-
-    public override async Task Where_subquery_all_not_equals(bool async)
-    {
-        await base.Where_subquery_all_not_equals(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" NOT IN (N'ABCDE', N'ALFKI', N'ANATR')
-""");
-    }
-
-    public override async Task Where_subquery_all_not_equals_static(bool async)
-    {
-        await base.Where_subquery_all_not_equals_static(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" NOT IN (N'ABCDE', N'ALFKI', N'ANATR')
-""");
-    }
-
-    public override async Task Where_subquery_where_all(bool async)
-    {
-        await base.Where_subquery_where_all(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."City" = N'México D.F.' AND "c"."CustomerID" NOT IN (N'ABCDE', N'ALFKI', N'ANATR')
-""",
-                //
-                """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."City" = N'México D.F.' AND "c"."CustomerID" NOT IN (N'ABCDE', N'ALFKI', N'ANATR')
-""");
-    }
-
-    public override async Task Cast_to_same_Type_Count_works(bool async)
-    {
-        await base.Cast_to_same_Type_Count_works(async);
-
-        AssertSql(
-            """
-SELECT COUNT(*)
-FROM "Customers" AS "c"
-""");
-    }
-
-    public override async Task Cast_before_aggregate_is_preserved(bool async)
-    {
-        await base.Cast_before_aggregate_is_preserved(async);
-
-        AssertSql(
-            """
-SELECT (
-    SELECT AVG(CAST("o"."OrderID" AS float))
-    FROM "Orders" AS "o"
-    WHERE "c"."CustomerID" = "o"."CustomerID")
-FROM "Customers" AS "c"
-""");
-    }
-
-    public override async Task DefaultIfEmpty_selects_only_required_columns(bool async)
-    {
-        await base.DefaultIfEmpty_selects_only_required_columns(async);
-
-        AssertSql(
-            """
-SELECT "p"."ProductName"
-FROM (
-    SELECT 1
-) AS "e"
-LEFT JOIN "Products" AS "p" ON 1 = 1
-""");
-    }
-
-    [ActianTodo]
-    public override async Task Collection_Last_member_access_in_projection_translated(bool async)
-    {
-        await base.Collection_Last_member_access_in_projection_translated(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" LIKE N'F%' AND (
-    SELECT FIRST 1 "o"."CustomerID"
-    FROM "Orders" AS "o"
-    WHERE "c"."CustomerID" = "o"."CustomerID"
-    ORDER BY "o"."OrderID") = "c"."CustomerID"
-""");
-    }
-
-    [ActianTodo]
-    public override async Task Collection_LastOrDefault_member_access_in_projection_translated(bool async)
-    {
-        await base.Collection_LastOrDefault_member_access_in_projection_translated(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
-FROM "Customers" AS "c"
-WHERE "c"."CustomerID" LIKE N'F%' AND (
-    SELECT FIRST 1 "o"."CustomerID"
-    FROM "Orders" AS "o"
-    WHERE "c"."CustomerID" = "o"."CustomerID"
-    ORDER BY "o"."OrderID") = "c"."CustomerID"
-""");
-    }
-
-    public override async Task Sum_over_explicit_cast_over_column(bool async)
-    {
-        await base.Sum_over_explicit_cast_over_column(async);
-
-        AssertSql(
-            """
-SELECT COALESCE(SUM(CAST("o"."OrderID" AS bigint)), 0)
-FROM "Orders" AS "o"
-""");
-    }
-
-    public override async Task Count_on_projection_with_client_eval(bool async)
-    {
-        await base.Count_on_projection_with_client_eval(async);
-
-        AssertSql(
-            """
-SELECT COUNT(*)
-FROM "Orders" AS "o"
-""",
-            //
-            """
-SELECT COUNT(*)
-FROM "Orders" AS "o"
-""",
-            //
-            """
-SELECT COUNT(*)
-FROM "Orders" AS "o"
-""");
-    }
-
-    public override async Task Average_on_nav_subquery_in_projection(bool async)
-    {
-        await base.Average_on_nav_subquery_in_projection(async);
-
-        AssertSql(
-            """
-SELECT (
-    SELECT AVG(CAST("o"."OrderID" AS float))
-    FROM "Orders" AS "o"
-    WHERE "c"."CustomerID" = "o"."CustomerID") AS "Ave"
-FROM "Customers" AS "c"
-ORDER BY "c"."CustomerID"
-""");
-    }
-
-    public override async Task Count_after_client_projection(bool async)
-    {
-        await base.Count_after_client_projection(async);
-
-        AssertSql(
-            """
-@__p_0='1'
-
-SELECT COUNT(*)
-FROM (
-    SELECT FIRST @__p_0 1
-    FROM "Orders" AS "o"
-) AS "o0"
-""");
-    }
-
-    public override async Task All_true(bool async)
-    {
-        await base.All_true(async);
-
-        AssertSql(
-            """
-SELECT CAST(1 AS boolean)
-""");
-    }
-
-    public override async Task Not_Any_false(bool async)
-    {
-        await base.Not_Any_false(async);
-
-        AssertSql(
-            """
-SELECT "c"."CustomerID"
-FROM "Customers" AS "c"
-""");
-    }
-
     public override async Task Contains_inside_aggregate_function_with_GroupBy(bool async)
     {
         await base.Contains_inside_aggregate_function_with_GroupBy(async);
 
         AssertSql(
-            """
+        """
+@cities1='London'
+@cities2='Berlin'
+
 SELECT COUNT(CASE
-    WHEN "c"."City" IN (N'London', N'Berlin') THEN 1
+    WHEN "c"."City" IN (@cities1, @cities2) THEN 1
 END)
 FROM "Customers" AS "c"
 GROUP BY "c"."Country"
@@ -2467,28 +1742,15 @@ GROUP BY "c"."Country"
     {
         await base.Contains_inside_Average_without_GroupBy(async);
 
-        AssertSql(
-            """
-SELECT AVG(CASE
-    WHEN "c"."City" IN (N'London', N'Berlin') THEN 1.0E0
-    ELSE 0.0E0
-END)
-FROM "Customers" AS "c"
-""");
+        AssertSql();
     }
 
+    [ActianTodo] // Expected: 59.841269841269866666666666667; Actual: 59.836
     public override async Task Contains_inside_Sum_without_GroupBy(bool async)
     {
         await base.Contains_inside_Sum_without_GroupBy(async);
 
-        AssertSql(
-            """
-SELECT COALESCE(SUM(CASE
-    WHEN "c"."City" IN (N'London', N'Berlin') THEN 1
-    ELSE 0
-END), 0)
-FROM "Customers" AS "c"
-""");
+        AssertSql();
     }
 
     public override async Task Contains_inside_Count_without_GroupBy(bool async)
@@ -2497,9 +1759,12 @@ FROM "Customers" AS "c"
 
         AssertSql(
             """
+@cities1='London'
+@cities2='Berlin'
+
 SELECT COUNT(*)
 FROM "Customers" AS "c"
-WHERE "c"."City" IN (N'London', N'Berlin')
+WHERE "c"."City" IN (@cities1, @cities2)
 """);
     }
 
@@ -2509,9 +1774,12 @@ WHERE "c"."City" IN (N'London', N'Berlin')
 
         AssertSql(
             """
+@cities1='London'
+@cities2='Berlin'
+
 SELECT COUNT(*)
 FROM "Customers" AS "c"
-WHERE "c"."City" IN (N'London', N'Berlin')
+WHERE "c"."City" IN (@cities1, @cities2)
 """);
     }
 
@@ -2521,8 +1789,11 @@ WHERE "c"."City" IN (N'London', N'Berlin')
 
         AssertSql(
             """
+@cities1='London'
+@cities2='Berlin'
+
 SELECT MAX(CASE
-    WHEN "c"."City" IN (N'London', N'Berlin') THEN 1
+    WHEN "c"."City" IN (@cities1, @cities2) THEN 1
     ELSE 0
 END)
 FROM "Customers" AS "c"
@@ -2535,8 +1806,11 @@ FROM "Customers" AS "c"
 
         AssertSql(
             """
+@cities1='London'
+@cities2='Berlin'
+
 SELECT MIN(CASE
-    WHEN "c"."City" IN (N'London', N'Berlin') THEN 1
+    WHEN "c"."City" IN (@cities1, @cities2) THEN 1
     ELSE 0
 END)
 FROM "Customers" AS "c"
@@ -2621,7 +1895,7 @@ FROM "Customers" AS "c"
         AssertSql();
     }
 
-    [ActianSkipIngres]
+    [ActianTodo]
     public override async Task Min_over_subquery(bool async)
     {
         await base.Min_over_subquery(async);
@@ -2629,7 +1903,7 @@ FROM "Customers" AS "c"
         AssertSql();
     }
 
-    [ActianSkipIngres]
+    [ActianTodo]
     public override async Task Min_over_nested_subquery(bool async)
     {
         await base.Min_over_nested_subquery(async);
@@ -2637,7 +1911,7 @@ FROM "Customers" AS "c"
         AssertSql();
     }
 
-    [ActianSkipIngres]
+    [ActianTodo]
     public override async Task Min_over_max_subquery(bool async)
     {
         await base.Min_over_max_subquery(async);
@@ -2645,7 +1919,7 @@ FROM "Customers" AS "c"
         AssertSql();
     }
 
-    [ActianSkipIngres]
+    [ActianTodo]
     public override async Task Max_over_subquery(bool async)
     {
         await base.Max_over_subquery(async);
@@ -2653,7 +1927,7 @@ FROM "Customers" AS "c"
         AssertSql();
     }
 
-    [ActianSkipIngres]
+    [ActianTodo]
     public override async Task Max_over_nested_subquery(bool async)
     {
         await base.Max_over_nested_subquery(async);
@@ -2661,7 +1935,7 @@ FROM "Customers" AS "c"
         AssertSql();
     }
 
-    [ActianSkipIngres]
+    [ActianTodo]
     public override async Task Max_over_sum_subquery(bool async)
     {
         await base.Max_over_sum_subquery(async);
@@ -2669,43 +1943,774 @@ FROM "Customers" AS "c"
         AssertSql();
     }
 
+    [ActianTodo]
+    public override async Task Multiple_collection_navigation_with_FirstOrDefault_chained(bool async)
+    {
+        await base.Multiple_collection_navigation_with_FirstOrDefault_chained(async);
+
+        AssertSql();
+    }
+
+    [ActianTodo]
+    public override async Task Multiple_collection_navigation_with_FirstOrDefault_chained_projecting_scalar(bool async)
+    {
+        await base.Multiple_collection_navigation_with_FirstOrDefault_chained_projecting_scalar(async);
+
+        AssertSql();
+    }
+
+    [ActianTodo]
+    public override async Task First_inside_subquery_gets_client_evaluated(bool async)
+    {
+        await base.First_inside_subquery_gets_client_evaluated(async);
+
+        AssertSql();
+    }
+
+    public override async Task Last(bool async)
+    {
+        await base.Last(async);
+
+        AssertSql(
+        """
+SELECT FIRST 1 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+ORDER BY "c"."ContactName" DESC
+""");
+    }
+
+    public override async Task Last_Predicate(bool async)
+    {
+        await base.Last_Predicate(async);
+
+        AssertSql(
+        """
+SELECT FIRST 1 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."City" = N'London'
+ORDER BY "c"."ContactName" DESC
+""");
+    }
+
+    public override async Task Where_Last(bool async)
+    {
+        await base.Where_Last(async);
+
+        AssertSql(
+        """
+SELECT FIRST 1 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."City" = N'London'
+ORDER BY "c"."ContactName" DESC
+""");
+    }
+
+    public override async Task LastOrDefault(bool async)
+    {
+        await base.LastOrDefault(async);
+
+        AssertSql(
+        """
+SELECT FIRST 1 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+ORDER BY "c"."ContactName" DESC
+""");
+    }
+
+    public override async Task LastOrDefault_Predicate(bool async)
+    {
+        await base.LastOrDefault_Predicate(async);
+
+        AssertSql(
+        """
+SELECT FIRST 1 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."City" = N'London'
+ORDER BY "c"."ContactName" DESC
+""");
+    }
+
+    public override async Task Where_LastOrDefault(bool async)
+    {
+        await base.Where_LastOrDefault(async);
+
+        AssertSql(
+        """
+SELECT FIRST 1 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."City" = N'London'
+ORDER BY "c"."ContactName" DESC
+""");
+    }
+
+    public override async Task Contains_with_subquery(bool async)
+    {
+        await base.Contains_with_subquery(async);
+
+        AssertSql(
+        """
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" IN (
+    SELECT "o"."CustomerID"
+    FROM "Orders" AS "o"
+)
+""");
+    }
+
+    public override async Task Contains_with_local_array_closure(bool async)
+    {
+        await base.Contains_with_local_array_closure(async);
+
+        AssertSql(
+        """
+@ids1='ABCDE'
+@ids2='ALFKI'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" IN (@ids1, @ids2)
+""",
+                        //
+                        """
+@ids1='ABCDE'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" = @ids1
+""");
+    }
+
+    public override async Task Contains_with_local_enumerable_closure(bool async)
+    {
+        await base.Contains_with_local_enumerable_closure(async);
+
+        AssertSql(
+        """
+@ids1='ABCDE'
+@ids2='ALFKI'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" IN (@ids1, @ids2)
+""",
+                        //
+                        """
+@ids1='ABCDE'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" = @ids1
+""");
+    }
+
+    public override async Task Contains_with_local_enumerable_inline(bool async)
+    {
+        // Issue #31776
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            async () =>
+                await base.Contains_with_local_enumerable_inline(async));
+
+        AssertSql();
+    }
+
+    public override async Task Contains_with_local_ordered_enumerable_closure(bool async)
+    {
+        await base.Contains_with_local_ordered_enumerable_closure(async);
+
+        AssertSql(
+        """
+@ids1='ABCDE'
+@ids2='ALFKI'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" IN (@ids1, @ids2)
+""",
+                        //
+                        """
+@ids1='ABCDE'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" = @ids1
+""");
+    }
+
+    public override async Task Contains_with_local_object_ordered_enumerable_closure(bool async)
+    {
+        await base.Contains_with_local_object_ordered_enumerable_closure(async);
+
+        AssertSql(
+        """
+@ids1='ABCDE'
+@ids2='ALFKI'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" IN (@ids1, @ids2)
+""");
+    }
+
+    public override async Task Contains_with_local_ordered_enumerable_closure_all_null(bool async)
+    {
+        await base.Contains_with_local_ordered_enumerable_closure_all_null(async);
+
+        AssertSql(
+        """
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE CAST(0 AS boolean) = CAST(1 AS boolean)
+""");
+    }
+
+    public override async Task Contains_with_local_ordered_enumerable_inline(bool async)
+    {
+        await base.Contains_with_local_ordered_enumerable_inline(async);
+
+        AssertSql(
+        """
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
+""");
+    }
+
+    public override async Task Contains_with_local_enumerable_inline_closure_mix(bool async)
+    {
+        // Issue #31776
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            async () =>
+                await base.Contains_with_local_enumerable_inline_closure_mix(async));
+
+        AssertSql();
+    }
+
+    public override async Task Contains_with_local_read_only_collection_closure(bool async)
+    {
+        await base.Contains_with_local_read_only_collection_closure(async);
+
+        AssertSql(
+        """
+@ids1='ABCDE'
+@ids2='ALFKI'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" IN (@ids1, @ids2)
+""",
+                //
+                """
+@ids1='ABCDE'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" = @ids1
+""");
+    }
+
+    public override async Task Contains_with_local_object_read_only_collection_closure(bool async)
+    {
+        await base.Contains_with_local_object_read_only_collection_closure(async);
+
+        AssertSql(
+        """
+@ids1='ABCDE'
+@ids2='ALFKI'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" IN (@ids1, @ids2)
+""");
+    }
+
+    public override async Task Contains_with_local_ordered_read_only_collection_all_null(bool async)
+    {
+        await base.Contains_with_local_ordered_read_only_collection_all_null(async);
+
+        AssertSql(
+        """
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE CAST(0 AS boolean) = CAST(1 AS boolean)
+""");
+    }
+
+    public override async Task Contains_with_local_read_only_collection_inline(bool async)
+    {
+        await base.Contains_with_local_read_only_collection_inline(async);
+
+        AssertSql(
+        """
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI')
+""");
+    }
+
+    public override async Task Contains_with_local_read_only_collection_inline_closure_mix(bool async)
+    {
+        await base.Contains_with_local_read_only_collection_inline_closure_mix(async);
+
+        AssertSql(
+        """
+@AsReadOnly1='ABCDE'
+@AsReadOnly2='ALFKI'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" IN (@AsReadOnly1, @AsReadOnly2)
+""",
+                        //
+                        """
+@AsReadOnly1='ABCDE'
+@AsReadOnly2='ANATR'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" IN (@AsReadOnly1, @AsReadOnly2)
+""");
+    }
+
+    public override async Task Contains_with_local_non_primitive_list_closure_mix(bool async)
+    {
+        await base.Contains_with_local_non_primitive_list_closure_mix(async);
+
+        AssertSql(
+        """
+@Select1='ABCDE'
+@Select2='ALFKI'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" IN (@Select1, @Select2)
+""");
+    }
+
+    public override async Task List_Contains_with_constant_list(bool async)
+    {
+        await base.List_Contains_with_constant_list(async);
+
+        AssertSql(
+        """
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" IN (N'ALFKI', N'ANATR')
+""");
+    }
+
+    public override async Task List_Contains_with_parameter_list(bool async)
+    {
+        await base.List_Contains_with_parameter_list(async);
+
+        AssertSql(
+        """
+@entity_equality_customers_CustomerID1='ALFKI'
+@entity_equality_customers_CustomerID2='ANATR'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" IN (@entity_equality_customers_CustomerID1, @entity_equality_customers_CustomerID2)
+""");
+    }
+
+    public override async Task Contains_over_entityType_with_null_in_projection(bool async)
+    {
+        await base.Contains_over_entityType_with_null_in_projection(async);
+
+        AssertSql(
+        """
+SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+FROM "Orders" AS "o"
+WHERE CAST(0 AS boolean) = CAST(1 AS boolean)
+""");
+    }
+
+    public override async Task Contains_over_scalar_with_null_should_rewrite_to_identity_equality_subquery(bool async)
+    {
+        await base.Contains_over_scalar_with_null_should_rewrite_to_identity_equality_subquery(async);
+
+        AssertSql(
+        """
+SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+FROM "Orders" AS "o"
+WHERE EXISTS (
+    SELECT 1
+    FROM "Orders" AS "o0"
+    WHERE "o0"."CustomerID" = N'VINET' AND "o0"."EmployeeID" IS NULL)
+""");
+    }
+
+    public override async Task Where_subquery_any_equals_operator(bool async)
+    {
+        await base.Where_subquery_any_equals_operator(async);
+
+        AssertSql(
+        """
+@ids1='ABCDE'
+@ids2='ALFKI'
+@ids3='ANATR'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" IN (@ids1, @ids2, @ids3)
+""");
+    }
+
+    public override async Task Where_subquery_any_equals(bool async)
+    {
+        await base.Where_subquery_any_equals(async);
+
+        AssertSql(
+        """
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" IN (N'ABCDE', N'ALFKI', N'ANATR')
+""");
+    }
+
+    public override async Task Where_subquery_any_equals_static(bool async)
+    {
+        await base.Where_subquery_any_equals_static(async);
+
+        AssertSql(
+        """
+@ids1='ABCDE'
+@ids2='ALFKI'
+@ids3='ANATR'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" IN (@ids1, @ids2, @ids3)
+""");
+    }
+
+    public override async Task Where_subquery_where_any(bool async)
+    {
+        await base.Where_subquery_where_any(async);
+
+        AssertSql(
+        """
+@ids1='ABCDE'
+@ids2='ALFKI'
+@ids3='ANATR'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."City" = N'México D.F.' AND "c"."CustomerID" IN (@ids1, @ids2, @ids3)
+""",
+                        //
+                        """
+@ids1='ABCDE'
+@ids2='ALFKI'
+@ids3='ANATR'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."City" = N'México D.F.' AND "c"."CustomerID" IN (@ids1, @ids2, @ids3)
+""");
+    }
+
+    public override async Task Where_subquery_all_not_equals_operator(bool async)
+    {
+        await base.Where_subquery_all_not_equals_operator(async);
+
+        AssertSql(
+        """
+@ids1='ABCDE'
+@ids2='ALFKI'
+@ids3='ANATR'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" NOT IN (@ids1, @ids2, @ids3)
+""");
+    }
+
+    public override async Task Where_subquery_all_not_equals(bool async)
+    {
+        await base.Where_subquery_all_not_equals(async);
+
+        AssertSql(
+        """
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" NOT IN (N'ABCDE', N'ALFKI', N'ANATR')
+""");
+    }
+
+    public override async Task Where_subquery_all_not_equals_static(bool async)
+    {
+        await base.Where_subquery_all_not_equals_static(async);
+
+        AssertSql(
+        """
+@ids1='ABCDE'
+@ids2='ALFKI'
+@ids3='ANATR'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" NOT IN (@ids1, @ids2, @ids3)
+""");
+    }
+
+    public override async Task Where_subquery_where_all(bool async)
+    {
+        await base.Where_subquery_where_all(async);
+
+        AssertSql(
+        """
+@ids1='ABCDE'
+@ids2='ALFKI'
+@ids3='ANATR'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."City" = N'México D.F.' AND "c"."CustomerID" NOT IN (@ids1, @ids2, @ids3)
+""",
+                        //
+                        """
+@ids1='ABCDE'
+@ids2='ALFKI'
+@ids3='ANATR'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."City" = N'México D.F.' AND "c"."CustomerID" NOT IN (@ids1, @ids2, @ids3)
+""");
+    }
+
+    public override async Task Cast_to_same_Type_Count_works(bool async)
+    {
+        await base.Cast_to_same_Type_Count_works(async);
+
+        AssertSql(
+            """
+SELECT COUNT(*)
+FROM "Customers" AS "c"
+""");
+    }
+
+    public override async Task Cast_before_aggregate_is_preserved(bool async)
+    {
+        await base.Cast_before_aggregate_is_preserved(async);
+
+        AssertSql(
+            """
+SELECT (
+    SELECT AVG(CAST("o"."OrderID" AS float))
+    FROM "Orders" AS "o"
+    WHERE "c"."CustomerID" = "o"."CustomerID")
+FROM "Customers" AS "c"
+""");
+    }
+
+    public override async Task DefaultIfEmpty_selects_only_required_columns(bool async)
+    {
+        await base.DefaultIfEmpty_selects_only_required_columns(async);
+
+        AssertSql(
+        """
+SELECT "p"."ProductName"
+FROM (
+    SELECT 1
+) AS "e"
+LEFT JOIN "Products" AS "p" ON CAST(1 AS boolean) = CAST(1 AS boolean)
+""");
+    }
+
+    [ActianTodo]
+    public override async Task Collection_Last_member_access_in_projection_translated(bool async)
+    {
+        await base.Collection_Last_member_access_in_projection_translated(async);
+
+        AssertSql();
+    }
+
+    [ActianTodo]
+    public override async Task Collection_LastOrDefault_member_access_in_projection_translated(bool async)
+    {
+        await base.Collection_LastOrDefault_member_access_in_projection_translated(async);
+
+        AssertSql();
+    }
+
+    public override async Task Sum_over_explicit_cast_over_column(bool async)
+    {
+        await base.Sum_over_explicit_cast_over_column(async);
+
+        AssertSql(
+        """
+SELECT COALESCE(SUM(CAST("o"."OrderID" AS bigint)), 0)
+FROM "Orders" AS "o"
+""");
+    }
+
+    public override async Task Count_on_projection_with_client_eval(bool async)
+    {
+        await base.Count_on_projection_with_client_eval(async);
+
+        AssertSql(
+        """
+SELECT COUNT(*)
+FROM "Orders" AS "o"
+""",
+                        //
+                        """
+SELECT COUNT(*)
+FROM "Orders" AS "o"
+""",
+                        //
+                        """
+SELECT COUNT(*)
+FROM "Orders" AS "o"
+""");
+    }
+
+    public override async Task Average_after_DefaultIfEmpty_does_not_throw(bool async)
+    {
+        await base.Average_after_DefaultIfEmpty_does_not_throw(async);
+
+        AssertSql(
+            """
+SELECT AVG(CAST(COALESCE("o0"."OrderID", 0) AS float))
+FROM (
+    SELECT 1
+) AS "e"
+LEFT JOIN (
+    SELECT "o"."OrderID"
+    FROM "Orders" AS "o"
+    WHERE "o"."OrderID" = 10243
+) AS "o0" ON CAST(1 AS boolean) = CAST(1 AS boolean)
+""");
+    }
+
+    public override async Task Max_after_DefaultIfEmpty_does_not_throw(bool async)
+    {
+        await base.Max_after_DefaultIfEmpty_does_not_throw(async);
+
+        AssertSql(
+        """
+SELECT MAX(COALESCE("o0"."OrderID", 0))
+FROM (
+    SELECT 1
+) AS "e"
+LEFT JOIN (
+    SELECT "o"."OrderID"
+    FROM "Orders" AS "o"
+    WHERE "o"."OrderID" = 10243
+) AS "o0" ON CAST(1 AS boolean) = CAST(1 AS boolean)
+""");
+    }
+
+    public override async Task Min_after_DefaultIfEmpty_does_not_throw(bool async)
+    {
+        await base.Min_after_DefaultIfEmpty_does_not_throw(async);
+
+        AssertSql(
+        """
+SELECT MIN(COALESCE("o0"."OrderID", 0))
+FROM (
+    SELECT 1
+) AS "e"
+LEFT JOIN (
+    SELECT "o"."OrderID"
+    FROM "Orders" AS "o"
+    WHERE "o"."OrderID" = 10243
+) AS "o0" ON CAST(1 AS boolean) = CAST(1 AS boolean)
+""");
+    }
+
+    public override async Task Average_on_nav_subquery_in_projection(bool async)
+    {
+        await base.Average_on_nav_subquery_in_projection(async);
+
+        AssertSql(
+            """
+SELECT (
+    SELECT AVG(CAST("o"."OrderID" AS float))
+    FROM "Orders" AS "o"
+    WHERE "c"."CustomerID" = "o"."CustomerID") AS "Ave"
+FROM "Customers" AS "c"
+ORDER BY "c"."CustomerID"
+""");
+    }
+
+    public override async Task All_true(bool async)
+    {
+        await base.All_true(async);
+
+        AssertSql(
+        """
+SELECT CAST(1 AS boolean)
+""");
+    }
+
+    public override async Task Count_after_client_projection(bool async)
+    {
+        await base.Count_after_client_projection(async);
+
+        AssertSql(
+        """
+@p='1'
+
+SELECT COUNT(*)
+FROM (
+    SELECT FIRST @p 1
+    FROM "Orders" AS "o"
+) AS "o0"
+""");
+    }
+
+    public override async Task Not_Any_false(bool async)
+    {
+        await base.Not_Any_false(async);
+
+        AssertSql(
+        """
+SELECT "c"."CustomerID"
+FROM "Customers" AS "c"
+""");
+    }
+
     public override async Task Return_type_of_singular_operator_is_preserved(bool async)
     {
         await base.Return_type_of_singular_operator_is_preserved(async);
 
         AssertSql(
-"""
+        """
 SELECT FIRST 1 "c"."CustomerID", "c"."City"
 FROM "Customers" AS "c"
 WHERE "c"."CustomerID" = N'ALFKI'
 """,
-                //
-                """
+                        //
+                        """
 SELECT FIRST 1 "c"."CustomerID", "c"."City"
 FROM "Customers" AS "c"
 WHERE "c"."CustomerID" = N'ALFKI'
 """,
-                //
-                """
+                        //
+                        """
 SELECT FIRST 2 "c"."CustomerID", "c"."City"
 FROM "Customers" AS "c"
 WHERE "c"."CustomerID" = N'ALFKI'
 """,
-                //
-                """
+                        //
+                        """
 SELECT FIRST 2 "c"."CustomerID", "c"."City"
 FROM "Customers" AS "c"
 WHERE "c"."CustomerID" = N'ALFKI'
 """,
-                //
-                """
+                        //
+                        """
 SELECT FIRST 1 "c"."CustomerID", "c"."City"
 FROM "Customers" AS "c"
 WHERE "c"."CustomerID" LIKE N'A%'
 ORDER BY "c"."CustomerID" DESC
 """,
-                //
-                """
+                        //
+                        """
 SELECT FIRST 1 "c"."CustomerID", "c"."City"
 FROM "Customers" AS "c"
 WHERE "c"."CustomerID" LIKE N'A%'
@@ -2719,6 +2724,57 @@ ORDER BY "c"."CustomerID" DESC
         await base.Type_casting_inside_sum(async);
 
         AssertSql();
+    }
+
+    public override async Task Contains_with_local_object_enumerable_closure(bool async)
+    {
+        await base.Contains_with_local_object_enumerable_closure(async);
+
+        AssertSql(
+        """
+@ids1='ABCDE'
+@ids2='ALFKI'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" IN (@ids1, @ids2)
+""");
+    }
+
+    public override async Task Contains_with_local_enumerable_closure_all_null(bool async)
+    {
+        await base.Contains_with_local_enumerable_closure_all_null(async);
+
+        AssertSql(
+"""
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE CAST(0 AS boolean) = CAST(1 AS boolean)
+""");
+    }
+
+    public override async Task Contains_with_local_ordered_enumerable_inline_closure_mix(bool async)
+    {
+        await base.Contains_with_local_ordered_enumerable_inline_closure_mix(async);
+
+        AssertSql(
+"""
+@Order1='ABCDE'
+@Order2='ALFKI'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" IN (@Order1, @Order2)
+""",
+                //
+                """
+@Order1='ABCDE'
+@Order2='ANATR'
+
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
+FROM "Customers" AS "c"
+WHERE "c"."CustomerID" IN (@Order1, @Order2)
+""");
     }
 
     private void AssertSql(params string[] expected)
