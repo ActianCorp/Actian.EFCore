@@ -95,19 +95,19 @@ FROM "Customers" AS "c"
 
         AssertSql(
             """
-@__customerID='ALFKI'
+@customerID='ALFKI'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__customerID
+WHERE "c"."CustomerID" = @customerID
 """,
             //
             """
-@__customerID='ANATR'
+@customerID='ANATR'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__customerID
+WHERE "c"."CustomerID" = @customerID
 """);
     }
 
@@ -117,19 +117,19 @@ WHERE "c"."CustomerID" = @__customerID
 
         AssertSql(
             """
-@__customerID='ALFKI'
+@customerID='ALFKI'
 
 SELECT FIRST 1 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__customerID
+WHERE "c"."CustomerID" = @customerID
 """,
             //
             """
-@__customerID='ANATR'
+@customerID='ANATR'
 
 SELECT FIRST 1 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__customerID
+WHERE "c"."CustomerID" = @customerID
 """);
     }
 
@@ -139,19 +139,19 @@ WHERE "c"."CustomerID" = @__customerID
 
         AssertSql(
             """
-@__customerID='ALFKI'
+@customerID='ALFKI'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__customerID
+WHERE "c"."CustomerID" = @customerID
 """,
             //
             """
-@__customerID='ANATR'
+@customerID='ANATR'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__customerID
+WHERE "c"."CustomerID" = @customerID
 """);
     }
 
@@ -161,22 +161,23 @@ WHERE "c"."CustomerID" = @__customerID
 
         AssertSql(
             """
-@__customerID='ALFKI'
+@customerID='ALFKI'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__customerID
+WHERE "c"."CustomerID" = @customerID
 """,
             //
             """
-@__customerID='ANATR'
+@customerID='ANATR'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__customerID
+WHERE "c"."CustomerID" = @customerID
 """);
     }
 
+    [ActianTodo] //It fails due to missing type mapping on collection parameter in an IN expression, which is an EF Core 10 type mapping issue that needs further investigation.
     public override void Query_with_contains()
     {
         base.Query_with_contains();
@@ -219,11 +220,11 @@ WHERE "c"."CustomerID" = N'ALFKI'
 
         AssertSql(
             """
-@__customerID='ALFKI'
+@customerID='ALFKI'
 
 SELECT COUNT(*)
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__customerID
+WHERE "c"."CustomerID" = @customerID
 """);
     }
 
@@ -233,160 +234,160 @@ WHERE "c"."CustomerID" = @__customerID
 
         AssertSql(
             """
-@__s1='ALFKI'
-@__s2='ANATR'
-@__s3='ANTON'
-@__s4='AROUT'
-@__s5='BERGS'
-@__s6='BLAUS'
-@__s7='BLONP'
-@__s8='BOLID'
-@__s9='BONAP'
-@__s10='BSBEV'
-@__s11='CACTU'
-@__s12='CENTC'
-@__s13='CHOPS'
-@__s14='CONSH'
-@__s15='RANDM'
+@s1='ALFKI'
+@s2='ANATR'
+@s3='ANTON'
+@s4='AROUT'
+@s5='BERGS'
+@s6='BLAUS'
+@s7='BLONP'
+@s8='BOLID'
+@s9='BONAP'
+@s10='BSBEV'
+@s11='CACTU'
+@s12='CENTC'
+@s13='CHOPS'
+@s14='CONSH'
+@s15='RANDM'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__s1 OR "c"."CustomerID" = @__s2 OR "c"."CustomerID" = @__s3 OR "c"."CustomerID" = @__s4 OR "c"."CustomerID" = @__s5 OR "c"."CustomerID" = @__s6 OR "c"."CustomerID" = @__s7 OR "c"."CustomerID" = @__s8 OR "c"."CustomerID" = @__s9 OR "c"."CustomerID" = @__s10 OR "c"."CustomerID" = @__s11 OR "c"."CustomerID" = @__s12 OR "c"."CustomerID" = @__s13 OR "c"."CustomerID" = @__s14 OR "c"."CustomerID" = @__s15
+WHERE "c"."CustomerID" = @s1 OR "c"."CustomerID" = @s2 OR "c"."CustomerID" = @s3 OR "c"."CustomerID" = @s4 OR "c"."CustomerID" = @s5 OR "c"."CustomerID" = @s6 OR "c"."CustomerID" = @s7 OR "c"."CustomerID" = @s8 OR "c"."CustomerID" = @s9 OR "c"."CustomerID" = @s10 OR "c"."CustomerID" = @s11 OR "c"."CustomerID" = @s12 OR "c"."CustomerID" = @s13 OR "c"."CustomerID" = @s14 OR "c"."CustomerID" = @s15
 """,
             //
             """
-@__s1='ALFKI'
-@__s2='ANATR'
-@__s3='ANTON'
-@__s4='AROUT'
-@__s5='BERGS'
-@__s6='BLAUS'
-@__s7='BLONP'
-@__s8='BOLID'
-@__s9='BONAP'
-@__s10='BSBEV'
-@__s11='CACTU'
-@__s12='CENTC'
-@__s13='CHOPS'
-@__s14='CONSH'
-@__s15='RANDM'
+@s1='ALFKI'
+@s2='ANATR'
+@s3='ANTON'
+@s4='AROUT'
+@s5='BERGS'
+@s6='BLAUS'
+@s7='BLONP'
+@s8='BOLID'
+@s9='BONAP'
+@s10='BSBEV'
+@s11='CACTU'
+@s12='CENTC'
+@s13='CHOPS'
+@s14='CONSH'
+@s15='RANDM'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM "Customers" AS "c"
 LEFT JOIN "Orders" AS "o" ON "c"."CustomerID" = "o"."CustomerID"
-WHERE "c"."CustomerID" = @__s1 OR "c"."CustomerID" = @__s2 OR "c"."CustomerID" = @__s3 OR "c"."CustomerID" = @__s4 OR "c"."CustomerID" = @__s5 OR "c"."CustomerID" = @__s6 OR "c"."CustomerID" = @__s7 OR "c"."CustomerID" = @__s8 OR "c"."CustomerID" = @__s9 OR "c"."CustomerID" = @__s10 OR "c"."CustomerID" = @__s11 OR "c"."CustomerID" = @__s12 OR "c"."CustomerID" = @__s13 OR "c"."CustomerID" = @__s14 OR "c"."CustomerID" = @__s15
+WHERE "c"."CustomerID" = @s1 OR "c"."CustomerID" = @s2 OR "c"."CustomerID" = @s3 OR "c"."CustomerID" = @s4 OR "c"."CustomerID" = @s5 OR "c"."CustomerID" = @s6 OR "c"."CustomerID" = @s7 OR "c"."CustomerID" = @s8 OR "c"."CustomerID" = @s9 OR "c"."CustomerID" = @s10 OR "c"."CustomerID" = @s11 OR "c"."CustomerID" = @s12 OR "c"."CustomerID" = @s13 OR "c"."CustomerID" = @s14 OR "c"."CustomerID" = @s15
 ORDER BY "c"."CustomerID"
 """,
             //
             """
-@__s1='ALFKI'
-@__s2='ANATR'
-@__s3='ANTON'
-@__s4='AROUT'
-@__s5='BERGS'
-@__s6='BLAUS'
-@__s7='BLONP'
-@__s8='BOLID'
-@__s9='BONAP'
-@__s10='BSBEV'
-@__s11='CACTU'
-@__s12='CENTC'
-@__s13='CHOPS'
-@__s14='CONSH'
-@__s15='RANDM'
+@s1='ALFKI'
+@s2='ANATR'
+@s3='ANTON'
+@s4='AROUT'
+@s5='BERGS'
+@s6='BLAUS'
+@s7='BLONP'
+@s8='BOLID'
+@s9='BONAP'
+@s10='BSBEV'
+@s11='CACTU'
+@s12='CENTC'
+@s13='CHOPS'
+@s14='CONSH'
+@s15='RANDM'
 
 SELECT COUNT(*)
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__s1 OR "c"."CustomerID" = @__s2 OR "c"."CustomerID" = @__s3 OR "c"."CustomerID" = @__s4 OR "c"."CustomerID" = @__s5 OR "c"."CustomerID" = @__s6 OR "c"."CustomerID" = @__s7 OR "c"."CustomerID" = @__s8 OR "c"."CustomerID" = @__s9 OR "c"."CustomerID" = @__s10 OR "c"."CustomerID" = @__s11 OR "c"."CustomerID" = @__s12 OR "c"."CustomerID" = @__s13 OR "c"."CustomerID" = @__s14 OR "c"."CustomerID" = @__s15
+WHERE "c"."CustomerID" = @s1 OR "c"."CustomerID" = @s2 OR "c"."CustomerID" = @s3 OR "c"."CustomerID" = @s4 OR "c"."CustomerID" = @s5 OR "c"."CustomerID" = @s6 OR "c"."CustomerID" = @s7 OR "c"."CustomerID" = @s8 OR "c"."CustomerID" = @s9 OR "c"."CustomerID" = @s10 OR "c"."CustomerID" = @s11 OR "c"."CustomerID" = @s12 OR "c"."CustomerID" = @s13 OR "c"."CustomerID" = @s14 OR "c"."CustomerID" = @s15
 """,
             //
             """
-@__s1='ALFKI'
-@__s2='ANATR'
-@__s3='ANTON'
-@__s4='AROUT'
-@__s5='BERGS'
-@__s6='BLAUS'
-@__s7='BLONP'
-@__s8='BOLID'
-@__s9='BONAP'
-@__s10='BSBEV'
-@__s11='CACTU'
-@__s12='CENTC'
-@__s13='CHOPS'
-@__s14='CONSH'
-@__s15='RANDM'
+@s1='ALFKI'
+@s2='ANATR'
+@s3='ANTON'
+@s4='AROUT'
+@s5='BERGS'
+@s6='BLAUS'
+@s7='BLONP'
+@s8='BOLID'
+@s9='BONAP'
+@s10='BSBEV'
+@s11='CACTU'
+@s12='CENTC'
+@s13='CHOPS'
+@s14='CONSH'
+@s15='RANDM'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__s1 OR "c"."CustomerID" = @__s2 OR "c"."CustomerID" = @__s3 OR "c"."CustomerID" = @__s4 OR "c"."CustomerID" = @__s5 OR "c"."CustomerID" = @__s6 OR "c"."CustomerID" = @__s7 OR "c"."CustomerID" = @__s8 OR "c"."CustomerID" = @__s9 OR "c"."CustomerID" = @__s10 OR "c"."CustomerID" = @__s11 OR "c"."CustomerID" = @__s12 OR "c"."CustomerID" = @__s13 OR "c"."CustomerID" = @__s14 OR "c"."CustomerID" = @__s15
+WHERE "c"."CustomerID" = @s1 OR "c"."CustomerID" = @s2 OR "c"."CustomerID" = @s3 OR "c"."CustomerID" = @s4 OR "c"."CustomerID" = @s5 OR "c"."CustomerID" = @s6 OR "c"."CustomerID" = @s7 OR "c"."CustomerID" = @s8 OR "c"."CustomerID" = @s9 OR "c"."CustomerID" = @s10 OR "c"."CustomerID" = @s11 OR "c"."CustomerID" = @s12 OR "c"."CustomerID" = @s13 OR "c"."CustomerID" = @s14 OR "c"."CustomerID" = @s15
 """,
             //
             """
-@__s1='ALFKI'
-@__s2='ANATR'
-@__s3='ANTON'
-@__s4='AROUT'
-@__s5='BERGS'
-@__s6='BLAUS'
-@__s7='BLONP'
-@__s8='BOLID'
-@__s9='BONAP'
-@__s10='BSBEV'
-@__s11='CACTU'
-@__s12='CENTC'
-@__s13='CHOPS'
-@__s14='CONSH'
-@__s15='RANDM'
+@s1='ALFKI'
+@s2='ANATR'
+@s3='ANTON'
+@s4='AROUT'
+@s5='BERGS'
+@s6='BLAUS'
+@s7='BLONP'
+@s8='BOLID'
+@s9='BONAP'
+@s10='BSBEV'
+@s11='CACTU'
+@s12='CENTC'
+@s13='CHOPS'
+@s14='CONSH'
+@s15='RANDM'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM "Customers" AS "c"
 LEFT JOIN "Orders" AS "o" ON "c"."CustomerID" = "o"."CustomerID"
-WHERE "c"."CustomerID" = @__s1 OR "c"."CustomerID" = @__s2 OR "c"."CustomerID" = @__s3 OR "c"."CustomerID" = @__s4 OR "c"."CustomerID" = @__s5 OR "c"."CustomerID" = @__s6 OR "c"."CustomerID" = @__s7 OR "c"."CustomerID" = @__s8 OR "c"."CustomerID" = @__s9 OR "c"."CustomerID" = @__s10 OR "c"."CustomerID" = @__s11 OR "c"."CustomerID" = @__s12 OR "c"."CustomerID" = @__s13 OR "c"."CustomerID" = @__s14 OR "c"."CustomerID" = @__s15
+WHERE "c"."CustomerID" = @s1 OR "c"."CustomerID" = @s2 OR "c"."CustomerID" = @s3 OR "c"."CustomerID" = @s4 OR "c"."CustomerID" = @s5 OR "c"."CustomerID" = @s6 OR "c"."CustomerID" = @s7 OR "c"."CustomerID" = @s8 OR "c"."CustomerID" = @s9 OR "c"."CustomerID" = @s10 OR "c"."CustomerID" = @s11 OR "c"."CustomerID" = @s12 OR "c"."CustomerID" = @s13 OR "c"."CustomerID" = @s14 OR "c"."CustomerID" = @s15
 ORDER BY "c"."CustomerID"
 """,
             //
             """
-@__s1='ALFKI'
-@__s2='ANATR'
-@__s3='ANTON'
-@__s4='AROUT'
-@__s5='BERGS'
-@__s6='BLAUS'
-@__s7='BLONP'
-@__s8='BOLID'
-@__s9='BONAP'
-@__s10='BSBEV'
-@__s11='CACTU'
-@__s12='CENTC'
-@__s13='CHOPS'
-@__s14='CONSH'
-@__s15='RANDM'
+@s1='ALFKI'
+@s2='ANATR'
+@s3='ANTON'
+@s4='AROUT'
+@s5='BERGS'
+@s6='BLAUS'
+@s7='BLONP'
+@s8='BOLID'
+@s9='BONAP'
+@s10='BSBEV'
+@s11='CACTU'
+@s12='CENTC'
+@s13='CHOPS'
+@s14='CONSH'
+@s15='RANDM'
 
 SELECT COUNT(*)
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__s1 OR "c"."CustomerID" = @__s2 OR "c"."CustomerID" = @__s3 OR "c"."CustomerID" = @__s4 OR "c"."CustomerID" = @__s5 OR "c"."CustomerID" = @__s6 OR "c"."CustomerID" = @__s7 OR "c"."CustomerID" = @__s8 OR "c"."CustomerID" = @__s9 OR "c"."CustomerID" = @__s10 OR "c"."CustomerID" = @__s11 OR "c"."CustomerID" = @__s12 OR "c"."CustomerID" = @__s13 OR "c"."CustomerID" = @__s14 OR "c"."CustomerID" = @__s15
+WHERE "c"."CustomerID" = @s1 OR "c"."CustomerID" = @s2 OR "c"."CustomerID" = @s3 OR "c"."CustomerID" = @s4 OR "c"."CustomerID" = @s5 OR "c"."CustomerID" = @s6 OR "c"."CustomerID" = @s7 OR "c"."CustomerID" = @s8 OR "c"."CustomerID" = @s9 OR "c"."CustomerID" = @s10 OR "c"."CustomerID" = @s11 OR "c"."CustomerID" = @s12 OR "c"."CustomerID" = @s13 OR "c"."CustomerID" = @s14 OR "c"."CustomerID" = @s15
 """,
             //
             """
-@__s1='ALFKI'
-@__s2='ANATR'
-@__s3='ANTON'
-@__s4='AROUT'
-@__s5='BERGS'
-@__s6='BLAUS'
-@__s7='BLONP'
-@__s8='BOLID'
-@__s9='BONAP'
-@__s10='BSBEV'
-@__s11='CACTU'
-@__s12='CENTC'
-@__s13='CHOPS'
-@__s14='CONSH'
+@s1='ALFKI'
+@s2='ANATR'
+@s3='ANTON'
+@s4='AROUT'
+@s5='BERGS'
+@s6='BLAUS'
+@s7='BLONP'
+@s8='BOLID'
+@s9='BONAP'
+@s10='BSBEV'
+@s11='CACTU'
+@s12='CENTC'
+@s13='CHOPS'
+@s14='CONSH'
 
 SELECT COUNT(*)
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__s1 OR "c"."CustomerID" = @__s2 OR "c"."CustomerID" = @__s3 OR "c"."CustomerID" = @__s4 OR "c"."CustomerID" = @__s5 OR "c"."CustomerID" = @__s6 OR "c"."CustomerID" = @__s7 OR "c"."CustomerID" = @__s8 OR "c"."CustomerID" = @__s9 OR "c"."CustomerID" = @__s10 OR "c"."CustomerID" = @__s11 OR "c"."CustomerID" = @__s12 OR "c"."CustomerID" = @__s13 OR "c"."CustomerID" = @__s14
+WHERE "c"."CustomerID" = @s1 OR "c"."CustomerID" = @s2 OR "c"."CustomerID" = @s3 OR "c"."CustomerID" = @s4 OR "c"."CustomerID" = @s5 OR "c"."CustomerID" = @s6 OR "c"."CustomerID" = @s7 OR "c"."CustomerID" = @s8 OR "c"."CustomerID" = @s9 OR "c"."CustomerID" = @s10 OR "c"."CustomerID" = @s11 OR "c"."CustomerID" = @s12 OR "c"."CustomerID" = @s13 OR "c"."CustomerID" = @s14
 """);
     }
 
@@ -490,19 +491,19 @@ WHERE "c"."CustomerID" LIKE N'A%'
 
         AssertSql(
             """
-@__customerID='ALFKI'
+@customerID='ALFKI'
 
 SELECT FIRST 1 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__customerID
+WHERE "c"."CustomerID" = @customerID
 """,
             //
             """
-@__customerID='ANATR'
+@customerID='ANATR'
 
 SELECT FIRST 1 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__customerID
+WHERE "c"."CustomerID" = @customerID
 """);
     }
 
@@ -524,19 +525,19 @@ ORDER BY "c"."CustomerID"
 
         AssertSql(
             """
-@__customerID='ALFKI'
+@customerID='ALFKI'
 
 SELECT FIRST 1 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__customerID
+WHERE "c"."CustomerID" = @customerID
 """,
             //
             """
-@__customerID='ANATR'
+@customerID='ANATR'
 
 SELECT FIRST 1 "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__customerID
+WHERE "c"."CustomerID" = @customerID
 """);
     }
 
@@ -562,7 +563,7 @@ ORDER BY "m"."CompanyName"
             """
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE 0 = 1
+WHERE CAST(0 AS boolean) = CAST(1 AS boolean)
 """);
     }
 
@@ -572,19 +573,19 @@ WHERE 0 = 1
 
         AssertSql(
             """
-@__customerID='ALFKI'
+@customerID='ALFKI'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__customerID
+WHERE "c"."CustomerID" = @customerID
 """,
             //
             """
-@__customerID='ANATR'
+@customerID='ANATR'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__customerID
+WHERE "c"."CustomerID" = @customerID
 """);
     }
 
@@ -594,19 +595,19 @@ WHERE "c"."CustomerID" = @__customerID
 
         AssertSql(
             """
-@__customerID='ALFKI'
+@customerID='ALFKI'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__customerID
+WHERE "c"."CustomerID" = @customerID
 """,
             //
             """
-@__customerID='ANATR'
+@customerID='ANATR'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__customerID
+WHERE "c"."CustomerID" = @customerID
 """);
     }
 
@@ -630,19 +631,19 @@ SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."Cont
 
         AssertSql(
             """
-@__customerID='ALFKI'
+@customerID='ALFKI'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__customerID
+WHERE "c"."CustomerID" = @customerID
 """,
             //
             """
-@__customerID='ANATR'
+@customerID='ANATR'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE "c"."CustomerID" = @__customerID
+WHERE "c"."CustomerID" = @customerID
 """);
     }
 
@@ -668,7 +669,7 @@ ORDER BY "m"."CompanyName"
             """
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region"
 FROM "Customers" AS "c"
-WHERE 0 = 1
+WHERE CAST(0 AS boolean) = CAST(1 AS boolean)
 """);
     }
 
@@ -742,22 +743,22 @@ SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."Cont
 
         AssertSql(
             """
-@__customerID='ALFKI'
+@customerID='ALFKI'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM "Customers" AS "c"
 LEFT JOIN "Orders" AS "o" ON "c"."CustomerID" = "o"."CustomerID"
-WHERE "c"."CustomerID" = @__customerID
+WHERE "c"."CustomerID" = @customerID
 ORDER BY "c"."CustomerID"
 """,
             //
             """
-@__customerID='ANATR'
+@customerID='ANATR'
 
 SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM "Customers" AS "c"
 LEFT JOIN "Orders" AS "o" ON "c"."CustomerID" = "o"."CustomerID"
-WHERE "c"."CustomerID" = @__customerID
+WHERE "c"."CustomerID" = @customerID
 ORDER BY "c"."CustomerID"
 """);
     }

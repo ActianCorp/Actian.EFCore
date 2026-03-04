@@ -25,6 +25,87 @@ public class NorthwindJoinQueryActianTest : NorthwindJoinQueryRelationalTestBase
     public virtual void Check_all_tests_overridden()
         => TestHelpers.AssertAllMethodsOverridden(GetType());
 
+    public override async Task LeftJoin(bool async)
+    {
+        await base.LeftJoin(async);
+
+        AssertSql(
+"""
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+FROM "Customers" AS "c"
+LEFT JOIN "Orders" AS "o" ON "c"."CustomerID" = "o"."CustomerID"
+""");
+    }
+
+    public override async Task RightJoin(bool async)
+    {
+        await base.RightJoin(async);
+
+        AssertSql(
+    """
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+FROM "Customers" AS "c"
+RIGHT JOIN "Orders" AS "o" ON "c"."CustomerID" = "o"."CustomerID"
+""");
+    }
+
+    public override async Task GroupJoin_aggregate_anonymous_key_selectors(bool async)
+    {
+        await base.GroupJoin_aggregate_anonymous_key_selectors(async);
+
+        AssertSql(
+    """
+SELECT "c"."CustomerID", (
+    SELECT COALESCE(SUM(CAST(LENGTH("o"."CustomerID") AS integer)), 0)
+    FROM "Orders" AS "o"
+    WHERE "c"."City" IS NOT NULL AND "c"."CustomerID" = "o"."CustomerID" AND "c"."City" = N'London') AS "Sum"
+FROM "Customers" AS "c"
+""");
+
+    }
+
+    public override async Task GroupJoin_aggregate_anonymous_key_selectors2(bool async)
+    {
+        await base.GroupJoin_aggregate_anonymous_key_selectors2(async);
+
+        AssertSql(
+"""
+SELECT "c"."CustomerID", (
+    SELECT COALESCE(SUM(CAST(LENGTH("o"."CustomerID") AS integer)), 0)
+    FROM "Orders" AS "o"
+    WHERE "c"."CustomerID" = "o"."CustomerID" AND 1996 = DATE_PART('YEAR', "o"."OrderDate")) AS "Sum"
+FROM "Customers" AS "c"
+""");
+    }
+
+    public override async Task GroupJoin_aggregate_anonymous_key_selectors_one_argument(bool async)
+    {
+        await base.GroupJoin_aggregate_anonymous_key_selectors_one_argument(async);
+
+        AssertSql(
+        """
+SELECT "c"."CustomerID", (
+    SELECT COALESCE(SUM(CAST(LENGTH("o"."CustomerID") AS integer)), 0)
+    FROM "Orders" AS "o"
+    WHERE "c"."CustomerID" = "o"."CustomerID") AS "Sum"
+FROM "Customers" AS "c"
+""");
+    }
+
+    public override async Task GroupJoin_aggregate_nested_anonymous_key_selectors(bool async)
+    {
+        await base.GroupJoin_aggregate_nested_anonymous_key_selectors(async);
+
+        AssertSql();
+    }
+
+    public override async Task Join_with_key_selectors_being_nested_anonymous_objects(bool async)
+    {
+        await base.Join_with_key_selectors_being_nested_anonymous_objects(async);
+
+        AssertSql();
+    }
+
     public override async Task Join_customers_orders_projection(bool async)
     {
         await base.Join_customers_orders_projection(async);
@@ -103,12 +184,12 @@ WHERE "o"."CustomerID" = N'ALFKI'
 
         AssertSql(
             """
-@__p_0='5'
+@p='5'
 
 SELECT "c"."ContactName", "t"."OrderID"
 FROM "Customers" AS "c"
 INNER JOIN (
-    SELECT TOP(@__p_0) "o"."OrderID", "o"."CustomerID"
+    SELECT TOP(@p) "o"."OrderID", "o"."CustomerID"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderID"
 ) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
@@ -136,12 +217,12 @@ WHERE "o"."CustomerID" = N'ALFKI'
 
         AssertSql(
             """
-@__p_0='5'
+@p='5'
 
 SELECT "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate"
 FROM "Customers" AS "c"
 INNER JOIN (
-    SELECT FIRST @__p_0 "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+    SELECT FIRST @p "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderID"
 ) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
@@ -173,12 +254,12 @@ WHERE "o0"."CustomerID" = N'ALFKI'
 
         AssertSql(
             """
-@__p_0='5'
+@p='5'
 
 SELECT "c"."ContactName", "t"."OrderID"
 FROM "Customers" AS "c"
 INNER JOIN (
-    SELECT FIRST @__p_0 "o"."OrderID", "o"."CustomerID"
+    SELECT FIRST @p "o"."OrderID", "o"."CustomerID"
     FROM "Orders" AS "o"
     WHERE "o"."OrderID" > 0
     ORDER BY "o"."OrderID"
@@ -300,77 +381,62 @@ ORDER BY "c"."City"
 
         AssertSql(
             """
-@__p_0='4'
+@p='4'
 
 SELECT "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
 FROM "Customers" AS "c"
 INNER JOIN (
-    SELECT FIRST @__p_0 "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
+    SELECT FIRST @p "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderID"
 ) AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupJoin_as_final_operator(bool async)
     {
         await base.GroupJoin_as_final_operator(async);
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM "Customers" AS "c"
-OUTER APPLY (
-    SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
-    FROM "Orders" AS "o"
-    WHERE "c"."CustomerID" = "o"."CustomerID"
-) AS "t"
+LEFT JOIN "Orders" AS "o" ON "c"."CustomerID" = "o"."CustomerID"
 WHERE "c"."CustomerID" LIKE N'F%'
 ORDER BY "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Unflattened_GroupJoin_composed(bool async)
     {
         await base.Unflattened_GroupJoin_composed(async);
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM "Customers" AS "c"
-OUTER APPLY (
-    SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
-    FROM "Orders" AS "o"
-    WHERE "c"."CustomerID" = "o"."CustomerID"
-) AS "t"
-WHERE "c"."CustomerID" LIKE N'F%' AND "c"."City" = N'Lisboa'
+LEFT JOIN "Orders" AS "o" ON "c"."CustomerID" = "o"."CustomerID"
+WHERE ("c"."CustomerID" LIKE N'F%') AND "c"."City" = N'Lisboa'
 ORDER BY "c"."CustomerID"
 """);
     }
 
-    [ActianTodo]
     public override async Task Unflattened_GroupJoin_composed_2(bool async)
     {
         await base.Unflattened_GroupJoin_composed_2(async);
 
         AssertSql(
             """
-SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "t"."CustomerID", "t0"."OrderID", "t0"."CustomerID", "t0"."EmployeeID", "t0"."OrderDate", "t"."Address", "t"."City", "t"."CompanyName", "t"."ContactName", "t"."ContactTitle", "t"."Country", "t"."Fax", "t"."Phone", "t"."PostalCode", "t"."Region"
+SELECT "c"."CustomerID", "c"."Address", "c"."City", "c"."CompanyName", "c"."ContactName", "c"."ContactTitle", "c"."Country", "c"."Fax", "c"."Phone", "c"."PostalCode", "c"."Region", "c1"."CustomerID", "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate", "c1"."Address", "c1"."City", "c1"."CompanyName", "c1"."ContactName", "c1"."ContactTitle", "c1"."Country", "c1"."Fax", "c1"."Phone", "c1"."PostalCode", "c1"."Region"
 FROM "Customers" AS "c"
 INNER JOIN (
     SELECT "c0"."CustomerID", "c0"."Address", "c0"."City", "c0"."CompanyName", "c0"."ContactName", "c0"."ContactTitle", "c0"."Country", "c0"."Fax", "c0"."Phone", "c0"."PostalCode", "c0"."Region"
     FROM "Customers" AS "c0"
     WHERE "c0"."City" = N'Lisboa'
-) AS "t" ON "c"."CustomerID" = "t"."CustomerID"
-OUTER APPLY (
-    SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
-    FROM "Orders" AS "o"
-    WHERE "c"."CustomerID" = "o"."CustomerID"
-) AS "t0"
+) AS "c1" ON "c"."CustomerID" = "c1"."CustomerID"
+LEFT JOIN "Orders" AS "o" ON "c"."CustomerID" = "o"."CustomerID"
 WHERE "c"."CustomerID" LIKE N'F%'
-ORDER BY "c"."CustomerID", "t"."CustomerID"
+ORDER BY "c"."CustomerID", "c1"."CustomerID"
 """);
     }
 
@@ -423,11 +489,11 @@ LEFT JOIN (
 
         AssertSql(
             """
-@__p_0='1'
+@p='1'
 
 SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
 FROM (
-    SELECT FIRST @__p_0 "c"."CustomerID"
+    SELECT FIRST @p "c"."CustomerID"
     FROM "Customers" AS "c"
     ORDER BY "c"."CustomerID"
 ) AS "c0"
@@ -518,20 +584,19 @@ INNER JOIN (
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupJoin_SelectMany_subquery_with_filter_orderby(bool async)
     {
         await base.GroupJoin_SelectMany_subquery_with_filter_orderby(async);
 
         AssertSql(
             """
-SELECT "c"."ContactName", "t"."OrderID"
+SELECT "c"."ContactName", "o0"."OrderID"
 FROM "Customers" AS "c"
-CROSS APPLY (
-    SELECT "o"."OrderID"
+INNER JOIN (
+    SELECT "o"."OrderID", "o"."CustomerID"
     FROM "Orders" AS "o"
-    WHERE "c"."CustomerID" = "o"."CustomerID" AND "o"."OrderID" > 5
-) AS "t"
+    WHERE "o"."OrderID" > 5
+) AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
 """);
     }
 
@@ -552,20 +617,19 @@ WHERE "c"."CustomerID" LIKE N'F%'
 """);
     }
 
-    [ActianTodo]
     public override async Task GroupJoin_SelectMany_subquery_with_filter_orderby_and_DefaultIfEmpty(bool async)
     {
         await base.GroupJoin_SelectMany_subquery_with_filter_orderby_and_DefaultIfEmpty(async);
 
         AssertSql(
             """
-SELECT "c"."ContactName", "t"."OrderID", "t"."CustomerID", "t"."EmployeeID", "t"."OrderDate"
+SELECT "c"."ContactName", "o0"."OrderID", "o0"."CustomerID", "o0"."EmployeeID", "o0"."OrderDate"
 FROM "Customers" AS "c"
-OUTER APPLY (
+LEFT JOIN (
     SELECT "o"."OrderID", "o"."CustomerID", "o"."EmployeeID", "o"."OrderDate"
     FROM "Orders" AS "o"
-    WHERE "c"."CustomerID" = "o"."CustomerID" AND "o"."OrderID" > 5
-) AS "t"
+    WHERE "o"."OrderID" > 5
+) AS "o0" ON "c"."CustomerID" = "o0"."CustomerID"
 WHERE "c"."CustomerID" LIKE N'F%'
 """);
     }
@@ -577,14 +641,14 @@ WHERE "c"."CustomerID" LIKE N'F%'
 
         AssertSql(
             """
-@__p_0='100'
+@p='100'
 
 SELECT "c"."CustomerID", "t0"."OrderID"
 FROM "Customers" AS "c"
 INNER JOIN (
     SELECT "t"."OrderID", "t"."CustomerID"
     FROM (
-        SELECT FIRST @__p_0 "o"."OrderID", "o"."CustomerID"
+        SELECT FIRST @p "o"."OrderID", "o"."CustomerID"
         FROM "Orders" AS "o"
         ORDER BY "o"."OrderID"
     ) AS "t"
@@ -599,16 +663,16 @@ INNER JOIN (
 
         AssertSql(
             """
-@__p_0='10'
+@p='10'
 
 SELECT "c0"."CustomerID", "o0"."OrderID"
 FROM (
-    SELECT FIRST @__p_0 "c"."CustomerID"
+    SELECT FIRST @p "c"."CustomerID"
     FROM "Customers" AS "c"
     ORDER BY "c"."CustomerID"
 ) AS "c0"
 CROSS JOIN (
-    SELECT FIRST @__p_0 "o"."OrderID"
+    SELECT FIRST @p "o"."OrderID"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderID"
 ) AS "o0"
@@ -622,19 +686,19 @@ ORDER BY "c0"."CustomerID"
 
         AssertSql(
             """
-@__p_0='10'
+@p='10'
 
 SELECT "c0"."CustomerID", "o0"."OrderID"
 FROM (
-    SELECT FIRST @__p_0 "c"."CustomerID"
+    SELECT FIRST @p "c"."CustomerID"
     FROM "Customers" AS "c"
     ORDER BY "c"."CustomerID"
 ) AS "c0"
 LEFT JOIN (
-    SELECT FIRST @__p_0 "o"."OrderID"
+    SELECT FIRST @p "o"."OrderID"
     FROM "Orders" AS "o"
     ORDER BY "o"."OrderID"
-) AS "o0" ON 1 = 1
+) AS "o0" ON CAST(1 AS boolean) = CAST(1 AS boolean)
 ORDER BY "c0"."CustomerID"
 """);
     }
@@ -840,11 +904,11 @@ INNER JOIN (
 
         AssertSql(
             """
-@__p_0='2'
+@p='2'
 
 SELECT "c3"."CustomerID", "c3"."Address", "c3"."City", "c3"."CompanyName", "c3"."ContactName", "c3"."ContactTitle", "c3"."Country", "c3"."Fax", "c3"."Phone", "c3"."PostalCode", "c3"."Region"
 FROM (
-    SELECT FIRST @__p_0 "c"."CustomerID"
+    SELECT FIRST @p "c"."CustomerID"
     FROM "Customers" AS "c"
     ORDER BY "c"."CustomerID"
 ) AS "c2"
@@ -924,19 +988,19 @@ INNER JOIN "Orders" AS "o" ON "c"."CustomerID" = "o"."CustomerID"
 
         AssertSql(
             """
-@__p_0='"1,2"' (Size = 4000)
+@p='"1,2"' (Size = 4000)
 
 SELECT "e"."EmployeeID"
 FROM "Employees" AS "e"
-INNER JOIN OPENJSON(@__p_0) WITH ("value" int '$') AS "p" ON "e"."EmployeeID" = "p"."value"
+INNER JOIN OPENJSON(@p) WITH ("value" int '$') AS "p" ON "e"."EmployeeID" = "p"."value"
 """,
             //
             """
-@__p_0='"3"' (Size = 4000)
+@p='"3"' (Size = 4000)
 
 SELECT "e"."EmployeeID"
 FROM "Employees" AS "e"
-INNER JOIN OPENJSON(@__p_0) WITH ("value" int '$') AS "p" ON "e"."EmployeeID" = "p"."value"
+INNER JOIN OPENJSON(@p) WITH ("value" int '$') AS "p" ON "e"."EmployeeID" = "p"."value"
 """);
     }
 
@@ -984,12 +1048,12 @@ INNER JOIN "Employees" AS "e" ON "c"."City" = "e"."City"
 
         AssertSql(
             """
-@__p_0='5'
+@p='5'
 
 SELECT "e0"."Title", "e0"."EmployeeID" AS "Id"
 FROM "Customers" AS "c"
 INNER JOIN (
-    SELECT FIRST @__p_0 "e"."EmployeeID", "e"."City", "e"."Title"
+    SELECT FIRST @p "e"."EmployeeID", "e"."City", "e"."Title"
     FROM "Employees" AS "e"
     ORDER BY "e"."City"
 ) AS "e0" ON "c"."City" = "e0"."City"

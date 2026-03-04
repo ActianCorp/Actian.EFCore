@@ -51,7 +51,7 @@ namespace Actian.EFCore
                     pos += diffBlock.InsertCountB;
                 }
 
-                while (pos < diffResult.PiecesNew.Length)
+                while (pos < diffResult.PiecesNew.Count)
                 {
                     yield return Unchanged(diffResult.PiecesNew[pos], oldLineNo, newLineNo);
                     pos += 1;

@@ -1,18 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0</TargetFrameworks>
+    <TargetFrameworks>net10.0</TargetFrameworks>
     <Description>Entity Framework Core provider for Actian</Description>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
     <Company>Actian Corporation</Company>
     <Authors>Actian Corporation</Authors>
-    <Copyright>©2025 Actian Corporation. All Rights Reserved.</Copyright>
+    <Copyright>©2026 Actian Corporation. All Rights Reserved.</Copyright>
     <Product>Actian Entity Framework Core Provider</Product>
     <Description>Actian Entity Framework Core Provider</Description>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 
-    <VersionPrefix>9.0.2</VersionPrefix>
+    <VersionPrefix>10.0.0</VersionPrefix>
     <MinClientVersion>4.3</MinClientVersion>
 
     <RepositoryType>git</RepositoryType>
@@ -54,13 +54,21 @@
     <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Actian.Client" Version="8.0.8" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.12" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="9.0.12" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.12" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.12" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.12" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+    <PackageReference Include="Actian.Client" Version="8.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
+    <PackageReference Include="Sprache" Version="2.3.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <PackageReference Include="Actian.Client" Version="10.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.3" />
     <PackageReference Include="Sprache" Version="2.3.1" />
   </ItemGroup>
 
@@ -92,9 +100,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="10.0.103" />
   </ItemGroup>
 
   <Import Project="..\Actian.EFCore.Parsing\Actian.EFCore.Parsing.projitems" Label="Shared" />
+
+
 
 </Project>

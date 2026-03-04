@@ -7,7 +7,7 @@ using System;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
-using Microsoft.EntityFrameworkCore.Storage;
+
 using Actian.EFCore.Internal;
 
 #nullable enable
@@ -59,9 +59,6 @@ namespace Actian.EFCore.Query.Internal
 
                     case SelectExpression { Offset: not null, Orderings.Count: 0 }:
                         throw new InvalidOperationException(ActianStrings.SplitQueryOffsetWithoutOrderBy);
-
-                    case NonQueryExpression nonQueryExpression:
-                        return nonQueryExpression;
 
                     default:
                         return base.Visit(expression);

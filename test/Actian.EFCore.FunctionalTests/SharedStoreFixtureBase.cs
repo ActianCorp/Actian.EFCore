@@ -137,5 +137,5 @@ public abstract class SharedStoreFixtureBase<TContext> : FixtureBase, IDisposabl
     }
 
     public virtual Task DisposeAsync()
-        => TestStore.DisposeAsync();
+        => TestStore.DisposeAsync().AsTask();
 }

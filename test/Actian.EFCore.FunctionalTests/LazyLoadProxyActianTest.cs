@@ -289,11 +289,6 @@ namespace Actian.EFCore
             base.Lazy_loading_finds_correct_entity_type_with_multiple_queries_using_Count();
         }
 
-        public override void Lazy_loading_shares_service__property_on_derived_types()
-        {
-            base.Lazy_loading_shares_service__property_on_derived_types();
-        }
-
         public override void Lazy_loading_finds_correct_entity_type_with_alternate_model()
         {
             base.Lazy_loading_finds_correct_entity_type_with_alternate_model();
